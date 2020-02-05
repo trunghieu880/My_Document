@@ -1,0 +1,1124 @@
+Rem ------------------------------------
+Rem Declare variable for folder structure
+Rem ------------------------------------
+Const TEST_SPEC = "単体テスト仕様書"
+Const TEST_RESULT = "単体テスト結果"
+
+Rem ------------------------------------
+Rem Declare variable for ALL SHEET NAME in TEST_SPEC FILE
+Rem ------------------------------------
+Const SHEET_NAME_HISTORY = "フォーマット変更来歴"
+Const SHEET_NAME_RESULT = "単体テスト仕様"
+Const SHEET_NAME_IE = "入力データ分析表"
+Const SHEET_NAME_OE = "出力データ分析表"
+Const SHEET_NAME_IO = "入出力データ分析表"
+Const SHEET_NAME_TABLE = "テストケース表"
+Const SHEET_NAME_COV = "カバレッジ結果"
+
+Rem ------------------------------------
+Const STUB_NAME = "AMSTB_SrcFile.c"
+Const EXTENSION_XLSX = ".xlsx"
+Const EXTENSION_CSV = ".csv"
+Const EXTENSION_HTML = ".html"
+Const EXTENSION_IE = "_IE" & EXTENSION_HTML
+Const EXTENSION_OE = "_OE" & EXTENSION_HTML
+Const EXTENSION_IO = "_IO" & EXTENSION_HTML
+Const EXTENSION_TABLE = "_Table" & EXTENSION_HTML
+Const EXTENSION_COV = ".txt"
+Rem ------------------------------------
+
+Const CONST_STUB = "スタブを使用した場合は，スタブの*.cファイルを添付"
+Const CONST_COV = "カバレッジ結果を貼り付けする。"
+
+Const CONST_TABLE_1_3 = "表１.３　初期値"
+Const CONST_TABLE_1_4 = "１．４　スタブ関数"
+
+Const CONST_STUB_TABLE_1_4 = "サブ関数名"
+Const CONST_NONSTUB = "スタブせず関数："
+Const CONST_FILE_STUB_1_5 = "１．５　スタブファイル"
+Const CONST_CONFIRMATION_NONE = "なし"
+Const CONST_CONFIRMATION_OK = "OK"
+Const CONST_CONFIRMATION_NG = "NG"
+Const CONST_LABEL_TABLE_1_1_BUG_REPORT_RESULT = "テスト結果              : "
+Const CONST_LABEL_TABLE_1_1_BUG_REPORT_C0 = "Ｃ０網羅率              : "
+Const CONST_LABEL_TABLE_1_1_BUG_REPORT_C1 = "Ｃ１網羅率              : "
+Const CONST_LABEL_TABLE_1_1_BUG_REPORT_MCDC = "ＭＣ／ＤＣ網羅率      : "
+Const CONST_LABEL_TABLE_1_1_BUG_REPORT_ISSUE = "問題点：  "
+
+Rem ------------------------------------
+Rem Declare variable to use for SHEET_NAME_COV in TEST_SPEC FILE
+Rem ------------------------------------
+Const CONST_FUNCTION_NAME = "Function name           : "
+Const CONST_SOURCE_FILE_NAME = "Source file name        : "
+Const CONST_C0_COV = "C0 Coverage rate        : "
+Const CONST_C1_COV = "C1 Coverage rate        : "
+Const CONST_MCDC_COV = "MC/DC Coverage rate     : "
+
+Sub main()
+  ToolExcelName = ActiveWorkbook.Name
+  funcName = "funca"
+  
+  fileStub = myPATH & "\" & STUB_NAME
+  fileCSV = myPATH & "\" & funcName & EXTENSION_CSV
+  fileIE = myPATH & "\" & funcName & EXTENSION_IE
+  fileOE = tempPath & "\" & funcName & EXTENSION_OE
+  fileIO = tempPath & "\" & funcName & EXTENSION_IO
+  fileTABLE = tempPath & "\" & funcName & EXTENSION_TABLE
+  fileCOV = myPATH & "\" & TEST_RESULT & "\" & Dir(myPATH + "\" + TEST_RESULT + "\" + funcName + "\" + "*.txt")
+
+  fileSPEC = funcName & EXTENSION_XLSX
+
+  Rem done Clear_Sheet_Table_And_Coverage(fileSPEC)
+  Rem done Clear_SHEET_NAME_RESULT_Table_1_3(fileSPEC)
+  Rem done Clear_SHEET_NAME_RESULT_Table_1_4(fileSPEC)
+    
+  Rem done Import_HTML_File(fileSPEC, fileIE)
+  Rem done Import_HTML_File(fileSPEC, fileOE)
+  Rem done Import_HTML_File(fileSPEC, fileIO)
+  Rem done Import_HTML_File(fileSPEC, fileTABLE)
+
+  Rem done Import_StubFile(fileSPEC, fileStub)
+  Rem done Import_Coverage_File(fileSPEC, fileCOV)
+
+  Rem done Fill_Table_1_1(fileSPEC)
+  Rem done Fill_Table_1_3(fileSPEC, fileCSV)
+  Rem done Fill_Table_1_4(fileSPEC, fileCSV)
+End Sub
+
+Private Sub Import_HTML_File(ByVal wb_name As String, ByVal htmlFile As String)
+  Dim find_ws_name As String
+  find_ws_name = ""
+
+  If (InStr(htmlFile, EXTENSION_IE)) Then
+    find_ws_name = SHEET_NAME_IE
+  ElseIf (InStr(htmlFile, EXTENSION_OE)) Then
+    find_ws_name = SHEET_NAME_OE
+  ElseIf (InStr(htmlFile, EXTENSION_IO)) Then
+    find_ws_name = SHEET_NAME_IO
+  ElseIf (InStr(htmlFile, EXTENSION_TABLE)) Then
+    find_ws_name = SHEET_NAME_TABLE
+  Else
+    Debug.Print ("BUG: Can not found html file " & htmlFile)
+    Exit Sub
+  End If
+
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, find_ws_name)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      Set FSO = CreateObject("Scripting.FileSystemObject")
+      
+      Workbooks.Open Filename:=htmlFile, ReadOnly:=True
+      
+      WBname_HTML = FSO.getBaseName(htmlFile) & EXTENSION_HTML
+      Workbooks(WBname_HTML).Worksheets(Mid(FSO.getBaseName(WBname_HTML), 1, 31)).Activate
+      
+      If (InStr(WBname_HTML, EXTENSION_IE) Or InStr(WBname_HTML, EXTENSION_TABLE)) Then
+        Fmt_correction
+      Else
+        Wrapping_off
+      End If
+
+      Workbooks(WBname_HTML).Worksheets(Mid(FSO.getBaseName(WBname_HTML), 1, 31)).Cells.Copy
+      DoEvents
+      Workbooks(wb_name).Worksheets(ws_name).Activate
+      Workbooks(wb_name).Worksheets(ws_name).Cells.PasteSpecial xlPasteAll
+
+      Application.CutCopyMode = False
+      Application.DisplayAlerts = False
+
+      Workbooks(WBname_HTML).Close SaveChanges:=False
+      Set FSO = Nothing
+      Debug.Print ("Complete insert HTML for sheet " & sheetName)
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Import_StubFile(ByVal wb_name As String, ByVal stubFile As String)
+  Dim offset_template_inside_table_1_5 As Integer: offset_template_inside_table_1_5 = 1
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      Dim rngAddr As Range
+      Set rngAddr = Cells.Find(What:=CONST_STUB, LookIn:=xlFormulas, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+      If rngAddr Is Nothing Then
+        Debug.Print ("Not Found Label for Stub")
+      Else
+        Rem Debug.Print (rngAddr.Address)
+        Range("A1").Select
+
+        For Each ole In Workbooks(wb_name).Worksheets(ws_name).OLEObjects
+          ole.Delete
+        Next
+
+        Dim ol As OLEObject
+        Set ol = Workbooks(wb_name).Worksheets(ws_name).OLEObjects.Add(Filename:=stubFile, Link:=False, DisplayAsIcon:=True)
+
+        ol.Top = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Offset(1, 0).Top
+        ol.Left = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Offset(1, 0).Left
+
+        Dim row_address_stub As Integer: row_address_stub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Row + offset_template_inside_table_1_5
+        Dim col_address_stub As Integer: col_address_stub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Column
+        Workbooks(wb_name).Worksheets(ws_name).Rows(row_address_stub).RowHeight = 42
+        Workbooks(wb_name).Worksheets(ws_name).Cells(row_address_stub, col_address_stub) = ""
+        
+        Debug.Print ("Complete insert stub file ") & stubFile
+      End If
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Fill_Table_1_4(ByVal wb_name As String, ByVal CSVFile As String)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      Dim sInputRecord As String
+      Dim outCol As Long
+      Dim outRow As Long
+      Dim fNum As Long
+
+      Dim rngAddr_stub As Range
+      Set rngAddr_stub = Cells.Find(What:=CONST_STUB_TABLE_1_4, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim rngAddr_nonstub As Range
+      Set rngAddr_nonstub = Cells.Find(What:=CONST_NONSTUB, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      If rngAddr_stub Is Nothing Then
+        Debug.Print ("BUG: Not Found label Table 1.4")
+      Else
+        Rem Debug.Print (rngAddr.Address)
+        Range("A1").Select
+        Dim row_stub As Integer: row_stub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_stub.Address).Row + 1
+        Dim col_stub As Integer: col_stub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_stub.Address).Column - 1
+
+        Dim row_nonstub As Integer: row_nonstub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_nonstub.Address).Row
+        Dim col_nonstub As Integer: col_nonstub = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_nonstub.Address).Column + 2
+
+        fNum = FreeFile
+        Open CSVFile For Input As #fNum
+
+        Dim count_stub As Integer: count_stub = 0
+        Dim count_non_stub As Integer: count_non_stub = 0
+        
+        Do While Not EOF(fNum)
+          Line Input #fNum, sInputRecord
+          If (InStr(sInputRecord, "#COMMENT") < 1) Then
+            If (InStr(sInputRecord, "%,""")) Then
+              Dim func_stub_nonstub As String: func_stub_nonstub = ""
+              If (InStr(sInputRecord, "%,""AMSTB_")) Then
+                If (count_stub > 0) Then
+                    Workbooks(wb_name).Worksheets(ws_name).Rows(row_stub + count_stub).Select
+                    Selection.Insert Shift:=xlDown
+                End If
+                func_stub_nonstub = Replace(Replace(Split(sInputRecord, ",")(1), Chr(34), ""), "AMSTB_", "")
+                Rem Debug.Print ("STUB:" & func_stub_nonstub)
+
+                Workbooks(wb_name).Worksheets(ws_name).Cells(row_stub + count_stub, col_stub).Value = count_stub + 1
+                Workbooks(wb_name).Worksheets(ws_name).Cells(row_stub + count_stub, col_stub + 1).Value = func_stub_nonstub
+                Workbooks(wb_name).Worksheets(ws_name).Cells(row_stub + count_stub, col_stub + 5).Value = "AMSTB_" & func_stub_nonstub
+                count_stub = count_stub + 1
+              Else
+                If (count_non_stub > 0) Then
+                    Workbooks(wb_name).Worksheets(ws_name).Rows(row_stub + count_stub + count_non_stub).Select
+                    Selection.Insert Shift:=xlDown
+                End If
+                
+                func_stub_nonstub = Replace(Split(sInputRecord, ",")(2), Chr(34), "")
+                Rem Debug.Print ("NON_STUB:" & func_stub_nonstub)
+                Workbooks(wb_name).Worksheets(ws_name).Cells(row_stub + count_stub + count_non_stub, col_nonstub).Value = func_stub_nonstub
+                count_non_stub = count_non_stub + 1
+              End If
+            End If
+          Else
+            Exit Do
+          End If
+        Loop
+        Close #fNum
+        
+        row_start = row_stub - 1
+        col_start = col_stub
+        row_end = row_stub + count_stub - 1
+        col_end = col_stub + 8
+        
+        Call Fill_Border_Table_1_4(wb_name, row_start, col_start, row_end, col_end)
+
+        Debug.Print ("Complete insert CSV for sheet " & ws_name)
+      End If
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Import_Coverage_File(ByVal wb_name As String, ByVal fileCOV As String)
+  Dim offset_sheet_cov As Integer: offset_sheet_cov = 1
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_COV)) Then
+      Dim offset_content_sheet_cov As Integer: offset_content_sheet_cov = 4
+      Dim sInputRecord As String
+      Dim outCol As Long
+      Dim outRow As Long
+      Dim fNum As Long
+        
+      Workbooks(wb_name).Worksheets(ws_name).Select
+
+      Dim rngAddr As Range
+      Set rngAddr = Cells.Find(What:=CONST_COV, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+      If rngAddr Is Nothing Then
+        Debug.Print ("Not Found COV")
+      Else
+        Rem Debug.Print (rngAddr.Address)
+        Range("A1").Select
+        Dim row_address_cov As Integer: row_address_cov = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Row + offset_content_sheet_cov
+        Dim col_address_cov As Integer: col_address_cov = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Column
+        fNum = FreeFile
+        Open fileCOV For Input As #fNum
+
+        Do While Not EOF(fNum)
+          Line Input #fNum, sInputRecord
+          Workbooks(wb_name).Worksheets(ws_name).Cells(row_address_cov, col_address_cov).Value = sInputRecord
+          row_address_cov = row_address_cov + 1
+        Loop
+        Close #fNum
+        
+        Debug.Print ("Complete insert COV for sheet " & ws_name)
+      End If
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Clear_SHEET_NAME_RESULT_Table_1_4(ByVal wb_name As String)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+
+      Dim rngAddr_stub As Range
+      Set rngAddr_stub = Cells.Find(What:=CONST_STUB_TABLE_1_4, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim rngAddr_nonstub As Range
+      Set rngAddr_nonstub = Cells.Find(What:=CONST_NONSTUB, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim row_stub As Integer: row_stub = Range(rngAddr_stub.Address).Row + 2
+      Dim col_stub As Integer: col_stub = Range(rngAddr_stub.Address).Column - 1
+      Dim row_nonstub As Integer: row_nonstub = Range(rngAddr_nonstub.Address).Row
+      Dim col_nonstub As Integer: col_nonstub = Range(rngAddr_nonstub.Address).Column + 2
+      
+      If (row_stub <> row_nonstub) Then
+        If (row_stub < row_nonstub) Then
+            For i = row_stub To row_nonstub - 1
+                Workbooks(wb_name).Worksheets(ws_name).Rows(row_stub).Select
+                Selection.Delete Shift:=xlUp
+                Rem Debug.Print ("delete row " & i)
+            Next i
+        Else
+            Debug.Print ("BUG: ROW_STUB table 1.4")
+        End If
+      Else
+        Debug.Print ("No need to clear table 1.4 stub")
+      End If
+      
+      Set rngAddr_file_stub_1_5 = Cells.Find(What:=CONST_FILE_STUB_1_5, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Set rngAddr_nonstub = Cells.Find(What:=CONST_NONSTUB, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim row_file_stub_1_5 As Integer: row_file_stub_1_5 = Range(rngAddr_file_stub_1_5.Address).Row - 4
+      row_nonstub = Range(rngAddr_nonstub.Address).Row
+      
+      If (row_nonstub <> row_file_stub_1_5) Then
+        If (row_nonstub < row_file_stub_1_5) Then
+            For i = row_nonstub To row_file_stub_1_5 - 1
+                Workbooks(wb_name).Worksheets(ws_name).Rows(row_nonstub + 1).Select
+                Selection.Delete Shift:=xlUp
+                Rem Debug.Print ("delete row " & i)
+            Next i
+        Else
+            Debug.Print ("BUG ROW_STUB table 1.4")
+        End If
+      Else
+        Debug.Print ("No need to clear table 1.4 nonstub")
+      End If
+
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_nonstub - 1, col_stub).Value = "1"
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_nonstub - 1, col_stub + 1).Value = "－"
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_nonstub - 1, col_stub + 1 + 4).Value = "－"
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_nonstub - 1, col_stub + 1 + 4 + 2).Value = ""
+      Rem Workbooks(wb_name).Worksheets(ws_name).Cells(row_nonstub, col_nonstub).Value = CONST_CONFIRMATION_NONE
+      
+      Debug.Print ("Complete clear table 1.4 sheet " & sheetName)
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Clear_Sheet_Table_And_Coverage(ByVal wb_name As String)
+  Dim offset_sheet_cov As Integer: offset_sheet_cov = 1
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_IE) _
+        Or InStr(ws_name, SHEET_NAME_OE) _
+        Or InStr(ws_name, SHEET_NAME_IO) _
+        Or InStr(ws_name, SHEET_NAME_TABLE) _
+        Or InStr(ws_name, SHEET_NAME_COV) _
+      ) Then
+      Workbooks(wb_name).Worksheets(ws_name).Activate
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      If (InStr(ws_name, SHEET_NAME_COV) < 1) Then
+        Cells.Select
+        Selection.Delete Shift:=xlUp
+      Else
+        Dim rngAddr As Range
+        Set rngAddr = Cells.Find(What:=CONST_COV, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+          SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+        If rngAddr Is Nothing Then
+          Debug.Print ("BUG: not found CONST_COV")
+        Else
+          Dim row_address_cov As Integer: row_address_cov = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr.Address).Row + offset_sheet_cov
+          MAX_ROW = Workbooks(wb_name).Worksheets(ws_name).Range("A" & Workbooks(wb_name).Worksheets(ws_name).Rows.count).End(xlUp).Row
+          If MAX_ROW > 1 Then
+              Workbooks(wb_name).Worksheets(ws_name).Range("A" & row_address_cov & ":A" & MAX_ROW).Select
+              Selection.Delete Shift:=xlUp
+          End If
+        End If
+      End If
+      Workbooks(wb_name).Worksheets(ws_name).Range("A1").Select
+    End If
+  Next ws
+  Debug.Print ("Complete clear ALL data")
+End Sub
+
+Private Sub Fill_Table_1_1(ByVal wb_name As String)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      Dim function_name As String: function_name = ""
+      Dim path_file_source As String: path_file_source = ""
+      Dim file_source_name As String: file_source_name = ""
+      Dim score_c0_cov As String: score_c0_cov = ""
+      Dim score_c1_cov As String: score_c1_cov = ""
+      Dim score_mcdc_cov As String: score_mcdc_cov = ""
+      
+      For i = 1 To 1000
+        temp_str = Trim(Workbooks(wb_name).Worksheets(SHEET_NAME_COV).Cells(i, 1).Value)
+        If (InStr(temp_str, CONST_FUNCTION_NAME) > 0) Then
+          function_name = Replace(temp_str, CONST_FUNCTION_NAME, "")
+        ElseIf (InStr(temp_str, CONST_SOURCE_FILE_NAME) > 0) Then
+          path_file_source = Replace(temp_str, CONST_SOURCE_FILE_NAME, "")
+          Dim str_array() As String
+          str_array = Split(path_file_source, "\")
+          index_item = LBound(str_array)
+          
+          For temp_index = index_item To UBound(str_array)
+            If (str_array(temp_index) = "target") Then
+              index_item = temp_index
+              Exit For
+            End If
+          Next temp_index
+          
+          path_file_source = ""
+          For temp_index = index_item + 1 To UBound(str_array) - 1
+            If (temp_index = index_item + 1) Then
+              path_file_source = str_array(temp_index)
+            Else
+              path_file_source = path_file_source & "/" & str_array(temp_index)
+            End If
+          Next temp_index
+
+          file_source_name = str_array(UBound(str_array))
+        ElseIf (InStr(temp_str, CONST_C0_COV) > 0) Then
+          score_c0_cov = Replace(temp_str, CONST_C0_COV, "")
+        ElseIf (InStr(temp_str, CONST_C1_COV) > 0) Then
+          score_c1_cov = Replace(temp_str, CONST_C1_COV, "")
+        ElseIf (InStr(temp_str, CONST_MCDC_COV) > 0) Then
+          score_mcdc_cov = Replace(temp_str, CONST_MCDC_COV, "")
+          Rem Debug.Print (score_mcdc_cov)
+          Exit For
+        End If
+      Next i
+
+      Workbooks(wb_name).Worksheets(ws_name).Range("F8").Value = path_file_source
+      Workbooks(wb_name).Worksheets(ws_name).Range("F9").Value = file_source_name
+      Workbooks(wb_name).Worksheets(ws_name).Range("F10").Value = function_name
+      Workbooks(wb_name).Worksheets(ws_name).Range("F11").Value = function_name & EXTENSION_CSV
+      Workbooks(wb_name).Worksheets(ws_name).Range("F12").Value = CONST_LABEL_TABLE_1_1_BUG_REPORT_RESULT & CONST_CONFIRMATION_OK & vbCrLf _
+                                                                & CONST_LABEL_TABLE_1_1_BUG_REPORT_C0 & score_c0_cov & vbCrLf _
+                                                                & CONST_LABEL_TABLE_1_1_BUG_REPORT_C1 & score_c1_cov & vbCrLf _
+                                                                & CONST_LABEL_TABLE_1_1_BUG_REPORT_MCDC & score_mcdc_cov & vbCrLf _
+                                                                & CONST_LABEL_TABLE_1_1_BUG_REPORT_ISSUE & CONST_CONFIRMATION_NONE
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Fill_Border_Table_1_4(ByVal wb_name As String, ByVal row_start As Integer, ByVal col_start As Integer, ByVal row_end As Integer, ByVal col_end As Integer)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(row_start, col_start), Cells(row_end, col_end)).Select
+
+      With Selection
+        .WrapText = True
+        .Rows.AutoFit
+      End With
+      
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeTop)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeBottom)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlInsideVertical)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlInsideHorizontal)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      
+      start_cell_convert_row = row_start + 1
+      start_cell_convert_col = col_start + 1
+      last_cell_addr_row = row_end
+      last_cell_addr_col = col_start + 1 + 3
+
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(start_cell_convert_row, start_cell_convert_col), Cells(last_cell_addr_row, last_cell_addr_col)).Select
+
+      With Selection
+          .HorizontalAlignment = xlLeft
+          .VerticalAlignment = xlCenter
+          .WrapText = True
+      End With
+
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeTop)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeBottom)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      Selection.Borders(xlInsideVertical).LineStyle = xlNone
+      With Selection.Borders(xlInsideHorizontal)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+
+      Call my_merge_cell(start_cell_convert_row, start_cell_convert_col, last_cell_addr_row, last_cell_addr_col)
+      
+      start_cell_convert_row = row_start + 1
+      start_cell_convert_col = col_start + 4 + 1
+      last_cell_addr_row = row_end
+      last_cell_addr_col = col_start + 4 + 2
+
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(start_cell_convert_row, start_cell_convert_col), Cells(last_cell_addr_row, last_cell_addr_col)).Select
+
+      With Selection
+          .HorizontalAlignment = xlLeft
+          .VerticalAlignment = xlCenter
+          .WrapText = True
+      End With
+
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeTop)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeBottom)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      Selection.Borders(xlInsideVertical).LineStyle = xlNone
+      With Selection.Borders(xlInsideHorizontal)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+
+      Call my_merge_cell(start_cell_convert_row, start_cell_convert_col, last_cell_addr_row, last_cell_addr_col)
+
+      start_cell_convert_row = row_start + 1
+      start_cell_convert_col = col_end - 1
+      last_cell_addr_row = row_end
+      last_cell_addr_col = col_end
+      
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(start_cell_convert_row, start_cell_convert_col), Cells(last_cell_addr_row, last_cell_addr_col)).Select
+
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeTop)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeBottom)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlMedium
+      End With
+      Selection.Borders(xlInsideVertical).LineStyle = xlNone
+      With Selection.Borders(xlInsideHorizontal)
+          .LineStyle = xlContinuous
+          .ColorIndex = 0
+          .TintAndShade = 0
+          .Weight = xlThin
+      End With
+
+      Call my_merge_cell(start_cell_convert_row, start_cell_convert_col, last_cell_addr_row, last_cell_addr_col)
+
+      Dim temp_string As String: temp_string = row_start & ":" & row_end
+      Workbooks(wb_name).Worksheets(ws_name).Rows(temp_string).Select
+      With Selection
+        .WrapText = True
+        .EntireRow.AutoFit
+      End With
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Clear_SHEET_NAME_RESULT_Table_1_3(ByVal wb_name As String)
+  Dim offset_template_tb_1_3 As Integer: offset_template_tb_1_3 = 3
+  Dim offset_template_tb_1_4 As Integer: offset_template_tb_1_4 = 2
+  Dim offset_template_inside_table_1_3_row As Integer: offset_template_inside_table_1_3_row = 1
+  Dim offset_template_inside_table_1_3_col As Integer: offset_template_inside_table_1_3_col = 5
+  
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+
+      Dim rngAddr_table_1_3 As Range
+      Set rngAddr_table_1_3 = Cells.Find(What:=CONST_TABLE_1_3, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim rngAddr_table_1_4 As Range
+      Set rngAddr_table_1_4 = Cells.Find(What:=CONST_TABLE_1_4, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      Dim row_table_1_3 As Integer: row_table_1_3 = Range(rngAddr_table_1_3.Address).Row + offset_template_tb_1_3
+      Dim col_table_1_3 As Integer: col_table_1_3 = Range(rngAddr_table_1_3.Address).Column
+      Dim row_table_1_4 As Integer: row_table_1_4 = Range(rngAddr_table_1_4.Address).Row - offset_template_tb_1_4
+      Dim col_table_1_4 As Integer: col_table_1_4 = Range(rngAddr_table_1_4.Address).Column
+      
+      If (row_table_1_3 <> row_table_1_4) Then
+        If (row_table_1_3 < row_table_1_4) Then
+            For i = row_table_1_3 To row_table_1_4 - 1
+                Workbooks(wb_name).Worksheets(ws_name).Rows(row_table_1_3).Select
+                Selection.Delete Shift:=xlUp
+                Rem Debug.Print ("delete row " & i)
+            Next i
+        Else
+            Debug.Print ("BUG: ROW_STUB table 1.3")
+        End If
+      Else
+        Debug.Print ("No need to clear table 1.3 initial value")
+      End If
+      
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_table_1_3 - offset_template_inside_table_1_3_row, col_table_1_3).Value = CONST_CONFIRMATION_NONE
+      Workbooks(wb_name).Worksheets(ws_name).Cells(row_table_1_3 - offset_template_inside_table_1_3_row, col_table_1_3 + offset_template_inside_table_1_3_col).Value = CONST_CONFIRMATION_NONE
+
+      Workbooks(wb_name).Worksheets(ws_name).Range("A1").Select
+      Debug.Print ("Complete clear table 1.3 sheet" & ws_name)
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub Fill_Table_1_3(ByVal wb_name As String, ByVal CSVFile As String)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+
+      Dim sInputRecord As String
+      Dim outCol As Long
+      Dim outRow As Long
+      Dim fNum As Long
+
+      Dim rngAddr_table_1_3 As Range
+      Set rngAddr_table_1_3 = Cells.Find(What:=CONST_TABLE_1_3, After:=Range("A65536"), LookIn:=xlValues, LookAt:=xlWhole, _
+        SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+
+      If rngAddr_table_1_3 Is Nothing Then
+        Debug.Print ("Not Found Table 1.4")
+      Else
+        Rem Debug.Print (rngAddr.Address)
+        Dim row_table_1_3 As Integer: row_table_1_3 = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_table_1_3.Address).Row + 2
+        Dim col_table_1_3 As Integer: col_table_1_3 = Workbooks(wb_name).Worksheets(ws_name).Range(rngAddr_table_1_3.Address).Column
+
+        fNum = FreeFile
+        Open CSVFile For Input As #fNum
+
+        Dim flag_match_data As Boolean: flag_match_data = False
+
+        Dim str_var_array() As String
+        Dim str_val_of_var_array() As String
+
+        Do While Not EOF(fNum)
+          Line Input #fNum, sInputRecord
+          If (flag_match_data) Then
+            str_val_of_var_array = Split(Trim(sInputRecord), ",")
+            Exit Do
+          End If
+          If (InStr(sInputRecord, "#InitWheneverCal")) Then
+            flag_match_data = True
+            str_var_array = Split(Trim(sInputRecord), ",")
+          End If
+        Loop
+        Close #fNum
+
+        Dim count_variable As Integer: count_variable = 0
+        For i = 1 To UBound(str_var_array)
+          If (count_variable > 0) Then
+              Workbooks(wb_name).Worksheets(ws_name).Rows(row_table_1_3 + count_variable).Select
+              Selection.Insert Shift:=xlDown
+          End If
+
+          str_var_item = Replace(str_var_array(i), Chr(34), "")
+          str_var_item = Split(str_var_item, "/")(1)
+          
+          Workbooks(wb_name).Worksheets(ws_name).Cells(row_table_1_3 + count_variable, col_table_1_3).Value = str_var_item
+          Workbooks(wb_name).Worksheets(ws_name).Cells(row_table_1_3 + count_variable, col_table_1_3 + 5).Value = str_val_of_var_array(i)
+
+          count_variable = count_variable + 1
+        Next i
+        
+        row_start = row_table_1_3 - 1
+        col_start = col_table_1_3
+        row_end = row_table_1_3 + count_variable - 1
+        col_end = col_table_1_3 + 5
+        
+        Call Fill_Border_Table_1_3(wb_name, row_start, col_start, row_end, col_end)
+
+        Debug.Print ("Complete insert CSV for sheet " & ws_name)
+        Exit For
+      End If
+    End If
+  Next ws
+End Sub
+
+Private Sub Fill_Border_Table_1_3(ByVal wb_name As String, ByVal row_start As Integer, ByVal col_start As Integer, ByVal row_end As Integer, ByVal col_end As Integer)
+  For Each ws In Workbooks(wb_name).Worksheets
+    ws_name = ws.Name
+    If (InStr(ws_name, SHEET_NAME_RESULT)) Then
+      Workbooks(wb_name).Worksheets(ws_name).Select
+
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(row_start, col_start), Cells(row_end, col_end)).Select
+
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+      End With
+      With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+      End With
+
+      start_cell_convert_row = row_start + 1
+      start_cell_convert_col = col_start
+      last_cell_addr_row = row_end
+      last_cell_addr_col = col_end - 1
+
+      Workbooks(wb_name).Worksheets(ws_name).Range(Cells(start_cell_convert_row, start_cell_convert_col), Cells(last_cell_addr_row, last_cell_addr_col)).Select
+
+      With Selection
+        .HorizontalAlignment = xlLeft
+        .VerticalAlignment = xlCenter
+        .WrapText = True
+      End With
+
+      Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+      Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+      With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+      End With
+      With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlMedium
+      End With
+      With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+      End With
+      Selection.Borders(xlInsideVertical).LineStyle = xlNone
+      With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+      End With
+
+      start_cell_convert_row = row_start + 1
+      start_cell_convert_col = col_start
+      last_cell_addr_row = row_end
+      last_cell_addr_col = col_end - 1
+
+      Call my_merge_cell(start_cell_convert_row, start_cell_convert_col, last_cell_addr_row, last_cell_addr_col)
+
+      Dim temp_string As String: temp_string = row_start & ":" & row_end
+      Workbooks(wb_name).Worksheets(ws_name).Rows(temp_string).Select
+      With Selection
+        .WrapText = True
+        .EntireRow.AutoFit
+      End With
+      Exit For
+    End If
+  Next ws
+End Sub
+
+Private Sub my_merge_cell(ByVal start_cell_convert_row As Integer, ByVal start_cell_convert_col As Integer, ByVal last_cell_addr_row As Integer, ByVal last_cell_addr_col As Integer)
+  For index_row = start_cell_convert_row To last_cell_addr_row
+    Dim temp_rng_addr_start As String: temp_rng_addr_start = Cells(index_row, start_cell_convert_col).Address(RowAbsolute:=False, ColumnAbsolute:=False)
+    Dim temp_rng_addr_end As String: temp_rng_addr_end = Cells(index_row, last_cell_addr_col).Address(RowAbsolute:=False, ColumnAbsolute:=False)
+
+    Dim temp_rng As String: temp_rng = temp_rng_addr_start & ":" & temp_rng_addr_end
+    Dim temp_merge_rng As Range: Set temp_merge_rng = Application.Range(temp_rng)
+    temp_merge_rng.Merge
+  Next index_row
+End Sub
+
+Private Sub Fmt_correction()
+  Call Wrapping_off
+  Call Line_correction
+  Call Merge_cells
+  ActiveSheet.Range("A1").Select
+End Sub
+
+Private Sub Wrapping_off()
+  ActiveSheet.Range("A1").Select
+  ActiveSheet.Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+  With Selection
+    .VerticalAlignment = xlCenter
+    .WrapText = False
+    .Orientation = 0
+    .AddIndent = False
+    .IndentLevel = -1
+    .ShrinkToFit = False
+    .ReadingOrder = xlContext
+  End With
+  ActiveSheet.Range("A1").Select
+End Sub
+
+Private Sub Line_correction()
+  Dim Cell_Base_Row As Long
+  Dim Cell_Base_Column As Long
+  Dim Cell_Last_Row As Long
+  Dim Cell_Last_Column As Long
+  Dim Interior_Color As Long
+  Dim Cell_Selection As String
+  Dim White As Long
+  Dim LightBlue As Long
+  Dim Blue As Long
+  Dim Green As Long
+  Dim Orange As Long
+  
+  '16777164:light blue,13434828:green,16777215:White,52479:orange
+  White = 16777215
+  LightBlue = 16777164
+  Blue = 16764057
+  Green = 13434828
+  Orange = 52479
+  
+  ActiveSheet.Range("A1").Select
+  Cell_Selection = Selection
+  If Cell_Selection = SHEET_NAME_IE Then
+      ActiveSheet.Range("A1").Select
+  Else
+      ActiveSheet.Range("B3").Select
+  End If
+
+  Cell_Base_Row = ActiveCell.Row
+  Cell_Base_Column = ActiveCell.Column
+  
+  'Debug.Print (Cell_Base_Row)
+  'Debug.Print (Cell_Base_Column)
+  
+  ActiveCell.SpecialCells(xlLastCell).Select
+  Cell_Last_Row = ActiveCell.Row
+  Cell_Last_Column = ActiveCell.Column
+  'Debug.Print (Cell_Last_Row)
+  'Debug.Print (Cell_Last_Column)
+  
+  Dim i As Long
+
+  For i = 3 To Cell_Last_Row
+    ActiveSheet.Cells(i, Cell_Base_Column).Select
+    Interior_Color = ActiveSheet.Cells(i, Cell_Base_Column).Interior.Color
+    'Debug.Print (Interior_Color)
+    If Interior_Color = LightBlue Or Interior_Color = Green Or Interior_Color = Blue Then
+      'Debug.Print (Interior_Color)
+    ElseIf Interior_Color = White Or Interior_Color = Orange Then
+      'Debug.Print (Interior_Color)
+      ActiveSheet.Range(ActiveSheet.Cells(i, Cell_Base_Column), ActiveSheet.Cells(i, Cell_Last_Column)).Cut
+      ActiveSheet.Range(ActiveSheet.Cells(i, Cell_Base_Column), ActiveSheet.Cells(i, Cell_Last_Column)).Select
+      Selection.Offset(0, 1).Select
+      DoEvents
+      ActiveSheet.Paste
+    Else
+      'Debug.Print (Interior_Color)
+      ActiveSheet.Range(ActiveSheet.Cells(i, Cell_Base_Column), ActiveSheet.Cells(i, Cell_Last_Column)).Cut
+      ActiveSheet.Range(ActiveSheet.Cells(i, Cell_Base_Column), ActiveSheet.Cells(i, Cell_Last_Column)).Select
+      If Cell_Selection = SHEET_NAME_IE Then
+        Selection.Offset(0, 2).Select
+      Else
+        Selection.Offset(0, 1).Select
+      End If
+      DoEvents
+      ActiveSheet.Paste
+    End If
+
+  Next i
+  ActiveSheet.Range("A1").Select
+End Sub
+
+Private Sub Merge_cells()
+    Dim i As Long
+    Dim Cell_Base_Row As Long
+    Dim Cell_Base_Column As Long
+    Dim Cell_Last_Row As Long
+    Dim Cell_Last_Column As Long
+    Dim Interior_Color As Long
+    Dim Next_InteriorColor As Long
+    Dim Cell_Merge_Start As Long
+    Dim Cell_Merge_End As Long
+    Dim Cell_Selection As String
+    Dim LightBlue As Long
+    Dim Green As Long
+    Dim Blue As Long
+    Dim IE_Offset As Long
+    Dim Table_Offset As Long
+    
+    '16777164:light blue,13434828:green,16777215:White,52479:orange
+    LightBlue = 16777164
+    Green = 13434828
+    Blue = 16764057
+    
+    IE_Offset = 12
+    Table_Offset = 4
+    
+    ActiveSheet.Range("A1").Select
+    Cell_Selection = Selection
+    If Cell_Selection = SHEET_NAME_IE Then
+        ActiveSheet.Range("A1").Select
+    Else
+        ActiveSheet.Range("B3").Select
+    End If
+    
+    Cell_Base_Row = ActiveCell.Row
+    Cell_Base_Column = ActiveCell.Column
+    
+    'Debug.Print (Cell_Base_Row)
+    'Debug.Print (Cell_Base_Column)
+    
+    ActiveCell.SpecialCells(xlLastCell).Select
+    Cell_Last_Row = ActiveCell.Row
+    Cell_Last_Column = ActiveCell.Column
+    'Debug.Print (Cell_Last_Row)
+    'Debug.Print (Cell_Last_Column)
+    
+    For i = 3 To Cell_Last_Row
+    
+        ActiveSheet.Cells(i, Cell_Base_Column).Select
+        Interior_Color = ActiveSheet.Cells(i, Cell_Base_Column).Interior.Color
+        Next_InteriorColor = ActiveSheet.Cells(i + 1, Cell_Base_Column).Interior.Color
+        'Debug.Print (Interior_Color)
+        
+        '16777164:light blue,13434828:green,16777215:White
+        If Interior_Color = LightBlue Or Interior_Color = Green Or Interior_Color = Blue Then
+            'Debug.Print (Interior_Color)
+            Cell_Merge_Start = i
+        Else
+            Cell_Merge_End = i
+            'Debug.Print (Cell_Merge_End)
+            
+            If Next_InteriorColor = LightBlue Or Next_InteriorColor = Blue Or i = Cell_Last_Row - 1 Then
+               ActiveSheet.Range(ActiveSheet.Cells(Cell_Merge_Start, Cell_Base_Column), ActiveSheet.Cells(Cell_Merge_End, Cell_Base_Column)).Merge
+               
+            End If
+        End If
+        
+    Next i
+    
+    If Cell_Selection = SHEET_NAME_IE Then
+        ActiveSheet.Range(ActiveSheet.Cells(Cell_Base_Row + IE_Offset, Cell_Base_Column), ActiveSheet.Cells(Cell_Last_Row - 1, Cell_Base_Column)).Select
+ #If 1 Then
+        With Selection.Borders(xlEdgeLeft)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+        With Selection.Borders(xlEdgeRight)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+        With Selection.Borders(xlInsideHorizontal)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+        With Selection.Borders(xlEdgeBottom)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+#Else
+        Selection.Borders.LineStyle = xlContinuous
+        Selection.Borders.Weight = xlThick
+#End If
+    Else
+        ActiveSheet.Range(ActiveSheet.Cells(Cell_Base_Row + Table_Offset, Cell_Base_Column), ActiveSheet.Cells(Cell_Last_Row - 1, Cell_Base_Column)).Select
+#If 1 Then
+        With Selection.Borders(xlEdgeLeft)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+        With Selection.Borders(xlEdgeRight)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+        With Selection.Borders(xlInsideHorizontal)
+            .LineStyle = xlContinuous
+            .Weight = xlMedium
+        End With
+        With Selection.Borders(xlEdgeBottom)
+            .LineStyle = xlContinuous
+            .Weight = xlThick
+        End With
+#Else
+        Selection.Borders.LineStyle = xlContinuous
+        Selection.Borders.Weight = xlThick
+#End If
+    End If
+    ActiveSheet.Range("A1").Select
+End Sub
