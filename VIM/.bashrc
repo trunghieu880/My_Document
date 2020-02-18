@@ -20,6 +20,7 @@ alias kdiff='/d/Program\ Files/KDiff3/kdiff3.exe'
 #alias xlsx2csv='/d/Program\ Files/Python36/Lib/xlsx2csv.py' 
 alias xlsx2csv='/d/workspace/mingw32_env/opt/python-3.8.1/python.exe /c/Python27/Lib/xlsx2csv.py'
 xlsx2csv='/d/workspace/mingw32_env/opt/python-3.8.1/python.exe /d/workspace/mingw32_env/opt/python-3.8.1/Lib/xlsx2csv.py' 
+alias tree='/d/Material/GIT/My_Document/Script/tree.exe'
 
 # Make and change directory at once
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
@@ -83,4 +84,8 @@ function win() {
   fi
   
   echo "$mypath" | sed "s|^~|$temp|g" | sed 's|^/||g' | sed 's|/|\\|g' | sed -e 's/^c/c:/g' -e 's/^d/d:/g' -e 's/^u/u:/g';
+}
+
+function win2linux() {
+  echo "$1" | sed -s 's#\\#/#g' | sed -e 's#^D:#/d#g' -e 's#^C:#/c#g'
 }
