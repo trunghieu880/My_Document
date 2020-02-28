@@ -1,0 +1,29 @@
+void [your_function](int doIt){
+if (doIt) {
+    /* Test case data declarations */
+
+    /* Set global data */
+    initialise_global_data();
+
+    [your_input]
+
+    /* Set expected values for global data checks */
+    initialise_expected_global_data();
+
+    [your_output]
+
+    START_TEST(""[function_description]"",
+               ""[comment_description]"");
+
+        /* Expected Call Sequence  */
+        EXPECTED_CALLS(""[your_stub]"");
+
+            /* Call SUT */
+            ACCESS_FUNCTION([your_source_c], [your_function])([your_argument]);
+
+            /* Test case checks */
+            /* Checks on global data */
+            check_global_data();
+        END_CALLS();
+    END_TEST();
+}}
