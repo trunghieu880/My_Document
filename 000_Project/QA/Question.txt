@@ -1,0 +1,15 @@
+I. Question
+1. KPI
+- As you know BV's team will do the task with the workpackage type, so could you please share with me about:
+ + The total LOC that you will assign to BV's team per month?
+ + The total KPI will calculate depend on the releasing status such as Ontime or InAdvance or Late, not regardless to the number of member?
+- In UT Work flow at RBVH, I see when a test coordinator (internal team) receives UT requirements, then the test coordinator will analyze & estimation, then planning, and then send the plan to customer to discuss, get the deal. When the plan is accepted by customer, we will move to phase "assign task". So how do you calculate the KPI for this milestone?
+- As you know, the PC's bosch always get some unkown issues such as:
+  + A PC can run ATT normally but after some days it can not run anymore => Need to reinstall software, even though reinstall WINDOWS
+=> These issues have aldready occrured for us in external training from RBVH, and RBVH's internal bosch can not fix these issues.
+=> So the tester can't proceed the task any more about 2 days or 3 days until the PC is fixed. Therefore the KPI for the tester will not calculate correctly.
+=> Could you please share your opinion for this point?
+
+My opinion:
+Opinion 1. When PC is corrupted, the KPI will not count until it is fixed.
+Opinion 2. Prepare one or two PC backup.
