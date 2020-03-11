@@ -16,5 +16,5 @@ else
   exit 1
 fi
 
-/c/Program\ Files/7-Zip/7z.exe x ${path_source}
+/c/Program\ Files/7-Zip/7z.exe x -aoa -bd ${path_source}
 
