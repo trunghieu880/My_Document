@@ -1,0 +1,33 @@
+$ make ADC_GIT_CMD_0001
+
+::: AES Version:2.1.0(Official Version) :::
+
+touch EvalEnvelope/Adc_CMD001_C1H/MakeDepend.mak
+cd EvalEnvelope/Adc_CMD001_C1H/ && /usr/bin/make -f Makefile ready_for_generate
+make[1]: Entering directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CMD001_C1H'
+cp /cygdrive/u/internal/X1X/C1x/common_family/generator/Test_Application_C1x_aes.trxml cdf/
+cp u:/external/X1X/C1x/modules/adc/generator/R403_ADC_C1x_BSWMDT.arxml cdf/
+make[1]: Leaving directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CMD001_C1H'
+cd EvalEnvelope/Adc_CMD001_C1H/ && ( /cygdrive/u/external/X1X/common_platform/generic/generator/MCALConfGen.exe -m adc -l -o ./ a.test cdf/*.[at]rxml || touch .ErrorFlag ) |& tee log/GenerationTool.log
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m adc -l -o ./ a.test
+           cdf/ADC_GIT_CMD_0001.arxml cdf/R403_ADC_C1x_BSWMDT.arxml
+           cdf/Test_Application_C1x_aes.trxml
+WRN000001: As per AUTOSAR ECU Configuration Description File naming
+           convention, the file extension should be '.arxml' for 'a.test'
+           file.
+ERR000001: File <a.test> does not exist.
+INF000004: Opened file <Adc.log> at [03 Oct 2019 - 02:16:20].
+INF000005: <1> Error(s) and <1> Warning(s) detected.
+INF000008: Execution terminated due to command line errors.
+Exit status of Generation Tool: FALSE
+mv -f EvalEnvelope/Adc_CMD001_C1H/adc.log EvalEnvelope/Adc_CMD001_C1H/log/
+cd EvalEnvelope/Adc_CMD001_C1H/ && ( /cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/Tool/GenToolLogCheck.py  -e"ERR000001" -f../../EvalEnvelope/Adc_CMD001_C1H/log/GenerationTool.log || true )
+cat EvalEnvelope/Adc_CMD001_C1H/Result.txt
+### Result Judgment 1.2.0 ###
+### 2019/10/03 14:16 ###
+OK
+rm -f EvalEnvelope/Adc_CMD001_C1H/.ErrorFlag
+******************************************
+ The end of Adc_CMD001_C1H
+******************************************

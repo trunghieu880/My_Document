@@ -1,0 +1,42 @@
+huynh.nguyen@L-126 /cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3
+$ make ADC_GIT_CHK_0004
+
+::: AES Version:2.1.0(Official Version) :::
+
+touch EvalEnvelope/Adc_CHK004_C1H/MakeDepend.mak
+cd EvalEnvelope/Adc_CHK004_C1H/ && /usr/bin/make -f Makefile ready_for_generate
+make[1]: Entering directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK004_C1H'
+cp /cygdrive/u/internal/X1X/C1x/common_family/generator/Test_Application_C1x_aes.trxml cdf/
+cp u:/external/X1X/C1x/modules/adc/generator/R403_ADC_C1x_BSWMDT.arxml cdf/
+make[1]: Leaving directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK004_C1H'
+cd EvalEnvelope/Adc_CHK004_C1H/ && ( /cygdrive/u/external/X1X/common_platform/generic/generator/MCALConfGen.exe -m adc -l -o ./ cdf/*.[at]rxml || touch .ErrorFlag ) |& tee log/GenerationTool.log
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m adc -l -o ./
+           cdf/ADC_GIT_CHK_0004.arxml cdf/R403_ADC_C1x_BSWMDT.arxml
+           cdf/Test_Application_C1x_aes.trxml
+ERR123004: The parameter 'AdcChannelValueSigned' in the container
+           'AdcPublishedInformation' should be configured. File Name:
+           U:\internal\X1X\C1x\modules\adc\workspace\C1H\4.0.3\EvalEnvelope\Adc_CHK004_C1H\cdf\ADC_GIT_CHK_0004.arxml
+           Path: /ActiveEcuC/Adc0/AdcPublishedInformation0
+ERR123004: The parameter 'AdcGroupFirstChannelFixed' in the container
+           'AdcPublishedInformation' should be configured. File Name:
+           U:\internal\X1X\C1x\modules\adc\workspace\C1H\4.0.3\EvalEnvelope\Adc_CHK004_C1H\cdf\ADC_GIT_CHK_0004.arxml
+           Path: /ActiveEcuC/Adc0/AdcPublishedInformation0
+ERR123004: The parameter 'AdcMaxChannelResolution' in the container
+           'AdcPublishedInformation' should be configured. File Name:
+           U:\internal\X1X\C1x\modules\adc\workspace\C1H\4.0.3\EvalEnvelope\Adc_CHK004_C1H\cdf\ADC_GIT_CHK_0004.arxml
+           Path: /ActiveEcuC/Adc0/AdcPublishedInformation0
+INF000004: Opened file <Adc.log> at [03 Oct 2019 - 02:12:14].
+INF000005: <3> Error(s) and <0> Warning(s) detected.
+INF000009: Execution terminated due to error in the input file.
+Exit status of Generation Tool: FALSE
+mv -f EvalEnvelope/Adc_CHK004_C1H/adc.log EvalEnvelope/Adc_CHK004_C1H/log/
+cd EvalEnvelope/Adc_CHK004_C1H/ && ( /cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/Tool/GenToolLogCheck.py  -e"ERR123004: The parameter 'AdcChannelValueSigned'" -e"ERR123004: The parameter 'AdcGroupFirstChannelFixed'" -e"ERR123004: The parameter 'AdcMaxChannelResolution'" -f../../EvalEnvelope/Adc_CHK004_C1H/log/GenerationTool.log || true )
+cat EvalEnvelope/Adc_CHK004_C1H/Result.txt
+### Result Judgment 1.2.0 ###
+### 2019/10/03 14:12 ###
+OK
+rm -f EvalEnvelope/Adc_CHK004_C1H/.ErrorFlag
+******************************************
+ The end of Adc_CHK004_C1H
+******************************************

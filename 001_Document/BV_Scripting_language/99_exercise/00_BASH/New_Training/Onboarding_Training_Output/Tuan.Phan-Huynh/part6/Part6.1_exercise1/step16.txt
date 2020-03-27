@@ -1,0 +1,30 @@
+
+::: AES Version:2.1.0(Official Version) :::
+
+touch EvalEnvelope/Adc_CHK019_C1H/MakeDepend.mak
+cd EvalEnvelope/Adc_CHK019_C1H/ && /usr/bin/make -f Makefile ready_for_generate
+make[1]: Entering directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK019_C1H'
+cp /cygdrive/u/internal/X1X/C1x/common_family/generator/Test_Application_C1x_aes.trxml cdf/
+cp u:/external/X1X/C1x/modules/adc/generator/R403_ADC_C1x_BSWMDT.arxml cdf/
+make[1]: Leaving directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK019_C1H'
+cd EvalEnvelope/Adc_CHK019_C1H/ && ( /cygdrive/u/external/X1X/common_platform/generic/generator/MCALConfGen.exe -m adc -l -o ./ cdf/*.[at]rxml || touch .ErrorFlag ) |& tee log/GenerationTool.log
+INF000001: Tool Version: 1.0.0 
+INF000002: Command line arguments: MCALConfGen.exe -m adc -l -o ./  
+           cdf/ADC_GIT_CHK_0016.arxml cdf/R403_ADC_C1x_BSWMDT.arxml 
+           cdf/Test_Application_C1x_aes.trxml 
+ERR123023: Value for the parameter 'AdcGroupHwTriggerSource' should be  
+           configured, when the parameter 'AdcGroupTriggSrc' is  
+           configured as <ADC_TRIGG_SRC_HW> in container <AdcGroup0>.  
+           Path: /ActiveEcuC/Adc0/AdcConfigSet0/AdcHwUnit0/AdcGroup0 File 
+           name: cdf/ADC_GIT_CHK_0016.arxml 
+INF000004: Opened file <Adc.log> at [11 Sep 2019 - 05:34:26]. 
+INF000005: <1> Error(s) and <0> Warning(s) detected. 
+INF000009: Execution terminated due to error in the input file. 
+Exit status of Generation Tool: FALSE
+mv -f EvalEnvelope/Adc_CHK019_C1H/adc.log EvalEnvelope/Adc_CHK019_C1H/log/
+cd EvalEnvelope/Adc_CHK019_C1H/ && ( /cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/Tool/GenToolLogCheck.py  -f../../EvalEnvelope/Adc_CHK019_C1H/log/GenerationTool.log || true )
+rm -f EvalEnvelope/Adc_CHK019_C1H/.ErrorFlag
+******************************************
+ The end of Adc_CHK019_C1H
+******************************************
+Error! : Argument is not enough

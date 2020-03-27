@@ -1,0 +1,442 @@
+
+C:\Workspace\Jenkins\Tool\QAC>REM @echo off 
+
+C:\Workspace\Jenkins\Tool\QAC>setlocal EnableDelayedExpansion 
+
+C:\Workspace\Jenkins\Tool\QAC>SET MSN=port 
+
+C:\Workspace\Jenkins\Tool\QAC>SET AR=4.0.3 
+
+C:\Workspace\Jenkins\Tool\QAC>IF "4.0.3" == "4.0.3" SET AR_TOOL=4_0_3 
+
+C:\Workspace\Jenkins\Tool\QAC>IF "4.0.3" == "4.2.2" SET AR_TOOL=4_2_2 
+
+C:\Workspace\Jenkins\Tool\QAC>SET DEVICE=F1x 
+
+C:\Workspace\Jenkins\Tool\QAC>SET ROOT_FOLDER=U:\internal\X1X 
+
+C:\Workspace\Jenkins\Tool\QAC>SET TOOl_FOLDER=C:\Workspace\Jenkins\Tool\QAC 
+
+C:\Workspace\Jenkins\Tool\QAC>IF /I "port" == "" (GOTO :Help ) 
+
+C:\Workspace\Jenkins\Tool\QAC>IF "4.0.3" NEQ "4.2.2" IF "4.0.3" NEQ "4.0.3" (GOTO :Help ) 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL :CONV_VAR_to_MAJ MSN 
+
+C:\Workspace\Jenkins\Tool\QAC>FOR %z IN (a b c d e f g h i j k l m n o p q r s t u v w x y z) DO CALL set MSN=%MSN:%z=%z% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:a=a% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:b=b% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:c=c% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:d=d% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:e=e% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:f=f% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:g=g% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:h=h% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:i=i% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:j=j% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:k=k% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:l=l% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:m=m% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:n=n% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:o=o% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:p=p% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:q=q% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:r=r% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:s=s% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:t=t% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:u=u% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:v=v% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:w=w% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:x=x% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:y=y% 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL set MSN=%MSN:z=z% 
+
+C:\Workspace\Jenkins\Tool\QAC>GOTO :Merging 
+
+C:\Workspace\Jenkins\Tool\QAC>IF NOT EXIST output\F1x\port\4_0_3\merge\output\error MKDIR output\F1x\port\4_0_3\merge\output\error 
+
+C:\Workspace\Jenkins\Tool\QAC>IF NOT EXIST "U:\temp\output_merge\temp" MKDIR "U:\temp\output_merge\temp" 
+
+C:\Workspace\Jenkins\Tool\QAC>CD /D "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3" 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>REM cd 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>FOR / %D in (*) DO (
+SET CFG=!CFG! %~nxD  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\%~nxD\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\%~nxD\output\" /S /Y 
+) 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! cfg01  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\cfg01\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! cfg03  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\cfg03\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg04  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg04\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg05  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg05\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg20  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg20\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg25  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg25\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! sample  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\sample\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>CD /D C:\Workspace\Jenkins\Tool\QAC 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\Merge_Tool.exe port\4_0_3 cfg01 cfg03 Cfg04 Cfg05 Cfg20 Cfg25 sample F1x C:\Workspace\Jenkins\Tool\QAC 
+Merging is done with 0 error(s), 0 warning(s)!
+
+*********************MERGING DONE************************
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\CWM_Tool.exe port\4_0_3 F1x C:\Workspace\Jenkins\Tool\QAC 
+START CWM detecting...
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Ram_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Version_Merge.c file!
+
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\MWC_Tool.exe port\4_0_3 .\output\Messages.txt F1x C:\Workspace\Jenkins\Tool\QAC 
+START MWC detecting...
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_sample.c file!
+
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Ram_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Version_Merge.c file!
+
+Error Detecting is done with 0 error(s), 0 warning(s)!
+
+*******************ERROR DETECTING DONE********************
+
+C:\Workspace\Jenkins\Tool\QAC>goto :END 
+
+C:\Workspace\Jenkins\Tool\QAC>ENDLOCAL
+
+C:\Workspace\Jenkins\Tool\QAC>IF NOT EXIST output\F1x\port\4_0_3\merge\output\error MKDIR output\F1x\port\4_0_3\merge\output\error 
+
+C:\Workspace\Jenkins\Tool\QAC>IF NOT EXIST "U:\temp\output_merge\temp" MKDIR "U:\temp\output_merge\temp" 
+
+C:\Workspace\Jenkins\Tool\QAC>CD /D "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3" 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>REM cd 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>FOR / %D in (*) DO (
+SET CFG=!CFG! %~nxD  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\%~nxD\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\%~nxD\output\" /S /Y 
+) 
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! cfg01  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\cfg01\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg01\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! cfg03  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\cfg03\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\cfg03\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg04  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg04\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg04\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg05  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg05\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg05\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg20  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg20\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg20\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! Cfg25  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\Cfg25\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\Cfg25\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>(
+SET CFG=!CFG! sample  
+ XCOPY "U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\*.c" "C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\sample\output\" /S /Y 
+) 
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Hardware.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_PBcfg.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Ram.c
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3\sample\output\Port_Version.c
+5 File(s) copied
+
+U:\internal\X1X\F1x\modules\port\test_static\qac\4.0.3>CD /D C:\Workspace\Jenkins\Tool\QAC 
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\Merge_Tool.exe port\4_0_3 cfg01 cfg03 Cfg04 Cfg05 Cfg20 Cfg25 sample cfg01 cfg03 Cfg04 Cfg05 Cfg20 Cfg25 sample F1x C:\Workspace\Jenkins\Tool\QAC 
+Merging is done with 0 error(s), 0 warning(s)!
+
+*********************MERGING DONE************************
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\CWM_Tool.exe port\4_0_3 F1x C:\Workspace\Jenkins\Tool\QAC 
+START CWM detecting...
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Ram_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Version_Merge.c file!
+
+
+C:\Workspace\Jenkins\Tool\QAC>CALL .\scripts\MWC_Tool.exe port\4_0_3 .\output\Messages.txt F1x C:\Workspace\Jenkins\Tool\QAC 
+START MWC detecting...
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Hardware_sample.c file!
+
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg01.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_cfg03.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg04.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg05.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg20.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_Cfg25.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_PBcfg_sample.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Ram_Merge.c file!
+
+Done for C:\Workspace\Jenkins\Tool\QAC\output\F1x\port\4_0_3\merge\output\Port_Version_Merge.c file!
+
+Error Detecting is done with 0 error(s), 0 warning(s)!
+
+*******************ERROR DETECTING DONE********************
+
+C:\Workspace\Jenkins\Tool\QAC>goto :END 
+
+C:\Workspace\Jenkins\Tool\QAC>ENDLOCAL

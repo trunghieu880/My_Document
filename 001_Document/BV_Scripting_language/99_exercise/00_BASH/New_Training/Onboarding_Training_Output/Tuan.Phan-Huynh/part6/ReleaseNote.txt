@@ -1,0 +1,372 @@
+*** 19-Dec-2017 ***
+AES version 2.1.0 (Official version)
+  Even if the path of the file or the file name is changed due to the 
+  specification change of the evaluation target, it can now be executed without problems.
+  For that, We have deleted the function to automatically set the path of the file necessary for evaluating.
+  It is necessary for the user to specify the path of the file that has been set up so far.
+  Main changes from AES version 2.0.0 are as follows
+    - AES's run folder path is just under [AUTOSAR_VERSION] folder
+      [AUTOSAR_VERSION] folder must follow the following folder structure
+        [msn]/[workspace]/[DEVICE_NAME]/[AUTOSAR_VERSION]
+            [msn] : Module name as lower case(e.g. dio, mcu, wdg , etc...)
+            [workspace] : The folder name is arbitrary
+            [DEVICE_NAME] : Device name(e.g. D1M2H, C1H, E2M, etc...)
+            [AUTOSAR_VERSION] : AUTOSAR version(4.0.3, 3.2.2, 4_2_2, etc...)
+      There is no restriction on folders above [msn]
+    - Please set the following path of the file.
+        - Generation Tool('Generation Tool' in AES_Config sheet)
+        - BSWMDT File('BSWMDT Config File' in AES_Config sheet)
+        - GHS Compiler option file('GHS Compiler option file' in AES_Config sheet)
+        - GHS Compiler option rule file('GHS Compiler option rule file' in AES_Config sheet)
+        - trxml file for AES('Trxml File' in AES_Config sheet)
+        - Compiler Include Paths('CC Include Path' in AES_Config sheet)
+        - Assembler Include Paths('ASM Include Path' in AES_Config sheet)
+      Please see AES User's Manual for details
+
+  1. The following change of specifications from AES version 2.1.0 (Alpha version).
+    (1) Template/Makefile_Template
+        - Removed the function to automatically determine the file 
+          to be read from the MCAL folder structure.
+        - Delete AUTOSAR_VERSION_CHECK
+        - Delete Function for Check timestamp of the trxml file for AES
+    (2) Makefile
+        - Changed to get MODULE_NAME from WORKSPACE_PATH
+    (3) Tool/EV2Sub.py
+        - bug fixed ReplaceDebuggerScript and EvalEnvMultiRc and 
+          CreateDebuggerScript at if-statement
+        - Add the following definitions in AES_Config sheet
+            - 'BSWMDT Config File'
+            - 'GHS Compiler option file'
+            - 'GHS Compiler option rule file'
+            - 'Trxml File'
+            - 'CC Include Path'
+            - 'ASM Include Path'
+        - Delete the following definitions in AES_Config sheet
+            - 'ADC Type'
+            - 'Folder Structure'
+            - 'Include Path'
+    (4) Tool/MakefileConfig.py
+        - Change the definition output to path_define.mak to 
+          "WORKSPACE_PATH", "DEVICE_NAME", "AUTOSAR_VERSION" only
+
+*** 13-Oct-2017 ***
+AES version 2.1.0 (Alpha version)
+
+  1. The following change of specifications.
+    (1) Template/Makefile_Template
+        - Delete generation tool name setting place
+        - Change generation tool path to "$(GEN_TOOL)"
+    (2) Tool/EV2Sub.py
+        - Add 'Generation Tool' in AES_Config sheet
+    (3) Tool/GroupList.py
+        - Delete generation tool name setting place
+        - Change generation tool path to value of 'Generation Tool' in AES_Config sheet
+        *** 14-Jul-2017 ***
+        AES version 2.0.0 (Official version)
+        
+          1. The following change of specifications.
+            (1) Tool/EV2Config.py
+                - Check of the stricter Test_Spec sheet
+            (2) Tool/EV2Sub.py
+                - Check of the stricter AES_Config sheet
+                - The debugger script is changed to the user setting possible files.
+                  (The debugger script place is changed to "DebugTemplate" from "Template".)
+            (3) Tool/GroupList.py
+                - The debugger script is changed to the user setting possible files.
+                  (The debugger script place is changed to "DebugTemplate" from "Template".)
+            (4) Makefile (overall controll)
+                - Add AES Version check.
+        
+          2. AES bug fix as followings.
+            (1) Tool/MakefileConfig.py
+                - When executed without parameters, it'll be an error.
+
+*** 13-May-2017 ***
+AES version 2.0.0 (Beta2 version)
+
+  1. The following change of specifications.
+    (1) Template/Makefile_Template
+        - The ASM_FILE_TO_BUILD is changed to the method read from Test_Spec.xls.
+        - Macro was eliminated with that.
+    (2) Tool/EV2Sub.py
+        - The ASM_FILE_TO_BUILD is changed to the method read from Test_Spec.xls.
+        - Reading above-mentioned was added.
+
+*** 27-Jan-2017 ***
+AES version 2.0.0 (Beta version)
+
+  1. The following change of specifications.
+    (1) Makefile (overall controll)
+        - Each setting files(AES_config.mak, Compiler_version.mak, Driver.mak, Module.mak) 
+          were concentrated in AES_Config sheet of Test_Spec.xls.
+    (2) Template/Makefile_Template
+        - Support to a change in X1x Folder Structures / X2x Folder Structures.
+        - Each setting files(AES_config.mak, Compiler_version.mak, Driver.mak, Module.mak) 
+          were concentrated in AES_Config sheet of Test_Spec.xls.
+        - A AUTOSAR version check is added.
+    (3) Tool/EV2Config.py
+        - Support to a change in Board / VLAB.
+        - Each setting files(AES_config.mak, Compiler_version.mak, Driver.mak, Module.mak) 
+          were concentrated in AES_Config sheet of Test_Spec.xls.
+        - Made a sheet position of Test_Spec.xls modifiable.
+        - Made a column position in Test_Spec sheet of Test_Spec.xls modifiable.
+    (4) Tool/EV2Sub.py
+        - Support to a change in SingleCore / MultiCore.
+        - Support to a change in Board / VLAB.
+        - Each setting files(AES_config.mak, Compiler_version.mak, Driver.mak, Module.mak) 
+          were concentrated in AES_Config sheet of Test_Spec.xls.
+        - Made a column position in Test_Spec sheet of Test_Spec.xls modifiable.
+    (5) Tool/GroupList.py
+        - Support to a change in SingleCore / MultiCore.
+        - Made a column position in Test_Spec sheet of Test_Spec.xls modifiable.
+    (6) Tool/MakefileConfig.py
+        - Support to a change in X1x Folder Structures / X2x Folder Structures.
+
+  2. AES bug fix as followings.
+    (1) Makefile (overall controll)
+        - When execute "make config_path" in a state without path_define.mak 
+          and target_define.mak, it becomes the error.
+
+  3. Python Renesas Coding Guidelines application
+    (1) Tool/MakefileConfig.py
+    (2) Tool/EV2Config.py
+    (3) Tool/EV2Sub.py
+    (4) Tool/group_list.py ->Tool/GroupList.py
+
+*** 5-Oct-2016 ***
+AES version 1.3.3 (Official version) for Single core/Multi core
+
+  1. AES bug fix as followings.
+    (1) Template/Makefile_Template
+        - Bug of the message displayed in building.
+        - "ASM_INCLUDE_PATH" is not referred in assembling.
+          Note : There are possibility that cannot assemble correctly, 
+                 because the assembler assembled with the COMPILOER_INCLUDE macro 
+                 in Makefile_Template conventionally, however after this version, 
+                 will be assembling with the ASSEMBLER_INCLUDE macro.
+        - An extra include path is set.
+        - Setting the "ASM_FILES_TO_BUILD" in "Driver.mak" is not reflected to 
+          other files.
+    (2) Tool/EV2Config.py
+        - Typo(L.120: "Illeagual" -> "Illegal")
+        - An Spec Number check is not implemented
+    (3) Tool/group_list.py
+        - Typo("Makefile generate_$(MODULE_NAME)" -> 
+          "Makefile generate_$(MODULE_NAMES)")
+        - Typo("FLASE" -> "FALSE")
+        - Typo("\tif " -> "\t@if " (there are some locations, but not at all))
+        - Typo("str(row + 2) + 'line.\r\n'" -> "str(row + 2) + ' line.\r\n'")
+        - Mistake of target designation at Build.
+    (4) Tool/BuildLogCheck.py
+        - remove file without closing a file
+    (5) Tool/CheckCommon.py
+        - remove file without closing a file
+    (6) Tool/CmdLineCheck.py
+        - remove file without closing a file
+    (7) Tool/ContentsCheck.py
+        - remove file without closing a file
+    (8) Tool/DebugerLogCheck.py
+        - remove file without closing a file
+    (9) Tool/GenToolLogCheck.py
+        - remove file without closing a file
+
+*** 20-Jun-2016 ***
+AES version 1.3.3 (Beta version) for Single core/Multi core
+
+  1. Template/Makefile_Template (Update)
+    (1) VariableCheck: Corrective measures against the defect of source file
+                       additional settings and the incorporation of exclusive
+                       control
+        Deleted the setting of AES_Test_Result.c file that was automatically
+        added to CC_FILES_TO_BUILD during the VariableCheck evaluation due to
+        the conflict with VariableCheck.c.
+        Added the processing to delete the setting of AES_Test_Result.c from
+        CC_FILES_TO_BUILD when it was registered with CC_FILES_TO_BUILD during
+        the VariableCheck evaluation.
+ 
+    (2) VariableCheck: Corrective measures against the inability to delete
+                       VariableCheck.c by executing "make clean_all"
+        The VariableCheck.c was not registered with GENERATED_SOURCE_FILES (it
+        was added to CC_FILES_TO_BUILD).
+        Changed the setting for it to be registered with both
+        GENERATED_SOURCE_FILES and CC_FILES_TO_BUILD.
+
+    (3) The exit status of errors occurred in the compiler/linker was converted
+        to the normal status and passed to Makefile for the build.
+        Modified the status of errors to be passed to Makefile for the build as
+        is in case of errors.
+
+    (4) Modified for Generation tool of ADC to be selectable.
+        It used to be necessary to directly modify Makefile_Template when
+        wanting to change the Generation Tool depending on the type of ADC but
+        modified for the Generation Tool to be selectable by defining macro in
+        the setting file (AES_config.mak).
+
+    (5) Deleted a non-existent path that was set in a part of the include file
+        search path information that was set to CC_INCLUDE_PATH.
+        [Restrictions]
+        Shown below are also non-existent paths but restricted since they are
+        defined in ghs_rh850_r4.0.3_defs.mak (common file) and unable to be
+        modified.
+
+        .../external/X1x/common_platform/generic/compiler/4.0.3/ghs/include4.0.3
+        .../external/X1x/common_platform/generic/compiler/4.0.3/ghs/includecommon
+
+    (6) Modified due to the wrong message output of trxml file check.
+        As it was passed to the shell without escaping "*" in the message and
+        perceived as a wild card, the list of files in current working directory
+        was displayed.
+        Modified for every "*" in the message to be escaped (enclosed in single
+        quotation marks).
+
+
+*** 28-Apr-2016 ***
+AES version 1.3.2 for Single core/Multi core
+
+  1. AES_Files/Template/Makefile_Template (Update)
+    (1) Changed the link directive setting list and moved its definition to
+        Module.mak.
+    (2) Added the include path for the flash library.
+    (3) Changed the positional relationship between the conversion line of
+        "MakeAppendix" and the include of Driver.mak.
+    (4) Integrated the path settings and the antomatic change items in
+        Module.mak.
+    (5) Organized unused MACRO definitions and commented-out parts (deleted).
+    (6) Simplified some path settings (PROJECT_ROOT) accompanied by a long
+        directory path.
+        Build log message about include path, etc, will be shortned.
+    (7) Changed for errors to be occurred when
+        "Test_Application_[MICRO_VARIANT]_aes.trxml" is older than
+        "Test_Application_[MICRO_VARIANT].trxml" or it does not exist.
+
+  2. AES_Files/Module.mak (Update)
+    (1) Changed the method of setting the stub file.
+    (2) Changed the definition of common file (library).
+    (3) Moved the setting contents sucn as path settings and aggregated the
+        definitions of stub file, library, etc. that are required to be changed
+        manually by evaluation environments and modules.
+
+  3. AES_Files/Driver.mak (Update)
+    (1) Moved the definition of output file for Generation Tool.
+    (2) Deleted the MACRO for renesas_lib... since it was unused.
+    (3) Replaced [MSN] shown in each driver source file name with a MACRO and
+        eliminated the module dependency. When using files, each file needs to
+        be modified depending on used/unused by modules.
+        Defined driver types and separately added the settings for Wdg.
+  
+  4. AES_Files/Compiler_version.mak (Update)
+    (1) Removed the latter part from the existing setting contents and left the
+        first part as is.  Moved the latter part to AES_config.mak that was
+        newly created.
+
+  5. AES_Files/AES_config.mak (Add)
+    (1) Is included in Makefile (overall controll) and in Makefile for the build
+        (Makefile_Template).
+    (2) Kept the settings for the latter part of the existing
+        Compiler_version.mak file.
+
+  6. Restrictions
+    (1) "VariableCheck" mode is not available.
+       * degrade for AES(single core) V1.2.2 (@D1x V406)
+       * degrade for AES(multi core) V1.3.1 (@D1x V402)
+      (1-1) Link error will be occured, when you select the "VariableCheck" mode
+            in Judgment column.
+      (1-2) The file VariableCheck.[ch], which is gereraged by "VariableCheck"
+            mode, is not removed by "make clean" or "make clean_all" command.
+    (2) Behaivor on GenTool error.
+       * new for AES(single core)
+       * degrade for AES(multi core) V1.3.1 (@D1x V402)
+       When generation tool outputs an error, AES continues next compile flow.
+    (3) Behaivor on Build error.
+       * new for AES(single core)
+       * degrade for AES(multi core) V1.3.1 (@D1x V402)
+       When compiler/linker stops with an error, AES continues to launch a Multi
+       debugger.
+
+
+*** 10-Nov-2015 ***
+AES version 1.3.1 for C1x (multi core)
+
+  1. Corresponding to debugging multi core processor.
+    (1) Start up the Debugger for target of multi core processor.
+    (2) Function of conversion debug script to python type. (In multi core
+        debugger start up with python script.) (#44287) Now, cannot use the "/"
+        and "\" in debug script at multi core environment.
+
+ *** Restriction Item. ******************************************************
+ * if you want to use character above, described as followings.
+ * example
+ * "\" --> "\\\\"
+ * "/" --> "\\/"
+ * But if using "/" in the debug command option, don't
+ * modify.
+ * example
+ * "print /a *ggg" --> "print /a *ggg"
+ * If you will use bracket in the script, should be describing in the single
+ * line to the closed bracket.
+ *****************************************************************************
+
+  2. AES bug fix in the followings.
+    (1) When lacking the "Check file" column in Test_Spec.xls at "Source File
+        Check", display the error message. But that message include no line
+        number. (#44287)
+    (2) File name and Line number in displayed error message when the AES cannot
+        find the test program, that file name is different with the expected
+        one. And different line number from the row number of Excel. (#44287)
+    (3) "make clean_all" does not remove the include file.
+
+  3. Enhancement of error processing. (#43934)
+    (1) When occur error, AES break the current test item and will carried out
+        the next test item without stopping.
+    (2) When occur error, AES does not perfrome next step.
+        Example: If target build was failed, does not start the debugger.
+    (3) Add the new function for confirming the exit status of Generation Tool
+        and GNU make in automatically.
+        Transformation from value of exit status to the text format and save to
+        the log file.
+
+  4. Countermeasure of debugger freeze. (#43934)
+    When elapsed time reach to 120 seconds from start of monitoring debugger
+    process, debugger process are killed from external.
+
+  5. The bug fix of the result report tool. (#43934)
+    If failed creation of the Result.txt of first test item that stop the result
+    report tool because error then can not create result report file.
+
+  6. Execute the test item by testID instead of the folder name.
+    You can be executing with test ID if invoke the single test. Test ID is
+    equal to "Spec Number" column of Test_Spec.xls.
+    Example
+    (1) make [test ID]
+    (2) make [test ID1] [test ID2] [test ID3]
+
+  7. Remove the Interrupt_VectorTable.c path setting from Makefile_Template
+    If you use interrupt at test then handled as Test Program or set to
+    CC_FILES_TO_BUILD in "Make Appendix" column.
+
+  8. Forcibly set locale to en_US.
+
+
+*** 30-Oct-2015 ***
+AES version 1.3.0 for C1x (multi core)
+
+  1. Update AES_files/Compiler_version.mak
+    Add "MULTICORE_CONNECT" for Multi Core debugging
+
+  2. Add AES_files/Template/Debug_Template.py
+    For Multi Core debugging
+
+  3. Add AES_files/Template/target.out.rc
+    For Multi Core debugging
+
+  4. Update AES_files/Tool/EV2Sub.py
+    Change that output "target.out.py" to scr folder
+
+  5. Update AES_files/Tool/group_list.py
+    Change that copy "target.out.rc" and "target.out.py" to obj folder
+
+
+*** 8-Jul-2015 ***
+AES version 1.2.2
+
+  1. AES for D1x MCAL Ver.4.00.06

@@ -1,0 +1,47 @@
+AES_files/
+├---- DebugScript/												: The folder which puts the debugger script in which control part was written.
+│   ├-S-- Debug_001.rc										: Sample debugger script.
+│   └-S-- VariableCheck.rc									: Sample debugger script for "Variable Check".
+├---- DebugTemplate/											: The folder which puts the debugger script in which connect part/disconnect part was written.
+│   ├-S-- Debug_Template.rc									: This file is described sample debugger script about connect part and disconnect part.
+│   ├-S-- Debug_Template_multicore_vlab.rc					: Sample Multi debugger command script used by VLAB-Supported AES (for Multi-core).
+│   ├-S-- Debug_Template_multicore_vlab_Run_Core1.py			: Sample Multi debugger command script which run Core1.(for VLAB, Multi-core)
+│   ├-S-- Debug_Template_multicore_vlab_Run_Core1_Core2.py	: Sample Multi debugger command script which run Core1 and Core2.(for VLAB, Multi-core)
+│   ├-S-- Debug_Template_Run_Core1.py							: This file is described debugger script about load part and disconnect part which run Core1.
+│   ├-S-- Debug_Template_Run_Core1_Core2.py					: This file is described debugger script about load part and disconnect part which run Core1 and Core2.
+│   ├-S-- Debug_Template_singlecore_vlab.rc					: Sample Multi debugger command script.(for VLAB, Single-core)
+│   └-S-- target.out.rc										: This file is described debugger script about call "target.out.py".
+├---- DescriptionFile/											: This folder saves Configuration Description Files (CDF) created according to the contents of the evaluation.
+├---- Template/												: This folder puts AES library.
+│   ├---- Makefile_Template									: Template of Makefile for build.
+│   ├---- VariableCheck.h										: (Editable)This file is included by a test program which is created automatically when using a  variable check tool.
+│   └---- vlab_config_e2x										: VLAB configuration file for E2x
+├---- TestProgram/												: This folder saves test programs created according to the evaluation contents.
+│   └---- AES_Library/										: This folder saves AES library.
+│       ├---- AES_Test_Result.c								: Source file of an AES test result setting library (AES library).
+│       └---- AES_Test_Result.h								: Header file of an AES test result setting library (AES library).
+├---- Tool/													: This folder puts AES Tools.
+│  ├---- BlockCheck.py										: Script for judgment of "File Block Check".
+│  ├---- BuildLogCheck.py										: Script for judgment of "Build Log Check".
+│  ├---- CheckCommon.py										: Common Script for "ResultJudgment Tool".
+│  ├---- CmdLineCheck.py										: Script for judgment of "Command Line Check".
+│  ├---- ContentsCheck.py										: Script for judgment of "Source File Check".
+│  ├---- DebugerLogCheck.py									: Script for judgment of "Debugger Log Check".
+│  ├---- EV2Config.py											: Script for Test_Spec.xls check.
+│  ├---- EV2Sub.py											: Script for making evaluation environment file/folder.
+│  ├---- EV2Version.py										: Version file for "EnvironmentConfigurator".
+│  ├---- GenToolLogCheck.py									: Script for judgment of "Generation Tool Check".
+│  ├---- GroupList.py											: Script for making "target_define.mak".
+│  ├---- MakefileConfig.py									: Script for "path_define.mak".
+│  ├---- MakefileConfigVersion.py								: Version file for "MakefileConfigurator".
+│  ├---- ResultCheckReport.py									: Script for making report.
+│  ├---- ResultCheckReportVersion.py							: Version file for "ResultCheckReport Tool".
+│  ├---- ResultJudgmentVersion.py								: Version file for "ResultJudgment Tool".
+│  ├---- TPGenerator.py										: Script for judgment of "Variable Check".
+│  └---- TPGeneratorVersion.py								: Version file for "TPGenerator Tool".
+├---- VlabTestbench/											: This folder saves VLAB script created according to the contents of the evaluation.
+│   ├-S-- sample_SARADStimulusDriver.py									: Sample file for VLAB script.
+│   └-S-- sample_vlab_e2x_exit.py										: Sample file for VLAB script.
+└---- Makefile													: Makefile for whole control.
+
+Note:"-S--" in the folder tree indicates that it is a sample file

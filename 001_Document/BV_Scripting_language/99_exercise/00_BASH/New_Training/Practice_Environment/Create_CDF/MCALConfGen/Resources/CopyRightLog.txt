@@ -1,0 +1,9 @@
+###########################################################################
+# AUTOSAR Renesas R4.0 & R4.2 {0} Driver Generation Tool for X1x - 1.0.0
+# Run time      = [{1}]
+#    Command line arguments = {2}
+#
+# (c) 2018 Renesas Electronics Corporation. All rights reserved.
+# All rights reserved
+###########################################################################
+

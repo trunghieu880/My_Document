@@ -1,0 +1,2675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+********************************************************************************
+** Project      = AUTOSAR Renesas R4.2.2 X2x MCAL Components                  **
+** Module       = ADC Driver                                                  **
+** Version      = 1.0.3                                                       **
+** Date         = 20-Oct-2017                                                 **
+********************************************************************************
+**                                  COPYRIGHT                                 **
+********************************************************************************
+** (c) 2016-2017 Renesas Electronics Corporation. All rights reserved.        **
+********************************************************************************
+** Purpose:                                                                   **
+** Provides the definition of the containers, sub-containers and parameters   **
+** specific to AUTOSAR Renesas ADC Driver Component for 4.2.2                 **
+**                                                                            **
+********************************************************************************
+**                                                                            **
+** Unless otherwise agreed upon in writing between your company and           **
+** Renesas Electronics Corporation the following shall apply!                 **
+**                                                                            **
+** Warranty Disclaimer                                                        **
+**                                                                            **
+** There is no warranty of any kind whatsoever granted by Renesas. Any        **
+** warranty is expressly disclaimed and excluded by Renesas, either expressed **
+** or implied, including but not limited to those for non-infringement of     **
+** intellectual property, merchantability and/or fitness for the particular   **
+** purpose.                                                                   **
+**                                                                            **
+** Renesas shall not have any obligation to maintain, service or provide bug  **
+** fixes for the supplied Product(s) and/or the Application.                  **
+**                                                                            **
+** Each User is solely responsible for determining the appropriateness of     **
+** using the Product(s) and assumes all risks associated with its exercise    **
+** of rights under this Agreement, including, but not limited to the risks    **
+** and costs of program errors, compliance with applicable laws, damage to    **
+** or loss of data, programs or equipment, and unavailability or              **
+** interruption of operations.                                                **
+**                                                                            **
+** Limitation of Liability                                                    **
+**                                                                            **
+** In no event shall Renesas be liable to the User for any incidental,        **
+** consequential, indirect, or punitive damage (including but not limited     **
+** to lost profits) regardless of whether such liability is based on breach   **
+** of contract, tort, strict liability, breach of warranties, failure of      **
+** essential purpose or otherwise and even if advised of the possibility of   **
+** such damages. Renesas shall not be liable for any services or products     **
+** provided by third party vendors, developers or consultants identified or   **
+** referred to the User by Renesas in connection with the Product(s) and/or   **
+** the Application.                                                           **
+**                                                                            **
+********************************************************************************
+** Environment:                                                               **
+**              Devices:        RH850/U2AEVA1:  BGA516                        **
+********************************************************************************
+**                      Revision Control History                              **
+********************************************************************************
+** V1.0.0: 25-Jan-2017  Initial Version                                       **
+** V1.0.1: 30-Mar-2017  SW-VERSION is updated.                                **
+** V1.0.2: 30-Jun-2017  SW-VERSION is updated.                                **
+** V1.0.3: 20-Oct-2017  Modification for issue.                               **
+**                      1.ARDAABO-168: <CODE-DESCRIPTORS>,                    **
+**                        <PROVIDED-ENTRYS>, <RESOURCE-CONSUMPTION> is added. **
+**                        <ENTITYS> is updated.                               **
+**                      2.ARDAABO-237:INTERRUPT_CONTROL_PROTECTION_AREA       **
+**                         is added in the tag <EXCLUSIVE-AREAS>.             **
+**                      3.ARDAABO-245:<VENDOR-API-INFIX> tag is removed.      **
+********************************************************************************
+!-->
+<AUTOSAR xmlns="http://autosar.org/schema/r4.0" xsi:schemaLocation="http://autosar.org/schema/r4.0 AUTOSAR_4-2-2.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <AR-PACKAGES>
+    <AR-PACKAGE UUID="057f01e3-5e76-4a2f-9f0b-74558bac9963">
+      <SHORT-NAME>Renesas</SHORT-NAME>
+      <AR-PACKAGES>
+        <AR-PACKAGE UUID="cb9ea247-81dd-43d6-a131-acb8ee66bb77">
+          <SHORT-NAME>EcucDefs_Adc</SHORT-NAME>
+          <ELEMENTS>
+            <BSW-IMPLEMENTATION UUID="3caaea80-eb5c-4dfd-8867-f5dd426e1ba9">
+              <SHORT-NAME>Adc_Impl</SHORT-NAME>
+              <CODE-DESCRIPTORS>
+                <CODE UUID="cebd3aca-2d49-4dcc-a195-b1bad16d8cfa">
+                  <SHORT-NAME>Adc_Code</SHORT-NAME>
+                  <ARTIFACT-DESCRIPTORS>
+                    <AUTOSAR-ENGINEERING-OBJECT>
+                      <SHORT-LABEL>Adc.c</SHORT-LABEL>
+                      <CATEGORY>SWSRC</CATEGORY>
+                    </AUTOSAR-ENGINEERING-OBJECT>
+                    <AUTOSAR-ENGINEERING-OBJECT>
+                      <SHORT-LABEL>Adc.h</SHORT-LABEL>
+                      <CATEGORY>SWHDR</CATEGORY>
+                    </AUTOSAR-ENGINEERING-OBJECT>
+                  </ARTIFACT-DESCRIPTORS>
+                </CODE>
+              </CODE-DESCRIPTORS>
+              <PROGRAMMING-LANGUAGE>C</PROGRAMMING-LANGUAGE>
+              <RESOURCE-CONSUMPTION UUID="4c790d47-f3d9-4348-a202-4305acf42976">
+                <SHORT-NAME>ResourceConsumption</SHORT-NAME>
+                <MEMORY-SECTIONS>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676384">
+                    <SHORT-NAME>PUBLIC_CODE</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CODE</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676383">
+                    <SHORT-NAME>PRIVATE_CODE</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CODE</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="6342a870-7203-4ed5-892f-5a5168a2b7e4">
+                    <SHORT-NAME>APPL_CODE</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CODE</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676381">
+                    <SHORT-NAME>CODE_FAST</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CODE</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="5160f41c-c6d3-4a05-a6f0-e2a1a51153b1">
+                    <SHORT-NAME>CONST_32</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONST</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="ae5f9b12-0275-40cb-9c6d-a3e4c8489d00">
+                    <SHORT-NAME>CONFIG_DATA_8</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONFIG_DATA</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="d509cc2c-4af2-431d-8495-41f5008e109e">
+                    <SHORT-NAME>CONFIG_DATA_16</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONFIG_DATA</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="d4fce836-6b99-4f4a-981c-553aeffd5915">
+                    <SHORT-NAME>CONFIG_DATA_32</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONFIG_DATA</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676385">
+                    <SHORT-NAME>CONFIG_DATA_UNSPECIFIED</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONFIG_DATA</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa12-b4c3-890e-6fa1-c841ba676385">
+                    <SHORT-NAME>DBTOC_DATA_UNSPECIFIED</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/CONFIG_DATA</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676376">
+                    <SHORT-NAME>VAR_INIT_BOOLEAN</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/VAR_INIT</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="289010ba-f25d-4f74-8d06-82a9807714ee">
+                    <SHORT-NAME>VAR_NO_INIT_BOOLEAN</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/VAR_NO_INIT</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676375">
+                    <SHORT-NAME>VAR_NO_INIT_8</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/VAR_NO_INIT</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="560eFa39-b4c5-890e-6fa1-c841ba676374">
+                    <SHORT-NAME>VAR_NO_INIT_32</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/VAR_NO_INIT</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                  <MEMORY-SECTION UUID="43abbd0e-a2bd-4a0a-a6e9-cc3bef40f001">
+                    <SHORT-NAME>VAR_NO_INIT_UNSPECIFIED</SHORT-NAME>
+                    <SW-ADDRMETHOD-REF DEST="SW-ADDR-METHOD">/AUTOSAR_MemMap/SwAddrMethods/VAR_NO_INIT</SW-ADDRMETHOD-REF>
+                  </MEMORY-SECTION>
+                </MEMORY-SECTIONS>
+              </RESOURCE-CONSUMPTION>
+              <SW-VERSION>2.0.0</SW-VERSION>
+              <VENDOR-ID>59</VENDOR-ID>
+              <AR-RELEASE-VERSION>4.2.2</AR-RELEASE-VERSION>
+              <BEHAVIOR-REF DEST="BSW-INTERNAL-BEHAVIOR">/Renesas/EcucDefs_Adc/AdcInternalBehavior/BswInternalBehavior_0</BEHAVIOR-REF>
+              <VENDOR-SPECIFIC-MODULE-DEF-REFS>
+                <VENDOR-SPECIFIC-MODULE-DEF-REF DEST="ECUC-MODULE-DEF">/Renesas/EcucDefs_Adc/Adc</VENDOR-SPECIFIC-MODULE-DEF-REF>
+              </VENDOR-SPECIFIC-MODULE-DEF-REFS>
+              </BSW-IMPLEMENTATION>
+              <BSW-MODULE-DESCRIPTION UUID="39c5b844-e4ac-4643-80b0-08f5c2a6d3a4">
+                <SHORT-NAME>AdcInternalBehavior</SHORT-NAME>
+                <MODULE-ID>123</MODULE-ID>
+              <PROVIDED-ENTRYS>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_Init</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DeInit</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_StartGroupConversion</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_StopGroupConversion</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_ReadGroup</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableHardwareTrigger</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableHardwareTrigger</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableGroupNotification</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableGroupNotification</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_GetGroupStatus</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_GetStreamLastPointer</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_SetupResultBuffer</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_GetVersionInfo</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableChannel</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableChannel</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG0_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG1_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG2_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG3_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG4_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_ERR_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG0_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG1_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG2_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG3_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG4_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_ERR_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG0_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG1_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG2_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG3_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG4_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_ERR_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG0_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG1_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG2_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG3_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG4_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_ERR_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH00_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH01_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH02_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH03_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH04_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH05_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH06_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH07_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH08_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH09_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH10_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH11_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH12_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH13_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH14_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH15_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH00_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH01_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH02_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH03_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH04_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH05_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH06_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH07_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH08_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH09_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH10_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH11_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH12_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH13_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH14_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                <BSW-MODULE-ENTRY-REF-CONDITIONAL>
+                  <BSW-MODULE-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH15_CAT2_ISR</BSW-MODULE-ENTRY-REF>
+                </BSW-MODULE-ENTRY-REF-CONDITIONAL>
+              </PROVIDED-ENTRYS>
+              <INTERNAL-BEHAVIORS>
+                <BSW-INTERNAL-BEHAVIOR UUID="c1d84eb9-a565-4383-975f-337759331439">
+                  <SHORT-NAME>BswInternalBehavior_0</SHORT-NAME>
+                  <EXCLUSIVE-AREAS>
+                    <EXCLUSIVE-AREA UUID="0012337d-ce8d-4fd5-b52b-173f920d40df">
+                      <SHORT-NAME>RAMDATA_PROTECTION</SHORT-NAME>
+                    </EXCLUSIVE-AREA>
+                    <EXCLUSIVE-AREA UUID="70e9ef6b-90af-4319-9ff3-c4a6640dba9e">
+                      <SHORT-NAME>INTERRUPT_CONTROL_PROTECTION_AREA</SHORT-NAME>
+                    </EXCLUSIVE-AREA>
+                  </EXCLUSIVE-AREAS>
+                  <ENTITYS>
+                    <BSW-INTERRUPT-ENTITY UUID="f453ab2a-b090-4ec7-96ad-6d1cb93b00f7">
+                      <SHORT-NAME>BswInterruptEntity_0</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG0_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT249</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ccc42a49-8744-4b71-b3f1-66fe6f8baa3b">
+                      <SHORT-NAME>BswInterruptEntity_1</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG0_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT249</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_2</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG1_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT250</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_3</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG1_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT250</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_4</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT251</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_5</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG2_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT251</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_6</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG3_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT252</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_7</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG3_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT252</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_8</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG4_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT253</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_9</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_SG4_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT253</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7acb7ac7-b1d8-4b92-8253-8e3f41eb5a53">
+                      <SHORT-NAME>BswInterruptEntity_10</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_ERR_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT269</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ECUS:2b1a4092-f013-409ab-8ef1-e151cf9feada">
+                      <SHORT-NAME>BswInterruptEntity_11</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC0_ERR_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT269</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="f453ab2a-b090-4ec7-96ad-6d1cb93b00f7">
+                      <SHORT-NAME>BswInterruptEntity_12</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG0_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT259</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ccc42a49-8744-4b71-b3f1-66fe6f8baa3b">
+                      <SHORT-NAME>BswInterruptEntity_13</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG0_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT259</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_14</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG1_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT260</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_15</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG1_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT260</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_16</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT261</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_17</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG2_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT261</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_18</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG3_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT262</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_19</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG3_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT262</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_20</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG4_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT263</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_21</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_SG4_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT263</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7acb7ac7-b1d8-4b92-8253-8e3f41eb5a53">
+                      <SHORT-NAME>BswInterruptEntity_22</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_ERR_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT271</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ECUS:2b1a4092-f013-409ab-8ef1-e151cf9feada">
+                      <SHORT-NAME>BswInterruptEntity_23</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC1_ERR_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT271</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="f453ab2a-b090-4ec7-96ad-6d1cb93b00f7">
+                      <SHORT-NAME>BswInterruptEntity_24</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG0_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT254</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ccc42a49-8744-4b71-b3f1-66fe6f8baa3b">
+                      <SHORT-NAME>BswInterruptEntity_25</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG0_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT254</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_26</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG1_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT255</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_27</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG1_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT255</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_28</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT256</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_29</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG2_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT256</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_30</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG3_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT257</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_31</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG3_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT257</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_32</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG4_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT258</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_33</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_SG4_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT258</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7acb7ac7-b1d8-4b92-8253-8e3f41eb5a53">
+                      <SHORT-NAME>BswInterruptEntity_34</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_ERR_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT270</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ECUS:2b1a4092-f013-409ab-8ef1-e151cf9feada">
+                      <SHORT-NAME>BswInterruptEntity_35</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC2_ERR_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT270</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="f453ab2a-b090-4ec7-96ad-6d1cb93b00f7">
+                      <SHORT-NAME>BswInterruptEntity_36</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG0_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT264</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ccc42a49-8744-4b71-b3f1-66fe6f8baa3b">
+                      <SHORT-NAME>BswInterruptEntity_37</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG0_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT264</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_38</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG1_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT265</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_39</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG1_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT265</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_40</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT266</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_41</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG2_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT266</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e1d74f7e-a27e-42c8-8ac1-cc354b416dee">
+                      <SHORT-NAME>BswInterruptEntity_42</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG3_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT267</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="36c8e0b2-13c1-4eb7-bb77-b769a91a9276">
+                      <SHORT-NAME>BswInterruptEntity_43</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG3_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT267</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e66b4dcd-3150-4251-afbc-26f81bfde8db">
+                      <SHORT-NAME>BswInterruptEntity_44</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG4_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT268</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ed79bbfc-d3fa-43aa-bdfd-8daceba46dcb">
+                      <SHORT-NAME>BswInterruptEntity_45</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_SG4_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT268</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7acb7ac7-b1d8-4b92-8253-8e3f41eb5a53">
+                      <SHORT-NAME>BswInterruptEntity_46</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_ERR_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT272</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ECUS:2b1a4092-f013-409ab-8ef1-e151cf9feada">
+                      <SHORT-NAME>BswInterruptEntity_47</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC3_ERR_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIINT272</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="abc0fb8c-8767-4556-84a8-4b8be769f2dd">
+                      <SHORT-NAME>BswInterruptEntity_48</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH00_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC45</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="02f25c90-1218-42db-93c7-9abacbac22fc">
+                      <SHORT-NAME>BswInterruptEntity_49</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH00_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC45</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8e40fe11-8a80-489c-99ce-37eaf2adc624">
+                      <SHORT-NAME>BswInterruptEntity_50</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH01_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC46</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="15ab8895-b71a-4854-b9bd-8d902b01418f">
+                      <SHORT-NAME>BswInterruptEntity_51</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH01_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC46</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="0b294212-7dc5-4302-abe5-f82bab116a7c">
+                      <SHORT-NAME>BswInterruptEntity_52</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH02_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC47</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="c5d8dca4-402b-4298-8d04-5132372c89c4">
+                      <SHORT-NAME>BswInterruptEntity_53</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH02_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC47</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="52907b9b-1f6a-41cd-af93-0e86dcfe511c">
+                      <SHORT-NAME>BswInterruptEntity_54</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH03_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC48</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ba890fa6-3560-486e-b15d-6ad57a86b517">
+                      <SHORT-NAME>BswInterruptEntity_55</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH03_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC48</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="96fe07e6-df45-4bf5-b8ae-9f710fecd7c7">
+                      <SHORT-NAME>BswInterruptEntity_56</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH04_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC49</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="5ece7ae3-5a5b-454c-a3db-736abb2ec132">
+                      <SHORT-NAME>BswInterruptEntity_57</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH04_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC49</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="b7f2ec34-d740-41b1-8d61-54e1d613c785">
+                      <SHORT-NAME>BswInterruptEntity_58</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH05_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC50</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="2b9b08fd-39f0-427d-bd03-2954594291e0">
+                      <SHORT-NAME>BswInterruptEntity_59</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH05_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC50</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7f0d5ad3-d331-4877-a1a3-05be603f34b8">
+                      <SHORT-NAME>BswInterruptEntity_60</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH06_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC51</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="070f9a2e-62a6-4ea5-b478-354b8a1d1d8f">
+                      <SHORT-NAME>BswInterruptEntity_61</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH06_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC51</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="391756bf-fb2e-4c19-a118-8def0d3af97e">
+                      <SHORT-NAME>BswInterruptEntity_62</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH07_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC52</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8e12ee8d-b79a-41bc-b6aa-c8b1ee1cfc21">
+                      <SHORT-NAME>BswInterruptEntity_63</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH07_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC52</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="59abe867-e3ff-4f2e-b665-4b179c6fba6c">
+                      <SHORT-NAME>BswInterruptEntity_64</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH08_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC53</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="69690a51-aded-4dab-b102-686e002f1558">
+                      <SHORT-NAME>BswInterruptEntity_65</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH08_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC53</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="70d53f32-0cff-4328-929e-ac13a3acc4e8">
+                      <SHORT-NAME>BswInterruptEntity_66</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH09_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC54</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="3178409b-af86-4812-ac7a-cd7ac651cb3e">
+                      <SHORT-NAME>BswInterruptEntity_67</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH09_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC54</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="3dfa66ec-5305-4fba-ac8a-deb31179c7be">
+                      <SHORT-NAME>BswInterruptEntity_68</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH10_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC55</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="9f918122-9ff7-4c6e-8f7c-d9c3fc6a0e5d">
+                      <SHORT-NAME>BswInterruptEntity_69</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH10_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC55</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e69b535a-443d-4107-9fc0-d44f4e25726b">
+                      <SHORT-NAME>BswInterruptEntity_70</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH11_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC56</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="a11dea27-55c4-4ec6-90e2-ac63608a7127">
+                      <SHORT-NAME>BswInterruptEntity_71</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH11_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC56</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="05a9d8e5-34a0-4f54-a87a-2822df852815">
+                      <SHORT-NAME>BswInterruptEntity_72</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH12_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC57</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="29f8ca56-bf52-410d-8910-0bec4759b321">
+                      <SHORT-NAME>BswInterruptEntity_73</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH12_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC57</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="52f7771a-99da-4419-9389-308cd32574f9">
+                      <SHORT-NAME>BswInterruptEntity_74</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH13_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC58</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="6c73ddcc-a8e8-4a78-8a37-e4676bf6357b">
+                      <SHORT-NAME>BswInterruptEntity_75</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH13_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC58</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7bfcb1cf-3053-4366-a612-197a3bf8451f">
+                      <SHORT-NAME>BswInterruptEntity_76</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH14_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC59</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8338c215-cccf-419b-bab1-ea9b40203c5b">
+                      <SHORT-NAME>BswInterruptEntity_77</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH14_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC59</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8aafeb66-80a3-49cd-987d-2e09dd912de8">
+                      <SHORT-NAME>BswInterruptEntity_78</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH15_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC60</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="08b91c21-419a-44fa-b4bb-38fe396f35d9">
+                      <SHORT-NAME>BswInterruptEntity_79</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA0_CH15_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC60</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="abc0fb8c-8767-4556-84a8-4b8be769f2dd">
+                      <SHORT-NAME>BswInterruptEntity_80</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH00_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC61</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="02f25c90-1218-42db-93c7-9abacbac22fc">
+                      <SHORT-NAME>BswInterruptEntity_81</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH00_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC61</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8e40fe11-8a80-489c-99ce-37eaf2adc624">
+                      <SHORT-NAME>BswInterruptEntity_82</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH01_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC62</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="15ab8895-b71a-4854-b9bd-8d902b01418f">
+                      <SHORT-NAME>BswInterruptEntity_83</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH01_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC62</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="0b294212-7dc5-4302-abe5-f82bab116a7c">
+                      <SHORT-NAME>BswInterruptEntity_84</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH02_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC63</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="c5d8dca4-402b-4298-8d04-5132372c89c4">
+                      <SHORT-NAME>BswInterruptEntity_85</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH02_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC63</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="52907b9b-1f6a-41cd-af93-0e86dcfe511c">
+                      <SHORT-NAME>BswInterruptEntity_86</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH03_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC64</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="ba890fa6-3560-486e-b15d-6ad57a86b517">
+                      <SHORT-NAME>BswInterruptEntity_87</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH03_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC64</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="96fe07e6-df45-4bf5-b8ae-9f710fecd7c7">
+                      <SHORT-NAME>BswInterruptEntity_88</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH04_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC65</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="5ece7ae3-5a5b-454c-a3db-736abb2ec132">
+                      <SHORT-NAME>BswInterruptEntity_89</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH04_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC65</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="b7f2ec34-d740-41b1-8d61-54e1d613c785">
+                      <SHORT-NAME>BswInterruptEntity_90</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH05_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC66</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="2b9b08fd-39f0-427d-bd03-2954594291e0">
+                      <SHORT-NAME>BswInterruptEntity_91</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH05_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC66</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7f0d5ad3-d331-4877-a1a3-05be603f34b8">
+                      <SHORT-NAME>BswInterruptEntity_92</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH06_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC67</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="070f9a2e-62a6-4ea5-b478-354b8a1d1d8f">
+                      <SHORT-NAME>BswInterruptEntity_93</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH06_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC67</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="391756bf-fb2e-4c19-a118-8def0d3af97e">
+                      <SHORT-NAME>BswInterruptEntity_94</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH07_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC68</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8e12ee8d-b79a-41bc-b6aa-c8b1ee1cfc21">
+                      <SHORT-NAME>BswInterruptEntity_95</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH07_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC68</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="59abe867-e3ff-4f2e-b665-4b179c6fba6c">
+                      <SHORT-NAME>BswInterruptEntity_96</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH08_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC69</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="69690a51-aded-4dab-b102-686e002f1558">
+                      <SHORT-NAME>BswInterruptEntity_97</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH08_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC69</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="70d53f32-0cff-4328-929e-ac13a3acc4e8">
+                      <SHORT-NAME>BswInterruptEntity_98</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH09_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC70</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="3178409b-af86-4812-ac7a-cd7ac651cb3e">
+                      <SHORT-NAME>BswInterruptEntity_99</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH09_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC70</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="3dfa66ec-5305-4fba-ac8a-deb31179c7be">
+                      <SHORT-NAME>BswInterruptEntity_100</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH10_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC71</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="9f918122-9ff7-4c6e-8f7c-d9c3fc6a0e5d">
+                      <SHORT-NAME>BswInterruptEntity_101</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH10_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC71</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="e69b535a-443d-4107-9fc0-d44f4e25726b">
+                      <SHORT-NAME>BswInterruptEntity_102</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH11_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC72</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="a11dea27-55c4-4ec6-90e2-ac63608a7127">
+                      <SHORT-NAME>BswInterruptEntity_103</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH11_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC72</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="05a9d8e5-34a0-4f54-a87a-2822df852815">
+                      <SHORT-NAME>BswInterruptEntity_104</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH12_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC73</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="29f8ca56-bf52-410d-8910-0bec4759b321">
+                      <SHORT-NAME>BswInterruptEntity_105</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH12_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC73</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="52f7771a-99da-4419-9389-308cd32574f9">
+                      <SHORT-NAME>BswInterruptEntity_106</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH13_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC74</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="6c73ddcc-a8e8-4a78-8a37-e4676bf6357b">
+                      <SHORT-NAME>BswInterruptEntity_107</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH13_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC74</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="7bfcb1cf-3053-4366-a612-197a3bf8451f">
+                      <SHORT-NAME>BswInterruptEntity_108</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH14_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC75</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8338c215-cccf-419b-bab1-ea9b40203c5b">
+                      <SHORT-NAME>BswInterruptEntity_109</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH14_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC75</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="8aafeb66-80a3-49cd-987d-2e09dd912de8">
+                      <SHORT-NAME>BswInterruptEntity_110</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH15_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-1</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC76</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-INTERRUPT-ENTITY UUID="08b91c21-419a-44fa-b4bb-38fe396f35d9">
+                      <SHORT-NAME>BswInterruptEntity_120</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/ADC_DMA1_CH15_CAT2_ISR</IMPLEMENTED-ENTRY-REF>
+                      <INTERRUPT-CATEGORY>CAT-2</INTERRUPT-CATEGORY>
+                      <INTERRUPT-SOURCE>EIC76</INTERRUPT-SOURCE>
+                    </BSW-INTERRUPT-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="79336ad9-95d1-4f98-b0b7-4faa20a7f112">
+                      <SHORT-NAME>BswCalledEntity_0</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_Init</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="3925348b-34d2-4959-961c-ce0a5d770a8c">
+                      <SHORT-NAME>BswCalledEntity_1</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DeInit</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="91fa6533-aa48-483a-8b8a-befdf8e0c1ad">
+                      <SHORT-NAME>BswCalledEntity_2</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_StartGroupConversion</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="63721f7e-ff95-4051-86a9-2461f3f4b900">
+                      <SHORT-NAME>BswCalledEntity_3</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_StopGroupConversion</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="f7d8e22d-a10c-4055-9ede-3d4b20c5381c">
+                      <SHORT-NAME>BswCalledEntity_4</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_ReadGroup</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="9e917842-f56d-4d65-9125-1b3a7f84755b">
+                      <SHORT-NAME>BswCalledEntity_5</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableHardwareTrigger</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="1f5c7c69-03f1-4cc0-ab84-d963ffc46986">
+                      <SHORT-NAME>BswCalledEntity_6</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/INTERRUPT_CONTROL_PROTECTION_AREA</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableHardwareTrigger</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="abe3265c-927c-4754-8ede-81e14c7fc6ce">
+                      <SHORT-NAME>BswCalledEntity_7</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableGroupNotification</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="57e89a53-f614-443a-bda0-d2b5e084c289">
+                      <SHORT-NAME>BswCalledEntity_8</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableGroupNotification</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="8b76bbc7-aaf7-441e-b9a5-6d061f1d40fd">
+                      <SHORT-NAME>BswCalledEntity_9</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_Adc_GetGroupStatus</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="a84bc0a1-13ef-425f-9a32-f49e6a62710e">
+                      <SHORT-NAME>BswCalledEntity_10</SHORT-NAME>
+                      <ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                        <ADC-ENTER-EXCLUSIVE-AREA-REF DEST="EXCLUSIVE-AREA">/Renesas/EcucDefs_Adc/Adc/BswInternalBehavior_0/ADC_RAMDATA_PROTECTION</ADC-ENTER-EXCLUSIVE-AREA-REF>
+                      </ADC-ENTER-EXCLUSIVE-AREA-REFS>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_GetStreamLastPointer</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="fc4809c5-9583-4206-a71d-3cad26006f60">
+                      <SHORT-NAME>BswCalledEntity_11</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_SetupResultBuffer</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="da7c1365-e4b4-4eb6-a0ab-56da556c0a43">
+                      <SHORT-NAME>BswCalledEntity_12</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_GetVersionInfo</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="834aa7d2-e35b-4b6c-ab2c-7289578181df">
+                      <SHORT-NAME>BswCalledEntity_13</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_DisableChannel</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                    <BSW-CALLED-ENTITY UUID="ee99a736-d0b5-4911-a6e1-f0ff33016ca6">
+                      <SHORT-NAME>BswCalledEntity_14</SHORT-NAME>
+                      <MINIMUM-START-INTERVAL>0.0</MINIMUM-START-INTERVAL>
+                      <IMPLEMENTED-ENTRY-REF DEST="BSW-MODULE-ENTRY">/Renesas/EcucDefs_Adc/Adc_EnableChannel</IMPLEMENTED-ENTRY-REF>
+                    </BSW-CALLED-ENTITY>
+                  </ENTITYS>
+                </BSW-INTERNAL-BEHAVIOR>
+              </INTERNAL-BEHAVIORS>
+            </BSW-MODULE-DESCRIPTION>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC0_SG0_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC0_SG0_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC0_SG1_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC0_SG1_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="336fed88-de9d-42b2-893b-ef5d85086a3f">
+              <SHORT-NAME>ADC0_SG2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="e15c3eef-20fa-4297-bd2b-fb9689be345c">
+              <SHORT-NAME>ADC0_SG2_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC0_SG3_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC0_SG3_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC0_SG4_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC0_SG4_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="ea5eb90c-f020-41df-9726-b32b6de3edb8">
+              <SHORT-NAME>ADC0_ERR_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC0_ERR_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC1_SG0_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC1_SG0_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC1_SG1_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC1_SG1_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="336fed88-de9d-42b2-893b-ef5d85086a3f">
+              <SHORT-NAME>ADC1_SG2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="e15c3eef-20fa-4297-bd2b-fb9689be345c">
+              <SHORT-NAME>ADC1_SG2_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC1_SG3_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC1_SG3_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC1_SG4_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC1_SG4_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="ea5eb90c-f020-41df-9726-b32b6de3edb8">
+              <SHORT-NAME>ADC1_ERR_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC1_ERR_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC2_SG0_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC2_SG0_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC2_SG1_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC2_SG1_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="336fed88-de9d-42b2-893b-ef5d85086a3f">
+              <SHORT-NAME>ADC2_SG2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="e15c3eef-20fa-4297-bd2b-fb9689be345c">
+              <SHORT-NAME>ADC2_SG2_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC2_SG3_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC2_SG3_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC2_SG4_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC2_SG4_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="ea5eb90c-f020-41df-9726-b32b6de3edb8">
+              <SHORT-NAME>ADC2_ERR_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC2_ERR_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC3_SG0_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC3_SG0_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da61201b-853b-4d25-8f61-0867b9c06d75">
+              <SHORT-NAME>ADC3_SG1_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="388375f7-d485-4df2-ba75-50d6d7736f2a">
+              <SHORT-NAME>ADC3_SG1_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="336fed88-de9d-42b2-893b-ef5d85086a3f">
+              <SHORT-NAME>ADC3_SG2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="e15c3eef-20fa-4297-bd2b-fb9689be345c">
+              <SHORT-NAME>ADC3_SG2_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC3_SG3_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC3_SG3_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="868c821c-3159-4bfd-b222-3e371d52600a">
+              <SHORT-NAME>ADC3_SG4_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC3_SG4_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="ea5eb90c-f020-41df-9726-b32b6de3edb8">
+              <SHORT-NAME>ADC3_ERR_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77b95910-17b0-4de8-896a-146f1a879c5d">
+              <SHORT-NAME>ADC3_ERR_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="de3e7a5c-148b-41ea-a5de-197a4b23fe43">
+              <SHORT-NAME>ADC_DMA0_CH00_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a8fc0dfa-ae2a-443c-8860-64d3a31adbcf">
+              <SHORT-NAME>ADC_DMA0_CH00_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="f7cad5b4-f584-4a0d-a111-6598599b4fc9">
+              <SHORT-NAME>ADC_DMA0_CH01_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="fbdf1525-76d9-44dc-96b8-2965d5d5787a">
+              <SHORT-NAME>ADC_DMA0_CH01_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c3c41ac9-805e-4998-9231-4a301f045dae">
+              <SHORT-NAME>ADC_DMA0_CH02_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="9a25773b-29fc-49d0-8716-e4a949e963d3">
+              <SHORT-NAME>ADC_DMA0_CH02_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a4618464-0e81-4248-8c3e-1f5d26d09983">
+              <SHORT-NAME>ADC_DMA0_CH03_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="aee3a1d8-8b77-4b64-a8f0-cc4da6169f96">
+              <SHORT-NAME>ADC_DMA0_CH03_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="88160ee7-acba-4f66-b293-fe6e2d1341b6">
+              <SHORT-NAME>ADC_DMA0_CH04_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="74b2f855-17dd-4b77-9a1b-0bf9e6948a61">
+              <SHORT-NAME>ADC_DMA0_CH04_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="7ff92f66-3ef2-4cf0-a446-6b8201a07021">
+              <SHORT-NAME>ADC_DMA0_CH05_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="b1d32f1c-bae0-42a6-b66a-b1b7909aec70">
+              <SHORT-NAME>ADC_DMA0_CH05_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="5e0f154b-5b4e-44c3-87ea-594104be5b66">
+              <SHORT-NAME>ADC_DMA0_CH06_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a6555cc3-b5c1-4763-9586-fc5fed7f5e9d">
+              <SHORT-NAME>ADC_DMA0_CH06_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="66545577-b9b4-4b58-9a3b-0083e08a44ea">
+              <SHORT-NAME>ADC_DMA0_CH07_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="07a78708-2002-4f9a-8f5e-959069a6272d">
+              <SHORT-NAME>ADC_DMA0_CH07_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="45b3ffba-9345-4614-b137-116dfae1dc4a">
+              <SHORT-NAME>ADC_DMA0_CH08_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2a095b43-92d0-4c0d-97fa-09548e5c07ee">
+              <SHORT-NAME>ADC_DMA0_CH08_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="0821bc97-5258-441c-b0c3-464501696bd9">
+              <SHORT-NAME>ADC_DMA0_CH09_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="68aebb2e-b24e-47dd-9efa-871fd5fd60fe">
+              <SHORT-NAME>ADC_DMA0_CH09_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="097bef78-5697-42bb-9629-47f702e5c733">
+              <SHORT-NAME>ADC_DMA0_CH10_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2355fb99-bd25-4066-9edf-e5ef4895edd9">
+              <SHORT-NAME>ADC_DMA0_CH10_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c2288df2-0e4a-45e1-9f5e-a6ce85a73d62">
+              <SHORT-NAME>ADC_DMA0_CH11_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="aae2c763-462f-426d-9885-9666093223d4">
+              <SHORT-NAME>ADC_DMA0_CH11_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="0cf7a115-3c0b-4eb5-aa41-38b4883e6353">
+              <SHORT-NAME>ADC_DMA0_CH12_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="d54902cc-3027-4e45-8a74-35b85ea67b38">
+              <SHORT-NAME>ADC_DMA0_CH12_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="1572dd8c-b82c-49b2-8611-660c32f58dd3">
+              <SHORT-NAME>ADC_DMA0_CH13_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da602d22-b370-4592-ab0a-34379060923e">
+              <SHORT-NAME>ADC_DMA0_CH13_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="9a5adee7-6e47-4031-b892-f79c8f70873c">
+              <SHORT-NAME>ADC_DMA0_CH14_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c549ff63-d8d0-48f9-a61c-8284a9e0c8a3">
+              <SHORT-NAME>ADC_DMA0_CH14_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="99a242c8-5436-4974-b3bf-e3a97892cda6">
+              <SHORT-NAME>ADC_DMA0_CH15_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2da59ee2-4f56-46ac-9feb-59694421d3ec">
+              <SHORT-NAME>ADC_DMA0_CH15_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="de3e7a5c-148b-41ea-a5de-197a4b23fe43">
+              <SHORT-NAME>ADC_DMA1_CH00_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a8fc0dfa-ae2a-443c-8860-64d3a31adbcf">
+              <SHORT-NAME>ADC_DMA1_CH00_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="f7cad5b4-f584-4a0d-a111-6598599b4fc9">
+              <SHORT-NAME>ADC_DMA1_CH01_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="fbdf1525-76d9-44dc-96b8-2965d5d5787a">
+              <SHORT-NAME>ADC_DMA1_CH01_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c3c41ac9-805e-4998-9231-4a301f045dae">
+              <SHORT-NAME>ADC_DMA1_CH02_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="9a25773b-29fc-49d0-8716-e4a949e963d3">
+              <SHORT-NAME>ADC_DMA1_CH02_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a4618464-0e81-4248-8c3e-1f5d26d09983">
+              <SHORT-NAME>ADC_DMA1_CH03_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="aee3a1d8-8b77-4b64-a8f0-cc4da6169f96">
+              <SHORT-NAME>ADC_DMA1_CH03_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="88160ee7-acba-4f66-b293-fe6e2d1341b6">
+              <SHORT-NAME>ADC_DMA1_CH04_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="74b2f855-17dd-4b77-9a1b-0bf9e6948a61">
+              <SHORT-NAME>ADC_DMA1_CH04_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="7ff92f66-3ef2-4cf0-a446-6b8201a07021">
+              <SHORT-NAME>ADC_DMA1_CH05_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="b1d32f1c-bae0-42a6-b66a-b1b7909aec70">
+              <SHORT-NAME>ADC_DMA1_CH05_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="5e0f154b-5b4e-44c3-87ea-594104be5b66">
+              <SHORT-NAME>ADC_DMA1_CH06_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a6555cc3-b5c1-4763-9586-fc5fed7f5e9d">
+              <SHORT-NAME>ADC_DMA1_CH06_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="66545577-b9b4-4b58-9a3b-0083e08a44ea">
+              <SHORT-NAME>ADC_DMA1_CH07_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="07a78708-2002-4f9a-8f5e-959069a6272d">
+              <SHORT-NAME>ADC_DMA1_CH07_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="45b3ffba-9345-4614-b137-116dfae1dc4a">
+              <SHORT-NAME>ADC_DMA1_CH08_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2a095b43-92d0-4c0d-97fa-09548e5c07ee">
+              <SHORT-NAME>ADC_DMA1_CH08_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="0821bc97-5258-441c-b0c3-464501696bd9">
+              <SHORT-NAME>ADC_DMA1_CH09_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="68aebb2e-b24e-47dd-9efa-871fd5fd60fe">
+              <SHORT-NAME>ADC_DMA1_CH09_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="097bef78-5697-42bb-9629-47f702e5c733">
+              <SHORT-NAME>ADC_DMA1_CH10_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2355fb99-bd25-4066-9edf-e5ef4895edd9">
+              <SHORT-NAME>ADC_DMA1_CH10_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c2288df2-0e4a-45e1-9f5e-a6ce85a73d62">
+              <SHORT-NAME>ADC_DMA1_CH11_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="aae2c763-462f-426d-9885-9666093223d4">
+              <SHORT-NAME>ADC_DMA1_CH11_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="0cf7a115-3c0b-4eb5-aa41-38b4883e6353">
+              <SHORT-NAME>ADC_DMA1_CH12_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="d54902cc-3027-4e45-8a74-35b85ea67b38">
+              <SHORT-NAME>ADC_DMA1_CH12_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="1572dd8c-b82c-49b2-8611-660c32f58dd3">
+              <SHORT-NAME>ADC_DMA1_CH13_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="da602d22-b370-4592-ab0a-34379060923e">
+              <SHORT-NAME>ADC_DMA1_CH13_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="9a5adee7-6e47-4031-b892-f79c8f70873c">
+              <SHORT-NAME>ADC_DMA1_CH14_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="c549ff63-d8d0-48f9-a61c-8284a9e0c8a3">
+              <SHORT-NAME>ADC_DMA1_CH14_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="99a242c8-5436-4974-b3bf-e3a97892cda6">
+              <SHORT-NAME>ADC_DMA1_CH15_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-1</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2da59ee2-4f56-46ac-9feb-59694421d3ec">
+              <SHORT-NAME>ADC_DMA1_CH15_CAT2_ISR</SHORT-NAME>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>INTERRUPT</CALL-TYPE>
+              <EXECUTION-CONTEXT>INTERRUPT-CAT-2</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="11c0624f-e2ce-40bc-afb2-071efc1b16c3">
+              <SHORT-NAME>Adc_Init</SHORT-NAME>
+              <SERVICE-ID>0</SERVICE-ID>
+              <IS-REENTRANT>false</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="a1d6a02d-0447-4b39-8c29-0e9b218ea1ec">
+              <SHORT-NAME>Adc_DeInit</SHORT-NAME>
+              <SERVICE-ID>1</SERVICE-ID>
+              <IS-REENTRANT>false</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="77818216-b37d-458c-9297-aaccb6891f58">
+              <SHORT-NAME>Adc_StartGroupConversion</SHORT-NAME>
+              <SERVICE-ID>2</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>false</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="27363f4d-0695-4d64-baba-718d41260d91">
+              <SHORT-NAME>Adc_StopGroupConversion</SHORT-NAME>
+              <SERVICE-ID>3</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="7e21e674-6864-4dd8-b019-734f5914f275">
+              <SHORT-NAME>Adc_ReadGroup</SHORT-NAME>
+              <SERVICE-ID>4</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="92eb4a00-5ced-4247-a7da-c26ee3c96380">
+              <SHORT-NAME>Adc_EnableHardwareTrigger</SHORT-NAME>
+              <SERVICE-ID>5</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="e5270660-d2c9-4b5b-86c0-34555d9d8c4f">
+              <SHORT-NAME>Adc_DisableHardwareTrigger</SHORT-NAME>
+              <SERVICE-ID>6</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="d208a9aa-8bd3-4be7-b68d-e7c763b52e92">
+              <SHORT-NAME>Adc_EnableGroupNotification</SHORT-NAME>
+              <SERVICE-ID>7</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="d8863023-2b25-44be-9fba-cd5299dd73ba">
+              <SHORT-NAME>Adc_DisableGroupNotification</SHORT-NAME>
+              <SERVICE-ID>8</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="98aa03db-e931-4839-8e29-a863d4ca8938">
+              <SHORT-NAME>Adc_GetGroupStatus</SHORT-NAME>
+              <SERVICE-ID>9</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="05d27157-380d-4e6e-bfda-a279ad995e23">
+              <SHORT-NAME>Adc_GetStreamLastPointer</SHORT-NAME>
+              <SERVICE-ID>11</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="6f7067f4-c014-4997-be38-e79df18e8f21">
+              <SHORT-NAME>Adc_GetVersionInfo</SHORT-NAME>
+              <SERVICE-ID>10</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>MACRO</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="acfca80c-d5ab-4ffc-8292-f29d1b44d40b">
+              <SHORT-NAME>Adc_SetupResultBuffer</SHORT-NAME>
+              <SERVICE-ID>12</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="bdd708eb-2145-4136-ac6d-fb46d0298896">
+              <SHORT-NAME>Adc_DisableChannel</SHORT-NAME>
+              <SERVICE-ID>160</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+            <BSW-MODULE-ENTRY UUID="2709ab9b-5777-4344-9b0e-62279fd07198">
+              <SHORT-NAME>Adc_EnableChannel</SHORT-NAME>
+              <SERVICE-ID>161</SERVICE-ID>
+              <IS-REENTRANT>true</IS-REENTRANT>
+              <IS-SYNCHRONOUS>true</IS-SYNCHRONOUS>
+              <CALL-TYPE>REGULAR</CALL-TYPE>
+              <EXECUTION-CONTEXT>TASK</EXECUTION-CONTEXT>
+              <SW-SERVICE-IMPL-POLICY>STANDARD</SW-SERVICE-IMPL-POLICY>
+            </BSW-MODULE-ENTRY>
+          </ELEMENTS>
+        </AR-PACKAGE>
+      </AR-PACKAGES>
+    </AR-PACKAGE>
+  </AR-PACKAGES>
+</AUTOSAR>

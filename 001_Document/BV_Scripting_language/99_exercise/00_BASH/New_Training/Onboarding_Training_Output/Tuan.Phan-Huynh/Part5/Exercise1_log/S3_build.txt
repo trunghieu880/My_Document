@@ -1,0 +1,49 @@
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: DIO
+===========================================================================
+===========================================================================
+                           CLEAN AND RE-BUILD
+===========================================================================
+U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\generator\Dio_X1X.exe -o U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3 U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\config\App_dio_F1KH_701710_Sample.arxml U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_dio.arxml "U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\generator\Sample_Application_F1x.trxml" "U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\generator\R403_dio_F1x_BSWMDT.arxml"
+INF000001: Tool Version: 2.2.4
+INF000002: Command line arguments: Dio_X1x.exe -o
+           U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3
+           U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\config\App_dio_F1KH_701710_Sample.arxml
+           U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_dio.arxml
+           U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\generator\Sample_Application_F1x.trxml
+           U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\generator\R403_dio_F1x_BSWMDT.arxml
+INF000004: Opened file
+           <U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src\Dio_PBcfg.c>
+           at [ 6 Sep 2019 - 09:12:35].
+INF000004: Opened file
+           <U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include\Dio_Cfg.h>
+           at [ 6 Sep 2019 - 09:12:35].
+INF000004: Opened file
+           <U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include\Dio_Cbk.h>
+           at [ 6 Sep 2019 - 09:12:35].
+INF000004: Opened file
+           <U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src\Dio_Hardware.c>
+           at [ 6 Sep 2019 - 09:12:35].
+INF000004: Opened file
+           <U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include\Dio_Hardware.h>
+           at [ 6 Sep 2019 - 09:12:35].
+INF000005: <0> Error(s) and <0> Warning(s) detected.
+INF000006: Execution completed successfully.
+*********************************************************************
+Compiling U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\src/App_DIO_F1KH_Sample.c ...
+Generating U:\external\X1X\F1x\common_family\make\ghs\..\..\..\modules\dio\sample_application\F1KH\obj\ghs\App_DIO_F1KH_Sample.o ...
+"C:\ghs\comp_201517\ccrh850.exe" -c -cpu=rh850g3kh -delete --diag_error 193 -dual_debug -g -gsize -ignore_callt_state_in_interrupts -inline_prologue -large_sda -no_callt --no_commons -nofloatio -Osize -prepare_dispose --prototype_errors -reserve_r2 -sda=all --short_enum -shorten_loads -shorten_moves -Wshadow  -Wundef -DLOWER_VERSION -DDIO_MODULE_TEST -DF1KH -DDEVICE_TEST=701710 -DF1KH_DEVICE -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include -ICC_SOURCE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src -ICPP_INCLUDE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include\4.0.3 -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\include\F1KH -ICC_INCLUDE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\include\ghs U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\src/App_DIO_F1KH_Sample.c -object_dir=U:\external\X1X\F1x\common_family\make\ghs\..\..\..\modules\dio\sample_application\F1KH\obj\ghs
+
+===========================================================================
+                             BUILDING COMPLETED
+===========================================================================

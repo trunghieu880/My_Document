@@ -1,0 +1,1 @@
+'+ERR123023: Value for the parameter 'AdcGroupHwTriggerSource'

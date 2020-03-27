@@ -1,0 +1,54 @@
+$ ./SampleApp.bat adc 4.0.3 701270 generate
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: ADC
+===========================================================================
+===========================================================================
+                          CLEAN AND RE-GENERATE
+===========================================================================
+Could Not Find U:\external\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\src\*.c
+Could Not Find U:\external\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\include\*.h
+"U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\common_platform\generic\generator\MCALConfGen.exe" -m "adc" -o "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\config\App_adc_C1H_701270_Sample.arxml" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml"" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\generator\R403_adc_C1x_BSWMDT.arxml"" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Adc.arxml""
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m adc -o
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\config\App_adc_C1H_701270_Sample.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\generator\R403_adc_C1x_BSWMDT.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Adc.arxml
+INF123001: The channel group 'AdcGroup' is mapped to <ADC0_SG1> unit. File
+           name:
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\config\App_adc_C1H_701270_Sample.arxml
+INF123001: The channel group 'AdcGroup_001' is mapped to <ADC0_SG4> unit.
+           File name:
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\config\App_adc_C1H_701270_Sample.arxml
+INF123001: The channel group 'AdcGroup_002' is mapped to <ADC0_SG3> unit.
+           File name:
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\adc\sample_application\C1H\4.0.3\config\App_adc_C1H_701270_Sample.arxml
+INF000004: Opened file
+           <..\..\..\modules\adc\sample_application\C1H\4.0.3\include\Adc_Cbk.h>
+           at [22 Nov 2019 - 03:21:07].
+INF000004: Opened file
+           <..\..\..\modules\adc\sample_application\C1H\4.0.3\include\Adc_Cfg.h>
+           at [22 Nov 2019 - 03:21:07].
+INF000004: Opened file
+           <..\..\..\modules\adc\sample_application\C1H\4.0.3\src\Adc_PBcfg.c>
+           at [22 Nov 2019 - 03:21:07].
+INF000004: Opened file
+           <..\..\..\modules\adc\sample_application\C1H\4.0.3\Adc.log> at
+           [22 Nov 2019 - 03:21:07].
+INF000005: <0> Error(s) and <0> Warning(s) detected.
+INF000006: Execution completed successfully.
+
+===========================================================================
+                       BUILDING COMPLETED
+===========================================================================

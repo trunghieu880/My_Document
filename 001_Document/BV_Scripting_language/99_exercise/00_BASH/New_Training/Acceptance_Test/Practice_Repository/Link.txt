@@ -1,0 +1,1 @@
+https://172.29.44.209/automotive/autosar/svnASG_D008633/dev/bsw/Autosar_R40/branch/REE/dev_mcal_F1Kx_R40_R42_all_variant

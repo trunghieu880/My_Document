@@ -1,0 +1,51 @@
+AUTOSAR Renesas Driver Generation Tool for X1x
+OVERVIEW :
+<MSN> Driver Generation Tool is a Command <MSN> Tool, which accepts
+the ECU Configuration Description File, BSWMDT File, Translation
+XML File (which contain the translation and device specific header
+file path) and Configuration XML File (which contains the seeting of
+command line options) as input and generates the
+<MSN> Driver C source and C Header files as output.
+
+USAGE:
+McalConfGen.exe [<Options> {<Input Filename>}]
+Input Filename: ECU Configuration Description File(s), BSWMDT File,
+                Translation XML File [optional] and
+                Configuration XML File [optional]
+Options       : [-H/-Help -O/-Ooutput -Oinc -Psrc -L/-Log -D/-DryRun
+                 -C/-CONFIG -FR/-Filter]
+
+Notations:
+{data} is compulsory data.
+<data> is represents the actual data that will be specified on the command line.
+[data] is optional data.
+
+McalConfGen.exe has the following command line options:
+-H/-Help      : To display help regarding usage of the tool.
+-M/-Module    : To chose module wanna run eg -m <msn>.
+-O/-Output    : To generate the output files in the specified directory
+                location.
+-Osrc         : To generate the output source files in the specified
+                directory location.
+-Oinc         : To generate the output header files in the specified
+                directory location.
+-L/-Log       : To log the tool processing information in <MSN>_Log.txt file.
+-C/-CONFIG    : To give configuration XML file path along with -C
+-D/-DryRun    : To execute in validation mode.
+-FR/-Filter   : To load CDF content for a specific vendor.
+
+INPUT FILE(S):
+The description of input file(s) is as follows:
+ECU Configuration Description File: This file contains <MSN>
+                                    Driver Component Configuration.
+BSWMDT File                       : This file contains Common Published
+                                    Information of <MSN> Driver.
+Translation XML File              : This file contains translation and
+                                    device specific header file path.
+Configuration XML File            : This file contains the setting of
+                                    command line options.
+
+OUTPUT FILES:
+The description of output files is as follows:
+<MSN>_Cfg.h     : This file contains pre-compile time parameters.
+<MSN>_PBcfg.c   : This file contains post-build time parameters.

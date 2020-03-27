@@ -1,0 +1,309 @@
+nghia.nguyen-tan@L-016 /cygdrive/u/external/X1X/C1x/common_family/make/ghs
+$ ./SampleApp_BuildLoad.sh
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                       HELP TO BUILD SAMPLE APPLICATION
+===========================================================================
+Usage:
+
+SampleApp.bat MODULE_NAME AUTOSAR_VERSION DEVICE_NAME BUILD_OPTION CPU_OPTION
+
+MODULE_NAME      -   Module Short Name to be generated e.g. Port, Dio, Adc, ...
+
+AUTOSAR_VERSION  -   AUTOSAR version to be compiled which is available
+                     4.0.3 or 4.2.2
+
+DEVICE_NAME      -   Device Name to be compiled which is available 701270
+                     or 701271 or 701275 or 701278
+
+BUILD_OPTION     -   build/none: Build all process.
+                     clean     : Only delete object files.
+                     generate  : Only generation tool done.
+                     make      : Only compile and link (use already generated files)
+
+CPU_OPTION       -   none      : PE1 as default.
+                     PEx       : PEx/CPUx is used, x = 1, 2, 3.
+                     Note: Mutilple CPU cores running like "PE1 PE2" not supported.
+                           Available CPUs of 701270 are PE1 and PE2.
+                           Available CPUs of 701271 is  PE1.
+                           Available CPUs of 701275 are PE1, PE2, and PE3(SubCPU).
+                           Available CPUs of 701278 are PE1 and PE3(SubCPU).
+
+DisplEnv         -   Display Useful Variable for debug
+===========================================================================
+
+
+nghia.nguyen-tan@L-016 /cygdrive/u/external/X1X/C1x/common_family/make/ghs
+$ ./SampleApp_BuildLoad.sh Wdg 4.0.3 701270 generate
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: WDG
+===========================================================================
+===========================================================================
+                          CLEAN AND RE-GENERATE
+===========================================================================
+Could Not Find U:\external\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\src\*.c
+Could Not Find U:\external\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\include\*.h
+"U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\common_platform\generic\generator\MCALConfGen.exe" -m "wdg" -o "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml"" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\config\4.0.3\Mcu_wdg_701270.arxml" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Wdg.arxml" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\generator\R403_wdg_C1x_BSWMDT.arxml""
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m wdg -o
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\config\4.0.3\Mcu_wdg_701270.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Wdg.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\generator\R403_wdg_C1x_BSWMDT.arxml
+INF102001: [DriverA] The duration of 75% of one WDG trigger cycle for slow
+           mode is <197 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path: '/ActiveEcuC/Wdg/WdgSettingsConfig/WdgSettingsSlow'.
+INF102001: [DriverB] The duration of 75% of one WDG trigger cycle for slow
+           mode is <197 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path:
+           '/ActiveEcuC/Wdg_001/WdgSettingsConfig_001/WdgSettingsSlow'.
+INF102002: [DriverA] The duration of 75% of one WDG trigger cycle for fast
+           mode is <2 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path: '/ActiveEcuC/Wdg/WdgSettingsConfig/WdgSettingsFast'.
+INF102002: [DriverB] The duration of 75% of one WDG trigger cycle for fast
+           mode is <2 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path:
+           '/ActiveEcuC/Wdg_001/WdgSettingsConfig_001/WdgSettingsFast'.
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\include\Wdg_59_DriverA_Cfg.h>
+           at [14 Aug 2019 - 10:19:12].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\include\Wdg_59_DriverB_Cfg.h>
+           at [14 Aug 2019 - 10:19:12].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\src\Wdg_59_DriverA_PBcfg.c>
+           at [14 Aug 2019 - 10:19:12].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\src\Wdg_59_DriverB_PBcfg.c>
+           at [14 Aug 2019 - 10:19:12].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\Wdg.log> at
+           [14 Aug 2019 - 10:19:12].
+INF000005: <0> Error(s) and <0> Warning(s) detected.
+INF000006: Execution completed successfully.
+
+===========================================================================
+                       BUILDING COMPLETED
+===========================================================================
+===========================================================================
+                  LOAD TO BOARD AND EXECUTE
+===========================================================================
+ .MODULE: WDG
+ .DEVICE: 701270
+ .SUB VARIANT: C1H
+ .DVF: U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf
+ .App: U:\external\X1X\C1x\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_C1H_Sample.out
+ .Muti:/cygdrive/c/ghs/multi_616/multi.exe
+ .# Core: 2
+ .Test Core: PE1
+===========================================================================
+
+
+nghia.nguyen-tan@L-016 /cygdrive/u/external/X1X/C1x/common_family/make/ghs
+$ ./SampleApp_BuildLoad.sh Wdg 4.0.3 701270 clean
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: WDG
+===========================================================================
+===========================================================================
+                              CLEAN ONLY
+===========================================================================
+
+===========================================================================
+                       BUILDING COMPLETED
+===========================================================================
+===========================================================================
+                  LOAD TO BOARD AND EXECUTE
+===========================================================================
+ .MODULE: WDG
+ .DEVICE: 701270
+ .SUB VARIANT: C1H
+ .DVF: U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf
+ .App: U:\external\X1X\C1x\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_C1H_Sample.out
+ .Muti:/cygdrive/c/ghs/multi_616/multi.exe
+ .# Core: 2
+ .Test Core: PE1
+===========================================================================
+
+
+nghia.nguyen-tan@L-016 /cygdrive/u/external/X1X/C1x/common_family/make/ghs
+$ ./SampleApp_BuildLoad.sh Wdg 4.0.3 701270 build
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: WDG
+===========================================================================
+
+===========================================================================
+                           CLEAN AND RE-BUILD
+===========================================================================
+Could Not Find U:\external\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\src\*.c
+Could Not Find U:\external\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\include\*.h
+"U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\common_platform\generic\generator\MCALConfGen.exe" -m "wdg" -o "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml"" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\config\4.0.3\Mcu_wdg_701270.arxml" "U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Wdg.arxml" ""U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\generator\R403_wdg_C1x_BSWMDT.arxml""
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m wdg -o
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\generator\Sample_Application_C1x.trxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\config\4.0.3\Mcu_wdg_701270.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\xml\Dem_Wdg.arxml
+           U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\generator\R403_wdg_C1x_BSWMDT.arxml
+INF102001: [DriverA] The duration of 75% of one WDG trigger cycle for slow
+           mode is <197 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path: '/ActiveEcuC/Wdg/WdgSettingsConfig/WdgSettingsSlow'.
+INF102001: [DriverB] The duration of 75% of one WDG trigger cycle for slow
+           mode is <197 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path:
+           '/ActiveEcuC/Wdg_001/WdgSettingsConfig_001/WdgSettingsSlow'.
+INF102002: [DriverA] The duration of 75% of one WDG trigger cycle for fast
+           mode is <2 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path: '/ActiveEcuC/Wdg/WdgSettingsConfig/WdgSettingsFast'.
+INF102002: [DriverB] The duration of 75% of one WDG trigger cycle for fast
+           mode is <2 msec>. File name:
+           'U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\config\App_wdg_C1H_701270_Sample.arxml'.
+           Path:
+           '/ActiveEcuC/Wdg_001/WdgSettingsConfig_001/WdgSettingsFast'.
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\include\Wdg_59_DriverA_Cfg.h>
+           at [14 Aug 2019 - 10:20:47].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\include\Wdg_59_DriverB_Cfg.h>
+           at [14 Aug 2019 - 10:20:47].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\src\Wdg_59_DriverA_PBcfg.c>
+           at [14 Aug 2019 - 10:20:47].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\src\Wdg_59_DriverB_PBcfg.c>
+           at [14 Aug 2019 - 10:20:47].
+INF000004: Opened file
+           <..\..\..\modules\wdg\sample_application\C1H\4.0.3\Wdg.log> at
+           [14 Aug 2019 - 10:20:47].
+INF000005: <0> Error(s) and <0> Warning(s) detected.
+INF000006: Execution completed successfully.
+*********************************************************************
+Compiling U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src/App_WDG_Common_Sample.c ...
+Generating U:\external\X1X\C1x\common_family\make\ghs\..\..\..\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_Common_Sample.o ...
+"C:\ghs\comp_201517\ccrh850.exe" -c -Ospace -g -cpu=rh850g3m -gsize -prepare_dispose -inline_prologue -sda=all -passsource -Wundef -no_callt -reserve_r2 --short_enum -fsoft --prototype_errors --diag_error 193 -dual_debug -large_sda --no_commons -shorten_loads -shorten_moves -Wshadow -nofloatio -ignore_callt_state_in_interrupts -delete -DWDG_MODULE_SAMPLE -DWDG_MODULE_DRIVERA_SAMPLE -DDEVICE_TEST=701270 -DPE1_USED -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Os\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Os\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\EcuM\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\EcuM\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\WdgIf\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -I\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -I\common -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -I\common -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -I\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\src\ghs -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\include\ghs U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src/App_WDG_Common_Sample.c -object_dir=U:\external\X1X\C1x\common_family\make\ghs\..\..\..\modules\wdg\sample_application\C1H\obj\ghs
+ecom800: 14Aug19 10:21:38.297858: No licenses available for ecom800
+
+
+Here are the current settings:
+  Config file = C:\ghs\comp_201517\config\license.cfg
+  GHS_LMHOST = @172.29.145.101:2012
+  GHS_LMPORT = N/A
+  License directory = C:\ghs\licenses
+
+ecom800: 14Aug19 10:21:38.297858: Exiting
+make: *** [App_WDG_Common_Sample.o] Error 1
+
+===========================================================================
+                       BUILDING COMPLETED
+===========================================================================
+===========================================================================
+                  LOAD TO BOARD AND EXECUTE
+===========================================================================
+ .MODULE: WDG
+ .DEVICE: 701270
+ .SUB VARIANT: C1H
+ .DVF: U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf
+ .App: U:\external\X1X\C1x\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_C1H_Sample.out
+ .Muti:/cygdrive/c/ghs/multi_616/multi.exe
+ .# Core: 2
+ .Test Core: PE1
+===========================================================================
+
+
+nghia.nguyen-tan@L-016 /cygdrive/u/external/X1X/C1x/common_family/make/ghs
+$ ./SampleApp_BuildLoad.sh Wdg 4.0.3 701270 make
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: WDG
+===========================================================================
+===========================================================================
+                               make
+===========================================================================
+*********************************************************************
+Compiling U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src/App_WDG_Common_Sample.c ...
+Generating U:\external\X1X\C1x\common_family\make\ghs\..\..\..\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_Common_Sample.o ...
+"C:\ghs\comp_201517\ccrh850.exe" -c -Ospace -g -cpu=rh850g3m -gsize -prepare_dispose -inline_prologue -sda=all -passsource -Wundef -no_callt -reserve_r2 --short_enum -fsoft --prototype_errors --diag_error 193 -dual_debug -large_sda --no_commons -shorten_loads -shorten_moves -Wshadow -nofloatio -ignore_callt_state_in_interrupts -delete -DWDG_MODULE_SAMPLE -DWDG_MODULE_DRIVERA_SAMPLE -DDEVICE_TEST=701270 -DPE1_USED -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Os\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Os\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\EcuM\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\EcuM\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\WdgIf\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\modules\wdg\sample_application\C1H\4.0.3\src -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -I\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -I\common -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -I\common -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -I\4.0.3 -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\src\ghs -IU:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\C1x\common_family\include\ghs U:\external\X1X\C1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\wdg\sample_application\src/App_WDG_Common_Sample.c -object_dir=U:\external\X1X\C1x\common_family\make\ghs\..\..\..\modules\wdg\sample_application\C1H\obj\ghs
+ecom800: 14Aug19 10:23:08.536695: No licenses available for ecom800
+
+
+Here are the current settings:
+  Config file = C:\ghs\comp_201517\config\license.cfg
+  GHS_LMHOST = @172.29.145.101:2012
+  GHS_LMPORT = N/A
+  License directory = C:\ghs\licenses
+
+ecom800: 14Aug19 10:23:08.536695: Exiting
+make: *** [App_WDG_Common_Sample.o] Error 1
+
+===========================================================================
+                       BUILDING COMPLETED
+===========================================================================
+===========================================================================
+                  LOAD TO BOARD AND EXECUTE
+===========================================================================
+ .MODULE: WDG
+ .DEVICE: 701270
+ .SUB VARIANT: C1H
+ .DVF: U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf
+ .App: U:\external\X1X\C1x\modules\wdg\sample_application\C1H\obj\ghs\App_WDG_C1H_Sample.out
+ .Muti:/cygdrive/c/ghs/multi_616/multi.exe
+ .# Core: 2
+ .Test Core: PE1
+===========================================================================

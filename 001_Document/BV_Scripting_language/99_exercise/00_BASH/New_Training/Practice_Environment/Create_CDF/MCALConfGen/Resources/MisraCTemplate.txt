@@ -1,0 +1,26 @@
+/* 1. MISRA C RULE VIOLATION:                                                 */
+/* Message       : (4:0303) Cast between a pointer to volatile object and     */
+/*                 an integral type.                                          */
+/* Rule          : MISRA-C:2004 Rule 11.3                                     */
+/*                 REFERENCE - ISO-6.3.4 Semantics                            */
+/* Justification : Typecasting is done as per the register size, to access    */
+/*                 hardware registers.                                        */
+/* Verification  : However, part of the code is verified manually and it is   */
+/*                 not having any impact.                                     */
+/* Reference     : Look for START Msg(4:0303)-1 and                           */
+/*                 END Msg(4:0303)-1 tags in the code.                        */
+/******************************************************************************/
+
+/* 2. MISRA C RULE VIOLATION:                                                 */
+/* Message       : (4:0489) Increment or decrement operation                  */
+/*                 performed on pointer.                                      */
+/* Rule          : MISRA-C:2004 Rule 17.4                                     */
+/*                 REFERENCE - ISO-6.3.4 Semantics                            */
+/* Justification : Array indexing shall be the only allowed form of pointer   */
+/*                 arithmetic.                                                */
+/* Verification  : Increment operator used to get the next address.           */
+/*                 However, part of the code is verified manually and         */
+/*                 it is not having any impact.                               */
+/* Reference     : Look for START Msg(4:0489)-2 and                           */
+/*                 END Msg(4:0489)-2 tags in the code.                        */
+/******************************************************************************/

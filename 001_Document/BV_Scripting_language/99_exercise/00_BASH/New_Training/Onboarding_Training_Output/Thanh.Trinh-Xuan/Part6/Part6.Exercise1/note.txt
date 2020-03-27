@@ -1,0 +1,2 @@
+value of cell which row is row 20 (testcase ADC_GIT_CHK_0019) and column is column R (Identifier) is already deleted. 
+So I can't complete this excecise :(

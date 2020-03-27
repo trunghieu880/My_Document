@@ -1,0 +1,24 @@
+**************************************************************************
+Run SampleApp ...
+***************************************************************************
+
+Found user variable GNUMAKE ...
+***************************************************************************
+Temporary modify path variable to be sure to use correct make, shell...
+path = C:\Workspace\GnuWin32\bin
+**************************************************************************
+
+===========================================================================
+                     BUILDING SAMPLE APPLICATION: DIO
+===========================================================================
+===========================================================================
+                               make
+===========================================================================
+*********************************************************************
+Compiling U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\src/App_DIO_F1KH_Sample.c ...
+Generating U:\external\X1X\F1x\common_family\make\ghs\..\..\..\modules\dio\sample_application\F1KH\obj\ghs\App_DIO_F1KH_Sample.o ...
+"C:\ghs\comp_201517\ccrh850.exe" -c -cpu=rh850g3kh -delete --diag_error 193 -dual_debug -g -gsize -ignore_callt_state_in_interrupts -inline_prologue -large_sda -no_callt --no_commons -nofloatio -Osize -prepare_dispose --prototype_errors -reserve_r2 -sda=all --short_enum -shorten_loads -shorten_moves -Wshadow  -Wundef -DLOWER_VERSION -DDIO_MODULE_TEST -DF1KH -DDEVICE_TEST=701710 -DF1KH_DEVICE -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Det\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\Dem\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\stubs\4.0.3\SchM\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include -ICC_SOURCE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src -ICPP_INCLUDE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\modules\dio\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\4.0.3\src -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\common\ghs\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\compiler\4.0.3\ghs\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include\4.0.3 -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\common\include\4.0.3 -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\common_platform\generic\include -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\include\F1KH -ICC_INCLUDE_PATH -I+= -IU:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\common_family\include\ghs U:\external\X1X\F1x\common_family\make\ghs\..\..\..\..\..\X1X\F1x\modules\dio\sample_application\F1KH\src/App_DIO_F1KH_Sample.c -object_dir=U:\external\X1X\F1x\common_family\make\ghs\..\..\..\modules\dio\sample_application\F1KH\obj\ghs
+
+===========================================================================
+                             BUILDING COMPLETED
+===========================================================================

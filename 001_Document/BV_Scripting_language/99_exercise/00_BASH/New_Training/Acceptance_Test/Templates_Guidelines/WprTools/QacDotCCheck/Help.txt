@@ -1,0 +1,9 @@
+Precondition:
++ Map U drive for Repo.
++ Tools should be located at: C:\workspace\Jenkins\Tool\QAC
++ Add missing accepted messages into C:\Workspace\Jenkins\Tool\QAC\output\Messages.txt
+
+Output:
+C:\Workspace\Jenkins\Tool\QAC\output\F1x\adc\4_0_3\merge\output\error
+1. MWC: Message without comment
+2. CWM: Comment without message

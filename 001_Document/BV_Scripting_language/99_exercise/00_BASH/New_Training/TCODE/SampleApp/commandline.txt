@@ -1,0 +1,1 @@
+-m adc -l -o ./ cdf/App_ADC_U2AEVA1_BGA516.arxml cdf/R422_ADC_U2AEVA1_BSWMDT.arxml cdf/Dem_Adc.arxml cdf/Sample_Application_U2A.trxml

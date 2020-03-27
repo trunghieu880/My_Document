@@ -1,0 +1,1 @@
+PDFGenerator_exec.bat example\RH850_X2x_SPI_ParameterDefinition.xls R7F702Z02EDBA SPI422.arxml example\R403_SPI_D1M_11_12_31_32.arxml

@@ -1,0 +1,18 @@
+test config:
+U:\internal\X1X\P1x-C\modules\<MSN>\test_cfg\<variant>\make
+
+test function:
+U:\internal\X1X\P1x-C\common_family\make\ghs
+
+Build log file run Launcher.bat
+
+Sampleapp:
+U:\external\X1X\P1x-C\common_family\Sample_Application\ghs
+
+Note: repare enviroment:
+
+Change Evn: SetEnv.bat
+
+Install: U:\internal\tools\CodeGenerator2.06.06\Executable\MCALCodegenerator_Installer.exe
+
+

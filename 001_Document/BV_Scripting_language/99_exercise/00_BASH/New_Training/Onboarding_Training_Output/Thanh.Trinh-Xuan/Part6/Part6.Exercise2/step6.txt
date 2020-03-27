@@ -1,0 +1,45 @@
+::: AES Version:2.1.0(Official Version) :::
+
+touch EvalEnvelope/Adc_CHK018_C1H/MakeDepend.mak
+cd EvalEnvelope/Adc_CHK018_C1H/ && /usr/bin/make -f Makefile ready_for_generate
+make[1]: Entering directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK018_C1H'
+cp /cygdrive/u/internal/X1X/C1x/common_family/generator/Test_Application_C1x_aes.trxml cdf/
+cp u:/external/X1X/C1x/modules/adc/generator/R403_ADC_C1x_BSWMDT.arxml cdf/
+make[1]: Leaving directory '/cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/EvalEnvelope/Adc_CHK018_C1H'
+cd EvalEnvelope/Adc_CHK018_C1H/ && ( /cygdrive/u/external/X1X/common_platform/generic/generator/MCALConfGen.exe -m adc -l -o ./ cdf/*.[at]rxml || touch .ErrorFlag ) |& tee log/GenerationTool.log
+INF000001: Tool Version: 1.0.0
+INF000002: Command line arguments: MCALConfGen.exe -m adc -l -o ./
+           cdf/ADC_GIT_CHK_0015.arxml cdf/R403_ADC_C1x_BSWMDT.arxml
+           cdf/Test_Application_C1x_aes.trxml
+WRN123006: Value of the parameter 'AdcNotification' of 'AdcGroup' container
+           should be configured with a value other than <NULL or NULL_PTR
+           or empty string> for at least one group, since value of the
+           parameter 'AdcGrpNotifCapability' of 'AdcGeneral' container is
+           configured as <true>. File name: cdf/ADC_GIT_CHK_0015.arxml
+INF123001: The channel group 'AdcGroup0' is mapped to <ADC0_SG1> unit. File
+           name: cdf/ADC_GIT_CHK_0015.arxml
+INF123005: The value of parameter 'AdcErrorNotification' of 'AdcHwUnit'
+           will be considered as <NULL> or <NULL_PTR> or empty string,
+           since all parameters 'AdcIdErrEnable', 'AdcParityErrEnable',
+           'AdcOverWriteErrEnable' and 'AdcEnableLimitCheck' of
+           'AdcGeneral' container are configured as <false>. Path:
+           /ActiveEcuC/Adc0/AdcConfigSet0/AdcHwUnit0 File name:
+           cdf/ADC_GIT_CHK_0015.arxml
+INF000004: Opened file <include\Adc_Cbk.h> at [11 Nov 2019 - 10:00:06].
+INF000004: Opened file <include\Adc_Cfg.h> at [11 Nov 2019 - 10:00:06].
+INF000004: Opened file <src\Adc_PBcfg.c> at [11 Nov 2019 - 10:00:06].
+INF000004: Opened file <Adc.log> at [11 Nov 2019 - 10:00:06].
+INF000005: <0> Error(s) and <1> Warning(s) detected.
+INF000007: Execution completed successfully with warnings.
+Exit status of Generation Tool: TRUE
+mv -f EvalEnvelope/Adc_CHK018_C1H/adc.log EvalEnvelope/Adc_CHK018_C1H/log/
+cd EvalEnvelope/Adc_CHK018_C1H/ && ( /cygdrive/u/internal/X1X/C1x/modules/adc/workspace/C1H/4.0.3/Tool/GenToolLogCheck.py  -e"ERR123022: Value of the parameter 'AdcStreamingNumSamples'" -f../../EvalEnvelope/Adc_CHK018_C1H/log/GenerationTool.log || true )
+cat EvalEnvelope/Adc_CHK018_C1H/Result.txt
+### Result Judgment 1.2.0 ###
+### 2019/11/11 10:00 ###
+NG
+"ERR123022: Value of the parameter 'AdcStreamingNumSamples'" does not exist
+rm -f EvalEnvelope/Adc_CHK018_C1H/.ErrorFlag
+******************************************
+ The end of Adc_CHK018_C1H
+******************************************

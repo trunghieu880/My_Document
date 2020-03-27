@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+********************************************************************************
+/* Project      = AUTOSAR Renesas X2x MCAL Components                         */
+********************************************************************************
+**                                  COPYRIGHT                                 **
+********************************************************************************
+** (c) 2018 Renesas Electronics Corporation. All rights reserved.             **
+********************************************************************************
+** Purpose:                                                                   **
+** Provides the path for the Translation Header File and Device Specific C    **
+** Header File.                                                               **
+**                                                                            **
+********************************************************************************
+** Unless otherwise agreed upon in writing between your company and           **
+** Renesas Electronics Corporation the following shall apply!                 **
+**                                                                            **
+** Warranty Disclaimer                                                        **
+**                                                                            **
+** There is no warranty of any kind whatsoever granted by Renesas. Any        **
+** warranty is expressly disclaimed and excluded by Renesas, either expressed **
+** or implied, including but not limited to those for non-infringement of     **
+** intellectual property, merchantability and/or fitness for the particular   **
+** purpose.                                                                   **
+**                                                                            **
+** Renesas shall not have any obligation to maintain, service or provide bug  **
+** fixes for the supplied Product(s) and/or the Application.                  **
+**                                                                            **
+** Each User is solely responsible for determining the appropriateness of     **
+** using the Product(s) and assumes all risks associated with its exercise    **
+** of rights under this Agreement, including, but not limited to the risks    **
+** and costs of program errors, compliance with applicable laws, damage to    **
+** or loss of data, programs or equipment, and unavailability or              **
+** interruption of operations.                                                **
+**                                                                            **
+** Limitation of Liability                                                    **
+**                                                                            **
+** In no event shall Renesas be liable to the User for any incidental,        **
+** consequential, indirect, or punitive damage (including but not limited     **
+** to lost profits) regardless of whether such liability is based on breach   **
+** of contract, tort, strict liability, breach of warranties, failure of      **
+** essential purpose or otherwise and even if advised of the possibility of   **
+** such damages. Renesas shall not be liable for any services or products     **
+** provided by third party vendors, developers or consultants identified or   **
+** referred to the User by Renesas in connection with the Product(s) and/or   **
+** the Application.                                                           **
+**                                                                            **
+********************************************************************************
+** Environment:                                                               **
+**              Devices:        U2A                                           **
+********************************************************************************
+**                      Revision Control History                              **
+********************************************************************************
+** V1.0.0:   09-Feb-2018  : Initial version                                   **
+********************************************************************************
+-->
+
+<!--
+The tag PATH-DETAILS should not be renamed since it's top level element.
+-->
+<PATH-DETAILS>
+<!--
+TRANSLATION-FILE-PATH should contain the path of the translation header file.
+The tag TRANSLATION-FILE-PATH should not be renamed. Only respective value should be updated for the translation header file.
+-->
+<TRANSLATION-FILE-PATH>
+   <BGA516>cdf/U2A_translation.h</BGA516>
+</TRANSLATION-FILE-PATH>
+<!--
+The tags present in DEVICE-FILE-PATH tag should contain the path of the device specific C Header File.
+The tags present in DEVICE-FILE-PATH should be equal to the value for parameter <MSN>DeviceName present in <MSN>General container.
+The tag DEVICE-FILE-PATH should not be renamed.
+If multiple device header files need to provide then each file name should be separated with space.
+Also child tag of DEVICE-FILE-PATH should be unique.
+-->
+  <DEVICE-FILE-PATH>
+    <BGA516>cdf/DR7F702Z19_0.h</BGA516>
+  </DEVICE-FILE-PATH>
+</PATH-DETAILS>

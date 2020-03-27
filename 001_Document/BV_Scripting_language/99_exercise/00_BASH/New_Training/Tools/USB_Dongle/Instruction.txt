@@ -1,0 +1,9 @@
+
+Step 1. Install USB Dongle driver
+	https://svn.banvien.com.vn/svn/RVC/trunk/BV_Training/RVC_MCAL_Guideline/07_SetupEnvironment/GHS/Sentinel_System_Driver_Installer_7.6.0.zip
+	
+Step 2. Download and extract license package 
+	https://svn.banvien.com.vn/svn/RVC/trunk/BV_Training/RVC_MCAL_Guideline/07_SetupEnvironment/GHS/USB_Dongle_LicenseFile/GHS_201815_Licenses_Key.zip
+	
+Step 3. Follow instruction here to license it.
+	https://svn.banvien.com.vn/svn/RVC/trunk/BV_Training/RVC_MCAL_Guideline/07_SetupEnvironment/GHS/USB_Dongle_how_to.rar

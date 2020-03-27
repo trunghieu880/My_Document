@@ -1,0 +1,15 @@
+IP1: 	output when execute initscript.sh: folder 20190819_Adc_test_input include all CDFs, 
+	source code, tool code, PDF, gentool(.exe); copy from ADC_GIT_Test_Specification_X1x.xls to Test_spec.xls.
+IP2: 	in step 8: delete Count column of row 15 and when make config: row 15 was still created in 
+	Evaluation Envelope folder normally.
+	in step 11: data of row 15 in Test_spec.xls was changed after execute initscript.sh GIT C1H, 
+	so row 15 was skipped when make config.
+IP3: 	If I modify the test specification, I have to modify data in ADC_GIT_Test_Specification_X1x.xls, then 
+	execute "initscript.sh GIT C1H" and "make config", finally "make <target>" to test.
+IP4: 	check file Report_ALL was created after "make all"
+IP5: 	file CDF: ADC_GIT_CHK_0016.arxml
+IP6: 	in step 6: output file Result.txt: ### Result Judgment 1.2.0 ###
+### 2019/08/19 10:56 ###
+OK
+
+	in step 11: errer occur: Argument is not enough

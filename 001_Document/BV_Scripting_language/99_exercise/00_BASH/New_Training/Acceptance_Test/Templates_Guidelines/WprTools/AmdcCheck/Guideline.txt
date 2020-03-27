@@ -1,0 +1,24 @@
+:: AUTHOR : FUSA/TOOL VIETNGUYEN
+:: DATE   : DEC 20 2016
+::                       ADMC ANALYSIS.
+::  
+::##############################################################################
+Requisites
+ -  AMDC's already installed.
+ -  Perl's already installed.
+ -  Perl's package Win32::OLE has already installed.
+ 
+DESC
+  - Analysing the result of ADMC tool and generate to report file in excel format.
+  
+1. config.bat
+   - Settings for all AMDC tool, location of all PDF files 
+     
+2. AMDC_analysis_exec.bat
+   - After config completed, run this script.(just double click)
+       
+3. REPORT
+   - Report file is automatically opened and stored in Report folder.
+   
+::##############################################################################
+_END_

@@ -1,0 +1,23 @@
+[-] Execute ./initscript.sh, information:
+  [+] Module: ADC
+  [+] Device: C1H
+  [+] Autosar version: 4.0.3
+  [+] Test spec: ./../../../../../../common_platform/modules/adc/test_cfg/plan/ADC_GIT_Test_Specification_X1x.xls
+  [+] Test type: test_cfg (GIT)
+[-] Make input directory: 20190911_Adc_test_input
+[-] Copy all CDFs
+[-] Copy test spec
+  [+] ./copy_ts.py ./../../../../../../common_platform/modules/adc/test_cfg/plan/ADC_GIT_Test_Specification_X1x.xls C1H Test_spec.xls
+  [+] DVF file: U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf
+  [+] Cpu Core type: g3m
+AES_Config_C1H
+  [+] Modifying sheet AES_Config_C1H
+  [+] Fill Cpu Core type g3m completed
+  [+] Fill DVF file U:\external\X1X\C1x\common_family\include\ghs\dr7f701270.dvf completed
+  [+] Test case copy for C1H : 240
+[-] Copy source code (ECODE)
+[-] Copy generation tool code
+[-] Copy generation tool (.exe)
+[-] Copy PDF
+[-] Done
+

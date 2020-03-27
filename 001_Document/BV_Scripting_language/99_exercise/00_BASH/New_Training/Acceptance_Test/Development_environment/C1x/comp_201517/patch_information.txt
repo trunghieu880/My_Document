@@ -1,0 +1,12 @@
+--------------------------------------------------------------------------------
+C:\GHS\iff\patch_10620_win32.iff
+This is Green Hills Software patch number 10620.
+
+Created on: Wed Oct 12 16:43:45 PDT 2016
+Other information: 
+register view support for RH850G3KH/RH850G3MH
+Files Installed:
+defaults/registers/850_creg.grd
+defaults/registers/os_constants_internal.grd
+defaults/python/ghs_target_constants.gpy
+--------------------------------------------------------------------------------

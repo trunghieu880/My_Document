@@ -1,0 +1,41 @@
+File: AdcE2xIntermediate.cs
+Method: protected virtual BaseIntermediateItem Compute_Adc_GaaSgUnitPriorityQueue()
+
+-----------------------------------------------------------------------------------
+
+GLOBAL VARIABLE IN:
+	List of scan group of Interdata[Adc_GaaSgUnitConfig]. RANGE: Empty, 1, Many
+
+GLOBAL VARIABLE OUT:
+	None
+	
+PRECONDITION:
+	(1) List of AdcConfigSet: never null or empty
+	(2) List of AdcHardwareUnit: never null or empty
+	(3) List of AdcHwScanGroup container: never null or empty
+	(4) List of scan group of Interdata[Adc_GaaSgUnitConfig]: never null
+	
+ABNORMAL SCENARIO:
+	(1) Scenario: AdcSGQueueSize is not a integer
+	    Expected result: return error xxxx to user
+
+LET prioFlag = CALL GetPrioQueFlag
+
+IF prioFlag = true THEN
+	FOREACH config IN list of containers AdcConfigSet of module ADC
+		LET countQue = 0
+		FOREACH hwu IN list of containers AdcHardwareUnit of container config
+			LET adcGaaSgUnitConfig = Interdata.GetItemByPath("/Adc_GaaSgUnitConfig")
+			LET index = 0
+			FOREACH scanGroup IN list of containers AdcHwScanGroup of hwu
+				IF adcGaaSgUnitConfig != null THEN
+					pQueue = adcGaaSgUnitConfig.Childs[index++].GetStringDataByPath("pQueue")
+				ELSE
+					pQueue = "NULL_PTR"
+				
+				IF pQueue != "NULL_PTR" THEN
+					countQue = countQue + Int32.Parse(scanGroup.GetParameterValue("AdcSGQueueSize"))
+
+	RETURN BaseIntermediateItem("Adc_GaaSgUnitPriorityQueue", "Adc_GaaSgUnitPriorityQueue[countQue]")
+ELSE
+	RETURN null
