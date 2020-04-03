@@ -1,0 +1,31 @@
+<TestProcessAttributes>
+	<UnitUnderTest>func_test.c</UnitUnderTest>
+	<Test>
+		<TestResult>
+			<NTUserID>nhi5hc</NTUserID>
+			<Verdict>Passed</Verdict>
+			
+			<TesterPart>
+				<FileName>func_test.c</FileName>
+				<Coverage>
+					<MetricName>C0</MetricName>
+					<Value>
+						<Percentage>97</Percentage>
+					</Value>
+				</Coverage>
+				<Coverage>
+					<MetricName>C1</MetricName>
+					<Value>
+						<Percentage>98</Percentage>
+					</Value>
+				</Coverage>		
+				<Coverage>
+					<MetricName>MC/DC</MetricName>
+					<Value>
+						<Percentage>100</Percentage>
+					</Value>
+				</Coverage>
+			</TesterPart>
+		</TestResult>
+	</Test>
+</TestProcessAttributes>
