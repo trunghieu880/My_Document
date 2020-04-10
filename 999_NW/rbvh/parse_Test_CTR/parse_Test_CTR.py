@@ -35,8 +35,8 @@ def get_infor_ctr(path, tc_index=1):
         key = ""
         val = ""
 
-        pattern_start = 'Start Test: ' + str(tc_index)
-        pattern_end = 'End Test: ' + str(tc_index)
+        pattern_start = 'Start Test: ' + str(tc_index) + ":"
+        pattern_end = 'End Test: ' + str(tc_index) + ":"
         with open(path, encoding='shift-jis', errors='ignore') as fp:
             for line in fp.readlines():
                 line = line.strip()
@@ -51,15 +51,35 @@ def get_infor_ctr(path, tc_index=1):
                     flag_start_test = False
                     next
                 if (flag_start_test):
-                    if '>> FAILED' in line:
-                        flag_start_collect = True
-                        temp = re.sub("^>> FAILED: Check ", "", line)
-                        key = temp.split("=")[1].strip()
-                        
+                    if '>>  FAILED' in line:
+                        if 'Check:' in line or 'Check Memory:' in line:
+                            flag_start_collect = True
+                            if 'Check:' in line:
+                                temp = re.sub("^>>.*Check: ", "", line)
+                                if re.search("=$", line):
+                                    key = temp.split("=")[0].strip()
+                                else:
+                                    key = temp.split("=")[1].strip()
+
+                                if not re.search('^expected_', key):
+                                    key = "expected_" + key
+                            elif 'Check Memory:':
+                                temp = re.sub("^>>.*Check Memory: ", "", line)
+                                key = temp.strip()
+                        else:
+                            print("BUG check:")
+
+#HieuNguyen                            print(temp)
+#HieuNguyen                            print("Fuck" + key)
+
                     if (flag_start_collect):
+#HieuNguyen                         print(line)
                         if 'actual:' in line:
-                            val = line.split(":")[1].strip()
+                            temp = re.sub("\s*\s<.*>$", "", line)
+                            temp = re.sub("\s*\s", " ", temp)
+                            val = temp.split(":")[1].strip()
                             data = {**data, key : val}
+#HieuNguyen                             print(datta)
                             key = ""
                             val = ""
                             flag_start_collect = False
@@ -72,15 +92,29 @@ def get_infor_ctr(path, tc_index=1):
 
 def get_list_testcase(path):
     l_tc = []
+    flag_start_test = False
+    tc_index = -1
     with open(path, encoding='shift-jis', errors='ignore') as fp:
         for line in fp.readlines():
             line = line.strip()
-            if 'Start Test: ' in line:
+
+            pattern_start = 'Start Test: '
+            pattern_end = 'End Test: '
+            if pattern_start in line:
+                flag_start_test = True
                 temp = "^.*" + 'Start Test: '
                 temp = re.sub(temp, "", line).strip()
                 tc_index = re.sub(":.*$", "", temp).strip()
-                l_tc.append(tc_index)
-    
+                next
+            if pattern_end in line:
+                flag_start_test = False
+                next
+            if (flag_start_test):
+                if '>>  FAILED' in line:
+                    l_tc.append(tc_index)
+                    flag_start_test = False
+                    next
+
     return l_tc
 
 def print_infor(l_d):
@@ -93,21 +127,27 @@ def print_infor(l_d):
                 val = item[child_key][key]
                 print("%s = %s;" % (key, val))
 
+        print("***********************************\n")
+
+
 
 
 def main():
-    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
+    #directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
+    directory = "C:\\Users\\nhi5hc\\PinnedFolders\\001_Working_JOEM\\RB_MS_CAV7_BB82107\\UT_019_RBAPLCUST_RoutineControl_Suzuki_BB82107\\Cantata\\tests\\atest_RBAPLCUST_RoutineControl_Suzuki"
     data = scan_files(directory, ext='.ctr')
 
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase(new_file)
+        #l_tc = [31]
 
         if(len(l_tc) > 0):
             l_d = []
             for i in l_tc:
+                flag_found_fail = False
                 l_d.append(get_infor_ctr(new_file, i))
-            
+
             print_infor(l_d)
         else:
             print("Not found TEST CASE in LOG FILE")
