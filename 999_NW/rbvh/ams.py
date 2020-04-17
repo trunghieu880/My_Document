@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from unicodedata import normalize
 
@@ -174,16 +175,16 @@ class FileSummaryXLSX(Base):
         super().__init__(path)
         self.doc = str(path)
 
-    def parse2json(self):
-        return dict(parse.parse_summary_json(self.doc))
+    def parse2json(self, begin=47, end=47):
+        return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
 
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
 
-    def get_data(self, key, value):
-        data = self.parse2json()
+    def get_data(self, data, key, value):
+        # data = self.parse2json()
         item = -1
         d = dict()
         for item in data.keys():
@@ -192,12 +193,38 @@ class FileSummaryXLSX(Base):
         
         return d
 
+def check_exist(directory, function):
+    return Path(directory).joinpath(function).exists()
 
 def main():
-    doc = FileSummaryXLSX("C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder\\Summary_performance_BV.xlsx")
-    data = doc.get_data(key="Type", value="PSW")
-    print(data)
+    doc = FileSummaryXLSX("D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm")
+    data = doc.parse2json(begin=47, end=227)
+    taskids = [1415974, 1416093]
 
+    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+
+    for taskid in taskids:
+        data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
+        path_taskid = Path(directory).joinpath(str(taskid))
+        if (path_taskid.exists()):
+            count = 0
+            for item in data_taskid.keys():
+                function = data_taskid[item].get("ItemName")
+                b_check_exist = check_exist(directory=path_taskid, function=function)
+                if (b_check_exist):
+                    count += 1
+                    print("\t{},{},{}".format(taskid, function, "OK"))
+                else:
+                    print("\t{},{},{}".format(taskid, function, "NG"))
+            
+            status = len(os.listdir(directory + "\\" + str(taskid))) == len(data_taskid)
+            print("Total {}: status {}: {}/{}/{}".format(str(taskid), status, count, len(os.listdir(directory + "\\" + str(taskid))), len(data_taskid)))
+
+        else:
+            print("{} is not existed".format(path_taskid))
+            next
+
+    print("Complete main")
 
 if __name__ == "__main__":
     main()

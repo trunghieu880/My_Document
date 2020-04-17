@@ -109,11 +109,11 @@ def get_xlsx_sheets(xlsx):
         wb.close()
         return data
 
-def parse_summary_json(file):
+def parse_summary_json(file, begin=47, end=47):
     lst_sheet = get_xlsx_sheets(file)
     
-    header = [h for h in get_xlsx_raw(file, lst_sheet[0], begin=2, end=2)[0]]
-    data = get_xlsx_raw(file, lst_sheet[0], begin=3, end=14)
+    header = [h for h in get_xlsx_raw(file, lst_sheet[0], begin=begin, end=begin)[0]]
+    data = get_xlsx_raw(file, lst_sheet[0], begin=begin+1, end=end)
     d_data = dict()
     result = dict()
     for index, d in enumerate(data):
@@ -121,7 +121,7 @@ def parse_summary_json(file):
         for key, val in dict(d_data).items():
             if key is None:
                 del d_data[key]
-        result[index] = dict(d_data)
+        result[index + 1] = dict(d_data)
     
     # path = Path(__file__).parent.joinpath("test.json")
     # Path(path).parent.mkdir(parents=True, exist_ok=True)
