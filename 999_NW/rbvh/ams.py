@@ -137,7 +137,7 @@ class FileTestSummaryHTML(Base):
                         break
                     else:
                         raise("BUG")
-        
+
         data = dict()
         data = {'Verdict': status}
         try:
@@ -162,7 +162,7 @@ class FileTestSummaryHTML(Base):
                             next
                         else:
                             continue
-                        
+
         except Exception as e:
             raise(e)
 
@@ -190,41 +190,71 @@ class FileSummaryXLSX(Base):
         for item in data.keys():
             if(data[item].get(key) == value):
                 d[item] = data[item]
-        
+
         return d
 
 def check_exist(directory, function):
     return Path(directory).joinpath(function).exists()
 
 def main():
-    doc = FileSummaryXLSX("D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm")
+    # path_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm"
+    path_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
+    doc = FileSummaryXLSX(path_summary)
+
     data = doc.parse2json(begin=47, end=227)
-    taskids = [1415974, 1416093]
+    taskids = [1415974, 1416009, 1416093, 1416090, 1417373, 1417493, 1416608, 1390624, 1420664, 1414211, 1414361, 1416225, 1417633, 1413225] # FULL deadline 17APR
+#    taskids = [1415974,1416009,1416093,1416090,1417373,1417493,1416608,1390624] # Group 200414
+#HieuNguyen     taskids = [1420664] #Group 20200415
+#HieuNguyen     taskids = [1414211,1414361,1416225,1417633] # Group 200416
 
-    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+#    directory = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200414\\COEM"
+#HieuNguyen     directory = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200415\\COEM"
+    #directory = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416\\COEM"
+#    directory = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416\\COEM"
+    directory = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
 
+    file_log = open("log_delivery.txt", "w")
+    print("Start checker")
+    print("*****************************************************************")
+    file_log.write("Start checker\n")
+    file_log.write("*****************************************************************\n")
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
-        path_taskid = Path(directory).joinpath(str(taskid))
+        path_taskid = Path(directory).joinpath(str(taskid) + str("\\RV"))
+        #path_taskid = Path(directory).joinpath(str("RV") + str(taskid))
         if (path_taskid.exists()):
             count = 0
             for item in data_taskid.keys():
-                function = data_taskid[item].get("ItemName")
+                function = data_taskid[item].get("ItemName").replace(".c", "")
+                user_tester = data_taskid[item].get("Tester")
                 b_check_exist = check_exist(directory=path_taskid, function=function)
                 if (b_check_exist):
                     count += 1
-                    print("\t{},{},{}".format(taskid, function, "OK"))
+                    print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                    file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+
                 else:
-                    print("\t{},{},{}".format(taskid, function, "NG"))
-            
-            status = len(os.listdir(directory + "\\" + str(taskid))) == len(data_taskid)
-            print("Total {}: status {}: {}/{}/{}".format(str(taskid), status, count, len(os.listdir(directory + "\\" + str(taskid))), len(data_taskid)))
+                    print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                    file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
+
+            status = (len(os.listdir(directory + "\\" + str(taskid))) == len(data_taskid)) and (count == len(data_taskid))
+            print("## Total {}: status {}: {}/{}/{}".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
+            print("-----------------------------------------------------------------\n")
+
+            file_log.write("## Total {}: status {}: {}/{}/{}\n".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
+            file_log.write("-----------------------------------------------------------------\n")
+
+
 
         else:
             print("{} is not existed".format(path_taskid))
+            file_log.write("{} is not existed\n".format(path_taskid))
             next
 
-    print("Complete main")
+    print("FINISH")
+    file_log.write("FINISH\n")
+    file_log.close()
+
 
 if __name__ == "__main__":
     main()
