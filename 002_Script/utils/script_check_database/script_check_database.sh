@@ -1,12 +1,13 @@
 #!/bin/bash -x
 
-#HieuNguyen set +x
+set +x
 you_want_create_list_database_again="NO"
 #HieuNguyen you_want_create_list_database_again="NO"
 
 you_want_update_list_check_again="YES"
 
 #Create your list finding from database
+list_group_package=",20200417,"
 your_input_path="$1"
 
 XLSX2CSV="/c/Python27/python.exe /c/Python27/Lib/site-packages/xlsx2csv.py "
@@ -27,6 +28,7 @@ then
 
   grep '^[0-9]\+,' .TEMP_SUMMARY \
     | grep -v '^,No,' \
+    | egrep "${list_group_package}" \
     | awk -v col_no=$COL_No -v col_componentname=$COL_ComponentName -v col_itemname=$COL_ItemName -v col_database=$COL_Database -v col_tester=$COL_Tester \
           -F, '{printf "%s,%s,%s,%s\n", \
                $col_no, $col_componentname, $col_itemname, $col_database}' \
@@ -61,6 +63,7 @@ do
   item_index=`echo "$line" | awk -F, '{print $1}'`
   path_c=`echo "$line" | awk -F, '{print $2}'`
   source_c=`echo "$line" | awk -F, '{print $3}'`
+  path_c=`echo $path_c | sed "s/\/${source_c}$//g"`
   database=`echo "$line" | awk -F, '{print $4}'`
 
   if [ -e list_${database} ]
