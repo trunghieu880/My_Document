@@ -10,14 +10,15 @@ import parse, utils
 import datetime
 
 import subprocess
+import re
+
+from docx.api import Document
 
 logger = logging.getLogger(__name__)
-
 
 class Base(object):
     def __init__(self, path):
         self.path = Path(path)
-
 
 class FileTPA(Base):
     def __init__(self, path):
@@ -28,6 +29,29 @@ class FileTPA(Base):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
+
+    def update_tag(self, tag, value):
+        self.get_tag(tag).text = value
+        path = re.sub("file:/", "", self.doc.docinfo.URL)
+        with open(path, 'wb') as f:
+            self.doc.write(f)
+
+    def update_tpa(self, data):
+        lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict"]
+
+        for h in lst_header:
+            self.update_tag(h, data[h])
+
+        # collect Percentage Coverage
+        lst_Percentage = [e for e in self.doc.iterfind('.//{0}'.format("Percentage"))]
+
+        lst_Percentage[0].text = data['C0']
+        lst_Percentage[1].text = data['C1']
+        lst_Percentage[2].text = data['MCDCM']
+
+        path = re.sub("file:/", "", self.doc.docinfo.URL)
+        with open(path, 'wb') as f:
+            self.doc.write(f)
 
     def get_data(self):
         lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
@@ -169,7 +193,6 @@ class FileTestSummaryHTML(Base):
         except Exception as e:
             raise(e)
 
-
 class FileXLS(Base):
     pass
 
@@ -232,11 +255,11 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
                     print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
                     file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
 
-            status = (len(os.listdir(dir_input + "\\" + str(taskid))) == len(data_taskid)) and (count == len(data_taskid))
-            print("## Total {}: status {}: {}/{}/{}".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
+            status = ["GOOD" if (len(os.listdir(dir_input + "\\" + str(taskid) + "\\RV")) == len(data_taskid)) and (count == len(data_taskid)) else "BAD"][0]
+            print("## Total {}: status {}: Found/Count/Total - {}/{}/{}".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
             print("-----------------------------------------------------------------\n")
 
-            file_log.write("## Total {}: status {}: {}/{}/{}\n".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
+            file_log.write("## Total {}: status {}: Found/Count/Total - {}/{}/{}\n".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
             file_log.write("-----------------------------------------------------------------\n")
 
 
@@ -250,61 +273,181 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
     file_log.write("FINISH\n")
     file_log.close()
 
-def convert_name(name):
-    if name == "hieu.nguyen-trung":
-        name = "Nguyen Trung Hieu"
-    elif name == "hau.nguyen-tai":
-        name = "Nguyen Tai Hau"
-    elif name == "bang.nguyen-duy":
-        name = "Nguyen Duy Bang"
-    elif name == "dac.luu-cong":
-        name = "Luu Cong Dac"
-    elif name == "duong.nguyen":
-        name = "Nguyen Duong"
-    elif name == "loc.do-phu":
-        name = "Do Phu Loc"
-    elif name == "thanh.nguyen-kim":
-        name = "Nguyen Kim Thanh"
-    elif name == "chung.ly":
-        name = "Ly Chung"
-    elif name == "huy.do-anh":
-        name = "Do Anh Huy"
-    elif name == "phuong.nguyen-thanh":
-        name = "Nguyen Thanh Phuong"
+def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
+    # path_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm"
+    #path_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
+    doc = FileSummaryXLSX(path_summary)
+
+    data = doc.parse2json(begin=begin, end=end)
+    # taskids = [1415974, 1416009, 1416093, 1416090, 1417373, 1417493, 1416608, 1390624, 1420664, 1414211, 1414361, 1416225, 1417633, 1413225] # FULL deadline 17APR
+    # dir_input = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
+
+    file_log = open("log_delivery.txt", "w")
+    print("Start checker")
+    print("*****************************************************************")
+    file_log.write("Start checker\n")
+    file_log.write("*****************************************************************\n")
+    for taskid in taskids:
+        data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
+        path_taskid = Path(dir_input).joinpath(str(taskid) + str("\\AR"))
+        #path_taskid = Path(dir_input).joinpath(str("RV") + str(taskid))
+        if (path_taskid.exists()):
+            count = 0
+            for item in data_taskid.keys():
+                function = data_taskid[item].get("ItemName").replace(".c", "")
+                user_tester = data_taskid[item].get("Tester")
+                b_check_exist = check_exist(dir_input=path_taskid.as_posix().replace("/", "\\") + "\\" + str(trim_src(data_taskid[item].get("ComponentName"))) + "\\Unit_tst\\" + str(data_taskid[item].get("TaskID")), function=function)
+                if (b_check_exist):
+                    count += 1
+                    print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                    file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+
+                else:
+                    print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                    file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
+
+            num_tpa = len(utils.scan_files(directory=path_taskid, ext=".tpa")[0])
+            status = ["GOOD" if (num_tpa == len(data_taskid)) and (count == len(data_taskid)) else "BAD"][0]
+            print("## Total {}: status {}: Found/Count/Total - {}/{}/{}".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+            print("-----------------------------------------------------------------\n")
+
+            file_log.write("## Total {}: status {}: Found/Count/Total - {}/{}/{}\n".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+            file_log.write("-----------------------------------------------------------------\n")
+
+
+
+        else:
+            print("{} is not existed".format(path_taskid))
+            file_log.write("{} is not existed\n".format(path_taskid))
+            next
+
+    print("FINISH")
+    file_log.write("FINISH\n")
+    file_log.close()
+
+def convert_name(name, opt="n"):
+    if opt == "n":
+        if name == "hieu.nguyen-trung":
+            name = "Nguyen Trung Hieu"
+        elif name == "hau.nguyen-tai":
+            name = "Nguyen Tai Hau"
+        elif name == "bang.nguyen-duy":
+            name = "Nguyen Duy Bang"
+        elif name == "dac.luu-cong":
+            name = "Luu Cong Dac"
+        elif name == "duong.nguyen":
+            name = "Nguyen Duong"
+        elif name == "loc.do-phu":
+            name = "Do Phu Loc"
+        elif name == "thanh.nguyen-kim":
+            name = "Nguyen Kim Thanh"
+        elif name == "chung.ly":
+            name = "Ly Chung"
+        elif name == "huy.do-anh":
+            name = "Do Anh Huy"
+        elif name == "phuong.nguyen-thanh":
+            name = "Nguyen Thanh Phuong"
+        else:
+            name = "Unknown"
+
+        return str("EXTERNAL " + name + " (Ban Vien, RBVH/EPS45)")
     else:
-        name = "Unknown"
-    
-    return str("EXTERNAL " + name + " (Ban Vien, RBVH/EPS45)")
+        if name == "hieu.nguyen-trung":
+            name = "nhi5hc"
+        elif name == "hau.nguyen-tai":
+            name = "h"
+        elif name == "bang.nguyen-duy":
+            name = "b"
+        elif name == "dac.luu-cong":
+            name = "d"
+        elif name == "duong.nguyen":
+            name = "d"
+        elif name == "loc.do-phu":
+            name = "l"
+        elif name == "thanh.nguyen-kim":
+            name = "t"
+        elif name == "chung.ly":
+            name = "c"
+        elif name == "huy.do-anh":
+            name = "h"
+        elif name == "phuong.nguyen-thanh":
+            name = "p"
+        else:
+            name = "Unknown"
+        return str(name)
 
+def is_have_src(path):
+    if "\\src" in path or "\\SRC" in path:
+        return True
+    else:
+        return False
 
-from docx.api import Document
+def trim_src(path):
+    result = re.sub("^.*\\\\rb\\\\", "rb\\\\", path)
+    result = re.sub("^.*\\\\rba\\\\", "rba\\\\", result)
+    result = re.sub("\\\\src\\\\.*$", "", result)
+    result = re.sub("\\\\SRC\\\\.*$", "", result)
+    result = re.sub("\\\\src$", "", result)
+    result = re.sub("\\\\SRC$", "", result)
+    return result
+
+def value(cell):
+    if str(cell).isdigit():
+        return str(cell)
+    else:
+        return str(cell)
+
 def update_walkthrough(file, data):
+    temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID"))
+    score_c0 = [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0]
+    score_c1 = [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C0") != None) else "NA"][0]
+    dict_walkthrough = {
+        'date': datetime.datetime.now().strftime("%m/%d/%Y"),
+        'project': data.get("ItemName"),
+        'review initiator': convert_name(name=data.get("Tester")),
+        'effort': str(0.5),
+        'baseline': data.get("Baseline"),
+        'review partner' : data.get("Owner Contact"),
+        'path_testscript': temp + "\\Test_Spec",
+        'path_test_summary': temp + "\\Test_Result",
+        'ScoreC0C1': "Test summary\n   C0: " + str(score_c0) + "%    C1: " + str(score_c1) + "%",
+    }
+
     document = Document(file)
     table1 = document.tables[0]
-    table1.cell(0,1).text = datetime.datetime.now().strftime("%d %b, %Y")
-    table1.cell(0,3).text = data.get("ItemName").replace(".c", "")
-    table1.cell(0,5).text = convert_name(name=data.get("Tester"))
-    table1.cell(1,1).text = "0.5"
-    table1.cell(1,3).text = data.get("Baseline")
-    table1.cell(1,5).text = data.get("Owner Contact")
-
+    table1.cell(0,1).text = dict_walkthrough['date']
+    table1.cell(0,3).text = dict_walkthrough['project']
+    table1.cell(0,5).text = dict_walkthrough['review initiator']
+    table1.cell(1,1).text = str(dict_walkthrough['effort'])
+    table1.cell(1,3).text = dict_walkthrough['baseline']
+    table1.cell(1,5).text = dict_walkthrough['review partner']
     table2 = document.tables[1]
-    table2.cell(1, 2).text = data.get("ComponentName") + "\\" + "test_script"
-    table2.cell(2, 2).text = data.get("ComponentName") + "\\" + "test_spec"
-    table2.cell(3, 2).text = data.get("ComponentName") + "\\" + "test_summary"
-
-    score_c0 = int(data.get("C0")) * 100
-    score_c1 = int(data.get("C1")) * 100
-    table2.cell(3, 1).text = "Test summary\n\tC0: " + str(score_c0) + "%\tC1: " + str(score_c1) + "%"
+    table2.cell(1, 2).text = dict_walkthrough['path_testscript']
+    table2.cell(3, 2).text = dict_walkthrough['path_test_summary']
+    table2.cell(3, 1).text = dict_walkthrough['ScoreC0C1']
     document.save(file)
+
+def update_tpa(file, data):
+    data_tpa = {
+        "UnitUnderTest": data.get("ItemName"),
+        "NTUserID": str(convert_name(data.get("Tester"), opt="u")),
+        "FileName": data.get("ItemName"),
+        "Verdict": data.get("Status Result"),
+        "C0": [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0],
+        "C1": [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA"][0],
+        "MCDCM": [value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA"][0]
+    }
+
+    FileTPA(file).update_tpa(data_tpa)
 
 def sevenzip(filename, zipname):
     zip_exe_path = "C:\\Program Files\\7-Zip\\7z.exe"
     subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename])
 
-def make_archieves(path_summary, dir_input, taskids, begin=47, end=47):
+def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
     doc = FileSummaryXLSX(path_summary)
     data = doc.parse2json(begin=begin, end=end)
+
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
         path_taskid = Path(dir_input).joinpath(str(taskid) + str("\\RV"))
@@ -318,15 +461,37 @@ def make_archieves(path_summary, dir_input, taskids, begin=47, end=47):
                 if (b_check_exist):
                     count += 1
 
-                    dst = "./OUTPUT/" + function
+                    temp = str(data_taskid[item].get("C0"))
+                    if (temp != "-" or temp != ""):
+                        temp_component = str(data_taskid[item].get("ComponentName"))
+                        if is_have_src(temp_component):
+                            final_dst = dir_output + "\\" + str(taskid) + "\\AR\\" + trim_src(temp_component) + "\\Unit_tst\\" + str(taskid) + "\\" + function
+                            dir_Configuration = final_dst + "\\Configuration"
+                            dir_Test_Spec = final_dst + "\\Test_Spec"
+                            dir_Test_Summary = final_dst + "\\Test_Summary"
 
-                    f_walkthrough = dst + "/WT_" + function + ".docx"
-                    Path(dst).parent.mkdir(parents=True, exist_ok=True)
-                    utils.copy(src="./template/WT_template.docx", dst=f_walkthrough)
-                    update_walkthrough(file=f_walkthrough, data=data_taskid[item])
-                    sevenzip(filename=f_walkthrough, zipname=dst + "/" + str(function) + ".zip")
-                    print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                            Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
+                            Path(dir_Configuration).mkdir(exist_ok=True)
+                            Path(dir_Test_Spec).mkdir(exist_ok=True)
+                            Path(dir_Test_Summary).mkdir(exist_ok=True)
 
+                            f_walkthrough = dir_Test_Summary + "\\WalkThrough_Protocol_" + function + ".docx"
+                            f_tpa = dir_Test_Summary + "\\" + function + ".tpa"
+                            utils.copy(src=".\\template\\WT_template.docx", dst=f_walkthrough)
+                            utils.copy(src=".\\template\\template.tpa", dst=f_tpa)
+                            update_walkthrough(file=f_walkthrough, data=data_taskid[item])
+                            update_tpa(file=f_tpa, data=data_taskid[item])
+
+                            sevenzip(filename=path_taskid.as_posix().replace("/", "\\") + "\\" + function, zipname=dir_Configuration + "\\" + str(function) + ".zip")
+                            # utils.copy(src=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html", dst=dir_Test_Summary + "\\")
+
+                            for f in utils.scan_files(directory=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\tests", ext=".c")[0]:
+                                sevenzip(filename=f.as_posix().replace("/", "\\"), zipname=dir_Test_Spec + "\\" + os.path.basename(f).replace(".c", ".zip"))
+
+                        else:
+                            print("Bug: " + temp_component)
+
+                        print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                 else:
                     print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
 
@@ -335,11 +500,13 @@ def make_archieves(path_summary, dir_input, taskids, begin=47, end=47):
             next
 
 def main():
-    file_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Sample\\Summary_JOEM.xlsm"
-    dir_check="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
-    # check_releases(path_summary=file_summary, dir_input=dir_check, taskids=[1415974, 1417373], begin=47, end=230)
-    make_archieves(path_summary=file_summary, dir_input=dir_check, taskids=[1415974], begin=47, end=230)
-
+    # file_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Sample\\Summary_JOEM.xlsm"
+    file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
+    dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+    dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
+    # check_releases(path_summary=file_summary, dir_input=dir_input, taskids=[1415974, 1417373], begin=47, end=230)
+    check_archives(path_summary=file_summary, dir_input=dir_output, taskids=[1415974], begin=47, end=230)
+    # make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=[1415974], begin=47, end=230)
     print("Complete")
 
 
