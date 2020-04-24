@@ -37,7 +37,7 @@ class FileTPA(Base):
             self.doc.write(f)
 
     def update_tpa(self, data):
-        lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict"]
+        lst_header = ["UnitUnderTest", "ExecutionDate", "NTUserID", "FileName", "Verdict"]
 
         for h in lst_header:
             self.update_tag(h, data[h])
@@ -47,7 +47,7 @@ class FileTPA(Base):
 
         lst_Percentage[0].text = data['C0']
         lst_Percentage[1].text = data['C1']
-        lst_Percentage[2].text = data['MCDCM']
+#        lst_Percentage[2].text = data['MCDCM']
 
         path = re.sub("file:/", "", self.doc.docinfo.URL)
         with open(path, 'wb') as f:
@@ -232,9 +232,9 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
     # dir_input = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
 
     file_log = open("log_delivery.txt", "w")
-    print("Start checker")
+    print("Start checker: Release")
     print("*****************************************************************")
-    file_log.write("Start checker\n")
+    file_log.write("Start checker: Release\n")
     file_log.write("*****************************************************************\n")
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
@@ -283,9 +283,9 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
     # dir_input = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
 
     file_log = open("log_delivery.txt", "w")
-    print("Start checker")
+    print("Start checker: Archives")
     print("*****************************************************************")
-    file_log.write("Start checker\n")
+    file_log.write("Start checker: Archives\n")
     file_log.write("*****************************************************************\n")
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
@@ -336,7 +336,7 @@ def convert_name(name, opt="n"):
         elif name == "dac.luu-cong":
             name = "Luu Cong Dac"
         elif name == "duong.nguyen":
-            name = "Nguyen Duong"
+            name = "Nguyen Tuan Duong"
         elif name == "loc.do-phu":
             name = "Do Phu Loc"
         elif name == "thanh.nguyen-kim":
@@ -355,23 +355,23 @@ def convert_name(name, opt="n"):
         if name == "hieu.nguyen-trung":
             name = "nhi5hc"
         elif name == "hau.nguyen-tai":
-            name = "h"
+            name = "nah4hc"
         elif name == "bang.nguyen-duy":
-            name = "b"
+            name = "nbg7hc"
         elif name == "dac.luu-cong":
-            name = "d"
+            name = "lud5hc"
         elif name == "duong.nguyen":
-            name = "d"
+            name = "ndy4hc"
         elif name == "loc.do-phu":
-            name = "l"
+            name = "dol7hc"
         elif name == "thanh.nguyen-kim":
-            name = "t"
+            name = "nut4hc"
         elif name == "chung.ly":
-            name = "c"
+            name = "lyc1hc"
         elif name == "huy.do-anh":
-            name = "h"
+            name = "duh7hc"
         elif name == "phuong.nguyen-thanh":
-            name = "p"
+            name = "gup7hc"
         else:
             name = "Unknown"
         return str(name)
@@ -407,30 +407,32 @@ def update_walkthrough(file, data):
         'review initiator': convert_name(name=data.get("Tester")),
         'effort': str(0.5),
         'baseline': data.get("Baseline"),
-        'review partner' : data.get("Owner Contact"),
+#        'review partner' : data.get("Owner Contact"),
+        'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)",
         'path_testscript': temp + "\\Test_Spec",
         'path_test_summary': temp + "\\Test_Result",
-        'ScoreC0C1': "Test summary\n   C0: " + str(score_c0) + "%    C1: " + str(score_c1) + "%",
+        'ScoreC0C1': "Test summary\n       C0: " + str(score_c0) + "%        C1: " + str(score_c1) + "%",
     }
 
     document = Document(file)
-    table1 = document.tables[0]
-    table1.cell(0,1).text = dict_walkthrough['date']
-    table1.cell(0,3).text = dict_walkthrough['project']
-    table1.cell(0,5).text = dict_walkthrough['review initiator']
-    table1.cell(1,1).text = str(dict_walkthrough['effort'])
-    table1.cell(1,3).text = dict_walkthrough['baseline']
-    table1.cell(1,5).text = dict_walkthrough['review partner']
-    table2 = document.tables[1]
-    table2.cell(1, 2).text = dict_walkthrough['path_testscript']
-    table2.cell(3, 2).text = dict_walkthrough['path_test_summary']
-    table2.cell(3, 1).text = dict_walkthrough['ScoreC0C1']
+    table_infor = document.tables[1]
+    table_infor.cell(0,1).text = dict_walkthrough['date']
+    table_infor.cell(0,3).text = dict_walkthrough['project']
+    table_infor.cell(0,5).text = dict_walkthrough['review initiator']
+    table_infor.cell(1,1).text = str(dict_walkthrough['effort'])
+    table_infor.cell(1,3).text = dict_walkthrough['baseline']
+    table_infor.cell(1,5).text = dict_walkthrough['review partner']
+    table_attach = document.tables[2]
+    table_attach.cell(1, 2).text = dict_walkthrough['path_testscript']
+    table_attach.cell(3, 2).text = dict_walkthrough['path_test_summary']
+    table_attach.cell(3, 1).text = dict_walkthrough['ScoreC0C1']
     document.save(file)
 
 def update_tpa(file, data):
     data_tpa = {
         "UnitUnderTest": data.get("ItemName"),
         "NTUserID": str(convert_name(data.get("Tester"), opt="u")),
+        "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "FileName": data.get("ItemName"),
         "Verdict": data.get("Status Result"),
         "C0": [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0],
@@ -483,7 +485,7 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                             update_tpa(file=f_tpa, data=data_taskid[item])
 
                             sevenzip(filename=path_taskid.as_posix().replace("/", "\\") + "\\" + function, zipname=dir_Configuration + "\\" + str(function) + ".zip")
-                            # utils.copy(src=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html", dst=dir_Test_Summary + "\\")
+                            utils.copy(src=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html", dst=dir_Test_Summary + "\\")
 
                             for f in utils.scan_files(directory=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\tests", ext=".c")[0]:
                                 sevenzip(filename=f.as_posix().replace("/", "\\"), zipname=dir_Test_Spec + "\\" + os.path.basename(f).replace(".c", ".zip"))
@@ -501,12 +503,20 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
 
 def main():
     # file_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Sample\\Summary_JOEM.xlsm"
-    file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
-    dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
-    dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
-    # check_releases(path_summary=file_summary, dir_input=dir_input, taskids=[1415974, 1417373], begin=47, end=230)
-    check_archives(path_summary=file_summary, dir_input=dir_output, taskids=[1415974], begin=47, end=230)
-    # make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=[1415974], begin=47, end=230)
+    #file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
+    #dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+    #dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
+    file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
+#HieuNguyen     dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\24-Apr-2020"
+    dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
+    dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
+
+    # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
+    l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 28-Apr-2020
+    
+    check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    # make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
     print("Complete")
 
 

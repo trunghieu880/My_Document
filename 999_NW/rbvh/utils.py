@@ -118,9 +118,9 @@ def scan_files(directory, ext='.txt'):
                 filepath = Path(root).joinpath(filename)
                 data.append(filepath)
 
-                if (latest is None or
-                        Path(latest).stat().st_mtime < filepath.stat().st_mtime):
-                    latest = filepath
+                # if (latest is None or
+                        # Path(latest).stat().st_mtime < filepath.stat().st_mtime):
+                    # latest = filepath
 
     return data, latest
 
