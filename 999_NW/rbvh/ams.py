@@ -411,7 +411,7 @@ def update_walkthrough(file, data):
         'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)",
         'path_testscript': temp + "\\Test_Spec",
         'path_test_summary': temp + "\\Test_Result",
-        'ScoreC0C1': "Test summary\n       C0: " + str(score_c0) + "%        C1: " + str(score_c1) + "%",
+        'ScoreC0C1': " Test summary\n\tC0: " + str(score_c0) + "%\tC1: " + str(score_c1) + "%",
     }
 
     document = Document(file)
@@ -507,16 +507,18 @@ def main():
     #dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
     #dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
     file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
-#HieuNguyen     dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\24-Apr-2020"
-    dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
+    release_date="28-Apr-2020"
+    dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
+    # dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
     dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
 
     # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
-    l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 28-Apr-2020
-    
+    l_taskids = [1424417] # Group 28-Apr-2020
+    # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
+
     check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
     check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    # make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+    #make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
     print("Complete")
 
 
