@@ -21,21 +21,25 @@ class Base(object):
         self.path = Path(path)
 
 class FileTPA(Base):
+    # Class FileTPA    
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.etree.parse(str(path))
 
+    # Function get_tag: get the node of XML file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
 
+    # Function update_tag: update the node with the specific tag and value
     def update_tag(self, tag, value):
         self.get_tag(tag).text = value
         path = re.sub("file:/", "", self.doc.docinfo.URL)
         with open(path, 'wb') as f:
             self.doc.write(f)
 
+    # Function update_tpa: update tpa file with the input data
     def update_tpa(self, data):
         lst_header = ["UnitUnderTest", "ExecutionDate", "NTUserID", "FileName", "Verdict"]
 
@@ -47,12 +51,13 @@ class FileTPA(Base):
 
         lst_Percentage[0].text = data['C0']
         lst_Percentage[1].text = data['C1']
-#        lst_Percentage[2].text = data['MCDCM']
+        # lst_Percentage[2].text = data['MCDCU']
 
         path = re.sub("file:/", "", self.doc.docinfo.URL)
         with open(path, 'wb') as f:
             self.doc.write(f)
 
+    # Function get_data: get the information in the Summary HTML file : "UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"
     def get_data(self):
         lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
         ut = self.get_tag("UnitUnderTest").text
@@ -82,15 +87,18 @@ class FileTPA(Base):
         return d
 
 class FileTestReportXML(Base):
+    # Class FileTestReportXML
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.etree.parse(str(path))
 
+    # Function get_tag: get the node of XML file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
 
+    # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
         lst_header = ["status", "statement", "decision", "booleanOperanndEffectivenessMasking", "booleanOperanndEffectivenessUnique", "testScriptName"]
         node_summary = self.get_tag("summary")
@@ -106,18 +114,21 @@ class FileTestReportXML(Base):
 
         data = dict()
         data = {**status, **score, **testscriptname}
-
-        print('')
+        return data
 
 class FileTestReportHTML(Base):
+    # Class FileTestReportHTML
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.html.parse(str(path))
+    
+    # Function get_tag: get the node of html file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
 
+    # T.B.D
     def get_data(self):
         # file_test_report_html=`grep "results/test_report.html" ./_lst_find_`
         # const_FileName="Source File"
@@ -142,75 +153,79 @@ class FileTestReportHTML(Base):
         pass
 
 class FileTestSummaryHTML(Base):
+    # Class FileTestSummaryHTML
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.html.parse(str(path))
+    
+    # Function get_tag: get the node of html file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
         node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
         return node
 
+    # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
-        node = [e for e in self.doc.iterfind('.//{0}'.format("td"))]
-        status = ""
-        for e in self.doc.iterfind('.//{0}'.format("td")):
-            for item in e:
-                if item.text == "PASSED" or item.text == "FAILED":
-                    if item.text == "PASSED":
-                        status = "PASSED"
-                        break
-                    elif item.text == "FALSED":
-                        status = "FAILED"
-                        break
+        data = dict()
+        for e in self.doc.iterfind('.//{0}'.format("div")):
+            if "Project:" in e.text or "Overall Result:" in e.text:
+                for item in e:
+                    if "Project:" in e.text:
+                        data = {**data, **{'Project': item.text}}
+                    elif "Overall Result:" in e.text:
+                        data = {**data, **{'Verdict': item.text}}
+                    else:
+                        print("BUG FileTestSummaryHTML get_data")
+        try:
+            key = ""
+            flag = False
+            for e in self.doc.iterfind('.//{0}'.format("div")):
+                if e.text == "Statement (S)" or e.text == "Decision (D)" or e.text == "MC/DC - masking (M)" or e.text == "MC/DC - unique cause (U)":
+                    flag = True
+                    if e.text == "Statement (S)":
+                        key = "C0"
+                    elif e.text == "Decision (D)":
+                        key = 'C1'
+                    elif e.text == "MC/DC - masking (M)":
+                        key = 'MCDCM'
+                    elif e.text == "MC/DC - unique cause (U)":
+                        key = 'MCDCU'
                     else:
                         raise("BUG")
-
-        data = dict()
-        data = {'Verdict': status}
-        try:
-            for e in self.doc.iterfind('.//{0}'.format("td")):
-                for item in e:
-                    if item.text == "Statement (S)" or item.text == "Decision (D)" or item.text == "MC/DC - masking (M)" or item.text == "MC/DC - unique cause (U)":
-                        if item.text == "Statement (S)":
-                            key = "C0"
-                        elif item.text == "Decision (D)":
-                            key = 'C1'
-                        elif item.text == "MC/DC - masking (M)":
-                            key = 'MCDCM'
-                        elif item.text == "MC/DC - unique cause (U)":
-                            key = 'MCDCU'
-                        else:
-                            raise("BUG")
+                    next
+                else:
+                    if "%" in e.text and flag == True:
+                        flag = False
+                        val = e.text.replace("%", "")
+                        data = {**data, key : val}
+                        key = ""
+                        val = ""
                         next
                     else:
-                        if "%" in item.text:
-                            val = item.text
-                            data = {**data, key : val}
-                            next
-                        else:
-                            continue
+                        continue
 
         except Exception as e:
+            data = {}
             raise(e)
+        finally:
+            return data
 
 class FileXLS(Base):
+    # T.B.D
     pass
 
 class FileSummaryXLSX(Base):
+    # Class FileSummaryXLSX
     def __init__(self, path):
         super().__init__(path)
         self.doc = str(path)
 
+    # Function parse2json: convert XLSX to json data
     def parse2json(self, begin=47, end=47):
         return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
 
-    def get_tag(self, tag, index=0):
-        '''Get normalized text of tag base on index of tag'''
-        node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
-        return node
-
+    # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, data, key, value):
-        # data = self.parse2json()
         item = -1
         d = dict()
         for item in data.keys():
@@ -219,17 +234,14 @@ class FileSummaryXLSX(Base):
 
         return d
 
+# Check the directory of function is exist or not
 def check_exist(dir_input, function):
     return Path(dir_input).joinpath(function).exists()
 
+# Check Release is correct or not
 def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
-    # path_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm"
-    #path_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
     doc = FileSummaryXLSX(path_summary)
-
     data = doc.parse2json(begin=begin, end=end)
-    # taskids = [1415974, 1416009, 1416093, 1416090, 1417373, 1417493, 1416608, 1390624, 1420664, 1414211, 1414361, 1416225, 1417633, 1413225] # FULL deadline 17APR
-    # dir_input = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
 
     file_log = open("log_delivery.txt", "w")
     print("Start checker: Release")
@@ -239,7 +251,6 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
         path_taskid = Path(dir_input).joinpath(str(taskid) + str("\\RV"))
-        #path_taskid = Path(dir_input).joinpath(str("RV") + str(taskid))
         if (path_taskid.exists()):
             count = 0
             for item in data_taskid.keys():
@@ -273,14 +284,10 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
     file_log.write("FINISH\n")
     file_log.close()
 
+# Check Archive is correct or not
 def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
-    # path_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Local_Summary.xlsm"
-    #path_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
     doc = FileSummaryXLSX(path_summary)
-
     data = doc.parse2json(begin=begin, end=end)
-    # taskids = [1415974, 1416009, 1416093, 1416090, 1417373, 1417493, 1416608, 1390624, 1420664, 1414211, 1414361, 1416225, 1417633, 1413225] # FULL deadline 17APR
-    # dir_input = "\\\\10.184.143.103\\d\\vivi\\BV\\Release\\20200417"
 
     file_log = open("log_delivery.txt", "w")
     print("Start checker: Archives")
@@ -290,7 +297,6 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
     for taskid in taskids:
         data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
         path_taskid = Path(dir_input).joinpath(str(taskid) + str("\\AR"))
-        #path_taskid = Path(dir_input).joinpath(str("RV") + str(taskid))
         if (path_taskid.exists()):
             count = 0
             for item in data_taskid.keys():
@@ -314,8 +320,6 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
             file_log.write("## Total {}: status {}: Found/Count/Total - {}/{}/{}\n".format(str(taskid), status, count, num_tpa, len(data_taskid)))
             file_log.write("-----------------------------------------------------------------\n")
 
-
-
         else:
             print("{} is not existed".format(path_taskid))
             file_log.write("{} is not existed\n".format(path_taskid))
@@ -325,63 +329,32 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
     file_log.write("FINISH\n")
     file_log.close()
 
-def convert_name(name, opt="n"):
-    if opt == "n":
-        if name == "hieu.nguyen-trung":
-            name = "Nguyen Trung Hieu"
-        elif name == "hau.nguyen-tai":
-            name = "Nguyen Tai Hau"
-        elif name == "bang.nguyen-duy":
-            name = "Nguyen Duy Bang"
-        elif name == "dac.luu-cong":
-            name = "Luu Cong Dac"
-        elif name == "duong.nguyen":
-            name = "Nguyen Tuan Duong"
-        elif name == "loc.do-phu":
-            name = "Do Phu Loc"
-        elif name == "thanh.nguyen-kim":
-            name = "Nguyen Kim Thanh"
-        elif name == "chung.ly":
-            name = "Ly Chung"
-        elif name == "huy.do-anh":
-            name = "Do Anh Huy"
-        elif name == "phuong.nguyen-thanh":
-            name = "Nguyen Thanh Phuong"
-        else:
-            name = "Unknown"
-
-        return str("EXTERNAL " + name + " (Ban Vien, RBVH/EPS45)")
+# Convert Tester name to Real Name or USERID
+def convert_name(key, opt="name"):
+    data = {
+        'hieu.nguyen-trung': {'name': "Nguyen Trung Hieu", 'id': "nhi5hc"},
+        'hau.nguyen-tai': {'name': "Nguyen Tai Hau", 'id': "nah4hc"},
+        'bang.nguyen-duy': {'name': "Nguyen Duy Bang", 'id': "nbg7hc"},
+        'dac.luu-cong': {'name': "Luu Cong Dac", 'id': "lud5hc"},
+        'duong.nguyen': {'name': "Nguyen Tuan Duong", 'id': "ndy4hc"},
+        'loc.do-phu': {'name': "Do Phu Loc", 'id': "dol7hc"},
+        'thanh.nguyen-kimhieu': {'name': "Nguyen Kim Thanh", 'id': "nut4hc"},
+        'chung.ly': {'name': "Ly Chung", 'id': "lyc1hc"},
+        'huy.do-anh': {'name': "Do Anh Huy", 'id': "duh7hc"},
+        'phuong.nguyen-thanh': {'name': "Nguyen Thanh Phuong", 'id': "gup7hc"}
+    }
+    if opt == "name":
+        return str("EXTERNAL " + data[key].get(opt) + " (Ban Vien, RBVH/EPS45)")
+    elif opt == "id":
+        return str(data[key].get(opt))
     else:
-        if name == "hieu.nguyen-trung":
-            name = "nhi5hc"
-        elif name == "hau.nguyen-tai":
-            name = "nah4hc"
-        elif name == "bang.nguyen-duy":
-            name = "nbg7hc"
-        elif name == "dac.luu-cong":
-            name = "lud5hc"
-        elif name == "duong.nguyen":
-            name = "ndy4hc"
-        elif name == "loc.do-phu":
-            name = "dol7hc"
-        elif name == "thanh.nguyen-kim":
-            name = "nut4hc"
-        elif name == "chung.ly":
-            name = "lyc1hc"
-        elif name == "huy.do-anh":
-            name = "duh7hc"
-        elif name == "phuong.nguyen-thanh":
-            name = "gup7hc"
-        else:
-            name = "Unknown"
-        return str(name)
+        print("BUG convert_name")
 
+# Check path : have src extension or not
 def is_have_src(path):
-    if "\\src" in path or "\\SRC" in path:
-        return True
-    else:
-        return False
+    return ("\\src" in path or "\\SRC" in path)
 
+# Trim Component Path to find the correct path
 def trim_src(path):
     result = re.sub("^.*\\\\rb\\\\", "rb\\\\", path)
     result = re.sub("^.*\\\\rba\\\\", "rba\\\\", result)
@@ -397,21 +370,55 @@ def value(cell):
     else:
         return str(cell)
 
-def update_walkthrough(file, data):
+# Check information between summary xlsx, and test_summay_html is same or not
+def check_information(file_test_summary_html, data):
+    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
+    
+    count = 0
+    flag = False
+
+    if data_test_summary.get("Project") == data.get("ItemName").replace(".c", ""):
+        flag = True
+    else:
+        flag = False
+        return False
+
+    if data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"):
+        flag = True
+    else:
+        flag = False
+        return False
+
+    if data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA"):
+        flag = True
+    else:
+        flag = False
+        return False
+
+    if data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA"):
+        flag = True
+    else:
+        flag = False
+        return False
+    
+    return True
+    
+# Update WalkThrough
+def update_walkthrough(file, data, file_test_summary_html):
+    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
     temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID"))
-    score_c0 = [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0]
-    score_c1 = [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C0") != None) else "NA"][0]
+    # score_c0 = [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0]
+    # score_c1 = [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C0") != None) else "NA"][0]
     dict_walkthrough = {
         'date': datetime.datetime.now().strftime("%m/%d/%Y"),
         'project': data.get("ItemName"),
-        'review initiator': convert_name(name=data.get("Tester")),
+        'review initiator': convert_name(key=data.get("Tester"), opt="name"),
         'effort': str(0.5),
         'baseline': data.get("Baseline"),
-#        'review partner' : data.get("Owner Contact"),
-        'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)",
+        'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)", #data.get("Owner Contact"),
         'path_testscript': temp + "\\Test_Spec",
         'path_test_summary': temp + "\\Test_Result",
-        'ScoreC0C1': " Test summary\n\tC0: " + str(score_c0) + "%\tC1: " + str(score_c1) + "%",
+        'ScoreC0C1': " Test summary\n\tC0: " + data_test_summary.get("C0") + "%\tC1: " + data_test_summary.get("C1") + "%",
     }
 
     document = Document(file)
@@ -428,24 +435,29 @@ def update_walkthrough(file, data):
     table_attach.cell(3, 1).text = dict_walkthrough['ScoreC0C1']
     document.save(file)
 
-def update_tpa(file, data):
+# Update File TPA
+def update_tpa(file, data, file_test_summary_html):
+    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
     data_tpa = {
         "UnitUnderTest": data.get("ItemName"),
-        "NTUserID": str(convert_name(data.get("Tester"), opt="u")),
+        "NTUserID": str(convert_name(key=data.get("Tester"), opt="id")),
         "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "FileName": data.get("ItemName"),
-        "Verdict": data.get("Status Result"),
-        "C0": [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0],
-        "C1": [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA"][0],
-        "MCDCM": [value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA"][0]
+        "Verdict": data_test_summary.get('Verdict').replace("Pass", "Passed").replace("Fail", "Failed"),
+        "C0": data_test_summary.get('C0'),
+        "C1": data_test_summary.get('C1'),
+        "MCDCU": data_test_summary.get('MCDCU'),
     }
 
     FileTPA(file).update_tpa(data_tpa)
 
+# Encrypt file with 7z
 def sevenzip(filename, zipname):
     zip_exe_path = "C:\\Program Files\\7-Zip\\7z.exe"
-    subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename])
+    with open(os.devnull, 'w') as null:
+        subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename], stdout=null, stderr=null)
 
+# Create Archive Walkthrough
 def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
     doc = FileSummaryXLSX(path_summary)
     data = doc.parse2json(begin=begin, end=end)
@@ -471,29 +483,41 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                             dir_Configuration = final_dst + "\\Configuration"
                             dir_Test_Spec = final_dst + "\\Test_Spec"
                             dir_Test_Summary = final_dst + "\\Test_Summary"
-
-                            Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
-                            Path(dir_Configuration).mkdir(exist_ok=True)
-                            Path(dir_Test_Spec).mkdir(exist_ok=True)
-                            Path(dir_Test_Summary).mkdir(exist_ok=True)
-
+                            
                             f_walkthrough = dir_Test_Summary + "\\WalkThrough_Protocol_" + function + ".docx"
                             f_tpa = dir_Test_Summary + "\\" + function + ".tpa"
-                            utils.copy(src=".\\template\\WT_template.docx", dst=f_walkthrough)
-                            utils.copy(src=".\\template\\template.tpa", dst=f_tpa)
-                            update_walkthrough(file=f_walkthrough, data=data_taskid[item])
-                            update_tpa(file=f_tpa, data=data_taskid[item])
+                            f_test_summary = path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html"
 
-                            sevenzip(filename=path_taskid.as_posix().replace("/", "\\") + "\\" + function, zipname=dir_Configuration + "\\" + str(function) + ".zip")
-                            utils.copy(src=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html", dst=dir_Test_Summary + "\\")
+                            if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item]):
+                                Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
+                                Path(dir_Configuration).mkdir(exist_ok=True)
+                                Path(dir_Test_Spec).mkdir(exist_ok=True)
+                                Path(dir_Test_Summary).mkdir(exist_ok=True)
 
-                            for f in utils.scan_files(directory=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\tests", ext=".c")[0]:
-                                sevenzip(filename=f.as_posix().replace("/", "\\"), zipname=dir_Test_Spec + "\\" + os.path.basename(f).replace(".c", ".zip"))
+
+                                
+                                utils.copy(src=".\\template\\WT_template.docx", dst=f_walkthrough)
+                                utils.copy(src=".\\template\\template.tpa", dst=f_tpa)
+                                utils.copy(src=f_test_summary, dst=dir_Test_Summary + "\\")
+
+                                update_walkthrough(file=f_walkthrough, data=data_taskid[item], file_test_summary_html=f_test_summary)
+                                update_tpa(file=f_tpa, data=data_taskid[item], file_test_summary_html=f_test_summary)
+
+                                sevenzip(filename=path_taskid.as_posix().replace("/", "\\") + "\\" + function, zipname=dir_Configuration + "\\" + str(function) + ".zip")
+
+                                for f in utils.scan_files(directory=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\tests", ext=".c")[0]:
+                                    sevenzip(filename=f.as_posix().replace("/", "\\"), zipname=dir_Test_Spec + "\\" + os.path.basename(f).replace(".c", ".zip"))
+                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))                                    
+                            else:
+                                print("Bug: different information" + str(data_taskid[item].get('C0')))
+                                print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                                next
 
                         else:
                             print("Bug: " + temp_component)
+                            print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
 
-                        print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                        
                 else:
                     print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
 
@@ -501,24 +525,26 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
         else:
             next
 
+# Main
 def main():
     # file_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Sample\\Summary_JOEM.xlsm"
-    #file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
-    #dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
-    #dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
-    file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
-    release_date="28-Apr-2020"
-    dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
+    file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
+    dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+    dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
+    # file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
+    # release_date="28-Apr-2020"
+    # dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
     # dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
-    dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
+    # dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
 
-    # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
-    l_taskids = [1424417] # Group 28-Apr-2020
-    # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
+    l_taskids = [1416009]
+    # # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
+    # l_taskids = [1424417] # Group 28-Apr-2020
+    # # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
 
-    check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    #make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+    # check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    # check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
     print("Complete")
 
 

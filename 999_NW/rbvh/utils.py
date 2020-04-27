@@ -123,8 +123,3 @@ def scan_files(directory, ext='.txt'):
                     # latest = filepath
 
     return data, latest
-
-def main():
-    directory = "D:\Material\GIT\lila"
-    data = scan_files(directory, ext='.py')
-    print(data)
