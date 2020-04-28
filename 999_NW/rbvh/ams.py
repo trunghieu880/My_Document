@@ -21,7 +21,7 @@ class Base(object):
         self.path = Path(path)
 
 class FileTPA(Base):
-    # Class FileTPA    
+    # Class FileTPA
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.etree.parse(str(path))
@@ -121,7 +121,7 @@ class FileTestReportHTML(Base):
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.html.parse(str(path))
-    
+
     # Function get_tag: get the node of html file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
@@ -157,7 +157,7 @@ class FileTestSummaryHTML(Base):
     def __init__(self, path):
         super().__init__(path)
         self.doc = lxml.html.parse(str(path))
-    
+
     # Function get_tag: get the node of html file with specific tag
     def get_tag(self, tag, index=0):
         '''Get normalized text of tag base on index of tag'''
@@ -373,7 +373,7 @@ def value(cell):
 # Check information between summary xlsx, and test_summay_html is same or not
 def check_information(file_test_summary_html, data):
     data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-    
+
     count = 0
     flag = False
 
@@ -400,9 +400,9 @@ def check_information(file_test_summary_html, data):
     else:
         flag = False
         return False
-    
+
     return True
-    
+
 # Update WalkThrough
 def update_walkthrough(file, data, file_test_summary_html):
     data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
@@ -471,6 +471,9 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                 function = data_taskid[item].get("ItemName").replace(".c", "")
                 user_tester = data_taskid[item].get("Tester")
 
+                # if function == "RBAPLCUST_RDBI_IOCtrlState" and taskid == 1416606:
+                    # print("HERE")
+                    # continue
                 b_check_exist = check_exist(dir_input=path_taskid, function=function)
                 if (b_check_exist):
                     count += 1
@@ -483,8 +486,8 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                             dir_Configuration = final_dst + "\\Configuration"
                             dir_Test_Spec = final_dst + "\\Test_Spec"
                             dir_Test_Summary = final_dst + "\\Test_Summary"
-                            
-                            f_walkthrough = dir_Test_Summary + "\\WalkThrough_Protocol_" + function + ".docx"
+
+                            f_walkthrough = dir_Test_Summary + "\\Walkthrough_Protocol_" + function + ".docx"
                             f_tpa = dir_Test_Summary + "\\" + function + ".tpa"
                             f_test_summary = path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html"
 
@@ -494,8 +497,6 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                                 Path(dir_Test_Spec).mkdir(exist_ok=True)
                                 Path(dir_Test_Summary).mkdir(exist_ok=True)
 
-
-                                
                                 utils.copy(src=".\\template\\WT_template.docx", dst=f_walkthrough)
                                 utils.copy(src=".\\template\\template.tpa", dst=f_tpa)
                                 utils.copy(src=f_test_summary, dst=dir_Test_Summary + "\\")
@@ -507,17 +508,13 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
 
                                 for f in utils.scan_files(directory=path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\tests", ext=".c")[0]:
                                     sevenzip(filename=f.as_posix().replace("/", "\\"), zipname=dir_Test_Spec + "\\" + os.path.basename(f).replace(".c", ".zip"))
-                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))                                    
+                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                             else:
-                                print("Bug: different information" + str(data_taskid[item].get('C0')))
-                                print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                                print("Bug: different information {},{},{},{}".format(taskid, function, user_tester, "NG"))
                                 next
 
                         else:
-                            print("Bug: " + temp_component)
-                            print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
-
-                        
+                            print("Bug: miss src in componentname {},{},{},{}".format(taskid, function, user_tester, "NG"))
                 else:
                     print("{},{},{},{}".format(taskid, function, user_tester, "NG"))
 
@@ -527,23 +524,23 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
 
 # Main
 def main():
-    # file_summary = "D:\\Material\\GIT\\My_Document\\999_NW\\Test_Folder\\Sample\\Summary_JOEM.xlsm"
-    file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
-    dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
-    dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
-    # file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
-    # release_date="28-Apr-2020"
-    # dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
+    # file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
+    # dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
+    # dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
+    file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
+    release_date="30-Apr-2020"
+    dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
     # dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
-    # dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
+    dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
 
-    l_taskids = [1416009]
-    # # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
+    # l_taskids = [1416009]
+    # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
     # l_taskids = [1424417] # Group 28-Apr-2020
-    # # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
+    # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
+    l_taskids = [1416607,1416606,1417780] # Group 30-Apr-2020
 
-    # check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    # check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    #check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    #check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
     make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
     print("Complete")
 
