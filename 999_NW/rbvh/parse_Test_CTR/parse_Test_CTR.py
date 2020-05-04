@@ -60,6 +60,9 @@ def get_infor_ctr(path, tc_index=1):
                                     key = temp.split("=")[0].strip()
                                 else:
                                     key = temp.split("=")[1].strip()
+#HieuNguyen                                     if key.isdigit():
+#HieuNguyen                                         key = temp.split("=")[0].strip()
+
 
                                 if not re.search('^expected_', key):
                                     key = "expected_" + key
@@ -67,7 +70,11 @@ def get_infor_ctr(path, tc_index=1):
                                 temp = re.sub("^>>.*Check Memory: ", "", line)
                                 key = temp.strip()
                         else:
-                            print("BUG check:")
+                            if 'No match' in line:
+                                print("BUG check:" + line)
+                                next
+                            else:
+                                print("BUG check:" + line)
 
 #HieuNguyen                            print(temp)
 #HieuNguyen                            print("Fuck" + key)
@@ -134,13 +141,14 @@ def print_infor(l_d):
 
 def main():
     #directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
-    directory = "C:\\Users\\nhi5hc\\PinnedFolders\\001_Working_JOEM\\RB_MS_CAV7_BB82107\\UT_019_RBAPLCUST_RoutineControl_Suzuki_BB82107\\Cantata\\tests\\atest_RBAPLCUST_RoutineControl_Suzuki"
+    #directory = "C:\\0000_Prj\\002_Working_COEM\\20200414\\NextEV_IB2_Int\\rba_BldrCmp_22ReadDataByIdentifier"
+    directory = "C:\\0000_Prj\\002_Working_COEM\\20200416_1\\BYD_IPB_BL05_Int\\NET_SCL_Rx_TPMS\\Cantata\\tests\\test_NET_SCL_Rx_TPMS"
     data = scan_files(directory, ext='.ctr')
 
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase(new_file)
-        #l_tc = [31]
+        #l_tc = [1]
 
         if(len(l_tc) > 0):
             l_d = []
