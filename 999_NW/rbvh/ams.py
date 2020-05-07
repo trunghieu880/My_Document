@@ -409,12 +409,17 @@ def update_walkthrough(file, data, file_test_summary_html):
     temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID"))
     # score_c0 = [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0]
     # score_c1 = [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C0") != None) else "NA"][0]
+    
+    data_baseline = data.get("Baseline")
+    if data_baseline == "None" or data_baseline = "":
+        data_baseline = ""
+
     dict_walkthrough = {
         'date': datetime.datetime.now().strftime("%m/%d/%Y"),
         'project': data.get("ItemName"),
         'review initiator': convert_name(key=data.get("Tester"), opt="name"),
         'effort': str(0.5),
-        'baseline': data.get("Baseline"),
+        'baseline': data_baseline,
         'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)", #data.get("Owner Contact"),
         'path_testscript': temp + "\\Test_Spec",
         'path_test_summary': temp + "\\Test_Result",
@@ -485,21 +490,21 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                             final_dst = dir_output + "\\" + str(taskid) + "\\AR\\" + trim_src(temp_component) + "\\Unit_tst\\" + str(taskid) + "\\" + function
                             dir_Configuration = final_dst + "\\Configuration"
                             dir_Test_Spec = final_dst + "\\Test_Spec"
-                            dir_Test_Summary = final_dst + "\\Test_Summary"
+                            dir_Test_Result = final_dst + "\\Test_Result"
 
-                            f_walkthrough = dir_Test_Summary + "\\Walkthrough_Protocol_" + function + ".docx"
-                            f_tpa = dir_Test_Summary + "\\" + function + ".tpa"
+                            f_walkthrough = dir_Test_Result + "\\Walkthrough_Protocol_" + function + ".docx"
+                            f_tpa = dir_Test_Result + "\\" + function + ".tpa"
                             f_test_summary = path_taskid.as_posix().replace("/", "\\") + "\\" + function + "\\Cantata\\results\\test_summary.html"
 
                             if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item]):
                                 Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
                                 Path(dir_Configuration).mkdir(exist_ok=True)
                                 Path(dir_Test_Spec).mkdir(exist_ok=True)
-                                Path(dir_Test_Summary).mkdir(exist_ok=True)
+                                Path(dir_Test_Result).mkdir(exist_ok=True)
 
                                 utils.copy(src=".\\template\\WT_template.docx", dst=f_walkthrough)
                                 utils.copy(src=".\\template\\template.tpa", dst=f_tpa)
-                                utils.copy(src=f_test_summary, dst=dir_Test_Summary + "\\")
+                                utils.copy(src=f_test_summary, dst=dir_Test_Result + "\\")
 
                                 update_walkthrough(file=f_walkthrough, data=data_taskid[item], file_test_summary_html=f_test_summary)
                                 update_tpa(file=f_tpa, data=data_taskid[item], file_test_summary_html=f_test_summary)
@@ -527,21 +532,25 @@ def main():
     # file_summary = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Summary_JOEM.xlsm"
     # dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
     # dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
-    file_summary = "\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\Summary_JOEM.xlsm"
-    release_date="30-Apr-2020"
-    dir_input="\\\\hc-ut40346c\\NHI5HC\\hieunguyen\\0000_Project\\001_Prj\\02_JOEM\\01_Output_Package\\20200416_1_20200417_20200420\\" + release_date
+    file_summary = r"//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm".replace("/", "\\")
+    release_date="06-May-2020"
+    # release_date="28-Apr-2020"
+    dir_input = r"//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200429/COEM".replace("\\", "\\\\") + "\\" + release_date
+    # dir_input="\\\\10.184.143.103\\d\\vivi\\BV\\Release\\JOEM\\28-Apr-2020"
     # dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
-    dir_output = "C:\\Users\\nhi5hc\\Desktop\\OUTPUT"
+    dir_output = r"C:/Users/nhi5hc/Desktop/OUTPUT".replace("/", "\\") + "\\" + release_date
 
     # l_taskids = [1416009]
     # l_taskids = [1411690,1411700,1417738,1423830,1423829] # Group 24-Apr-2020
     # l_taskids = [1424417] # Group 28-Apr-2020
     # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
-    l_taskids = [1416607,1416606,1417780] # Group 30-Apr-2020
+    # l_taskids = [1416607,1416606,1417780] # Group 30-Apr-2020
+    # l_taskids = [1435905,1439160,1439436,1417033] # Group 5-May-2020
+    l_taskids = [1439430,1416489,1442021] # Group 6-May-2020
 
-    #check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    #check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
-    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+    check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+    #make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
     print("Complete")
 
 
