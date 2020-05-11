@@ -1,14 +1,11 @@
-source /d/workspace/mingw32_env/env.sh
-
-export PATH="$PATH:/c/Users/hieu.nguyen-trung/AppData/Local/Programs/Python/Python37"
-alias python37='winpty /c/Users/hieu.nguyen-trung/AppData/Local/Programs/Python/Python37/python.exe'
-#---------------------------
+#----------------------------
 # PYTHON
 #----------------------------
-alias check_jira='winpty /d/workspace/mingw32_env/opt/python-3.8.1/python.exe /d/home/hieunguyen/TUT/PYTHON/filter_logtime.py '
-alias python38='winpty /d/workspace/mingw32_env/opt/python-3.8.1/python.exe '
-alias homeu='cd /d/home/hieunguyen'
-homeu='/d/home/hieunguyen'
+alias python27='winpty /c/Python27/python.exe ' 
+alias python37='winpty /c/Python37/python.exe'
+
+alias homeu='cd /c/Users/NHI5HC/Desktop/home/hieunguyen'
+homeu='/c/Users/NHI5HC/Desktop/home/hieunguyen'
 
 alias e='exit'
 alias ls='ls --color=auto'
@@ -16,11 +13,21 @@ alias l='ls --color=auto -l'
 alias ll='ls --color=auto -l'
 alias la='ls --color=auto -a'
 alias lg='ls | grep --color=always $1'
-alias kdiff='/d/Program\ Files/KDiff3/kdiff3.exe' 
-#alias xlsx2csv='/d/Program\ Files/Python36/Lib/xlsx2csv.py' 
-alias xlsx2csv='/d/workspace/mingw32_env/opt/python-3.8.1/python.exe /c/Python27/Lib/xlsx2csv.py'
-xlsx2csv='/d/workspace/mingw32_env/opt/python-3.8.1/python.exe /d/workspace/mingw32_env/opt/python-3.8.1/Lib/xlsx2csv.py' 
-alias tree='/d/Material/GIT/My_Document/Script/tree.exe'
+alias kdiff='/c/home/hieunguyen/utils/KDiff3-0.9.92/kdiff3.exe'
+alias tree='/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/tree.exe'
+alias wget='/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/wget.exe'
+
+alias auto_zip="/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/auto_zip.sh "
+auto_zip="/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/auto_zip.sh "
+
+alias auto_unzip="/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/auto_unzip.sh "
+auto_unzip="/c/home/hieunguyen/Material_HieuNguyen/My_Document/002_Script/utils/auto_unzip.sh "
+
+alias xlsx2csv='/c/Python27/python.exe /c/Python27/Lib/site-packages/xlsx2csv.py'
+xlsx2csv='/c/Python27/Lib/site-packages/xlsx2csv.py'
+alias xls2csv='/c/Python27/python.exe /c/Python27/Lib/site-packages/xls2csv.py'
+xls2csv='/c/Python27/Lib/site-packages/xls2csv.py'
+
 
 # Make and change directory at once
 alias mkcd='_(){ mkdir -p $1; cd $1; }; _'
@@ -83,9 +90,48 @@ function win() {
     mypath=`pwd`
   fi
   
-  echo "$mypath" | sed "s|^~|$temp|g" | sed 's|^/||g' | sed 's|/|\\|g' | sed -e 's/^c/c:/g' -e 's/^d/d:/g' -e 's/^u/u:/g';
+  echo "$mypath" | sed "s|^~|$temp|g" | sed 's|^/||g' | sed 's|/|\\|g' | sed 's/^c/c:/g' | sed 's/^d/d:/g' | sed 's|^\\hc-ut40346c|\\\\hc-ut40346c|g';
 }
 
 function win2linux() {
   echo "$1" | sed -s 's#\\#/#g' | sed -e 's#^D:#/d#g' -e 's#^C:#/c#g'
 }
+
+function trim_input(){
+  if [ "$1" != "" ]; then
+    grep -i -e '</\?TABLE\|</\?TD\|</\?TR\|</\?TH' $1 | sed 's/^[\ \t]*//g' | tr -d '\n' | sed 's/<\/TR[^>]*>/\n/Ig' \
+      | sed 's/^<T[DH][^>]*>\|<\/\?T[DH][^>]*>$//Ig' | sed 's/<\/T[DH][^>]*><T[DH][^>]*>/,/Ig' \
+      | head -4 | tail -n -2 | egrep '>Variable&nbsp;Name,|>Type,' | sed -e 's/<TR><TD .*>Variable&nbsp;Name,//g' -e 's/<TR><TD .*>Type,//g' -e 's/<BR>//g' -e 's/&nbsp;/ /g' \
+      | sed 's/,\w\+\.c\//,/g' \
+      | tac | awk -F, '{for (f=1;f<=NF;f++) col[f] = col[f]":"$f} END {for (f=1;f<=NF;f++) print col[f]}' | tr ':' ' ' | sed 's/^\s*\s//g'
+
+  else
+    echo "Please insert exel path"
+  fi
+}
+
+function get_data_ATT(){
+  cat $1 | sed -n '/<OutputSignals>/,/<\/OutputSignals>/p' | sed -e 's|<\!\[CDATA\[||g' -e 's|\]||g' | egrep -v 'SignalName|SignalVerdict|Time|Expected|Tolerance' | sed '/SignalDetail.*$/d' | sed 's/<Signal>//g' | sed 's/><\/Signal>//g' | sed 's/\s\+//g' | tr '\n' ',' | sed 's/<\/\w\+>,/\n/g' | sed 's/<\w\+>//g' | sed 's/^,//g' | sed 's/,$//g' | sed 's/,/ /g'
+}
+
+function gen_id () { 
+  FILE_SUMMARY="//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM.xlsm" 
+  PRJ_FINDING="CW10_EMP2V3_SmartCar_MHEV_381" 
+  userid="hieu.nguyen-trung" 
+  item=$1 
+  /c/Python27/python.exe /c/Python27/Lib/site-packages/xlsx2csv.py -s 1 ${FILE_SUMMARY}  | sed 's/^,//g' | sed -n '/^No,Package/,/^Table KPI ASW/p' | grep '^[0-9]\+,' | awk -F, '{printf "%s,%s,%s,%s,%s\n", $1, $4, $6, $7, $11}' | sed 's/MT_//g' | grep ",${item}," | awk -F, '{printf "module_name = \"%s\"\nmodule_version = \"%s\"\nmodule_number = \"%s\"\n", $4, $NF, $3}'
+} 
+
+###############################
+user="hieunguyen"
+pc_id="NHI5HC"
+link_share_hieunguyen="//hc-ut40346c/${pc_id}"
+share_folder_hieunguyen="/c/TSDE_Workarea/${pc_id}"
+
+prj_coem="$link_share_hieunguyen/${user}/0000_Project/001_Prj/01_COEM"
+prj_joem="$link_share_hieunguyen/${user}/0000_Project/001_Prj/02_JOEM"
+
+database_ATT="/c/TSDE_Workarea/ETASData/ASCET/V6_1_4/ATT"
+working_folder="/c/0000_Prj/000_Working_Folder"
+
+release_package_PSA_PHEVv1_81ASW_10PSW="//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/02_Release_Package/20200305/PSA_PHEVv1_81ASW_10PSW/T500"

@@ -409,9 +409,9 @@ def update_walkthrough(file, data, file_test_summary_html):
     temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID"))
     # score_c0 = [value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"][0]
     # score_c1 = [value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C0") != None) else "NA"][0]
-    
+
     data_baseline = data.get("Baseline")
-    if data_baseline == "None" or data_baseline = "":
+    if data_baseline == "None" or data_baseline == "":
         data_baseline = ""
 
     dict_walkthrough = {
@@ -533,9 +533,9 @@ def main():
     # dir_input="C:\\Users\\hieu.nguyen-trung\\Desktop\\check"
     # dir_output = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT"
     file_summary = r"//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm".replace("/", "\\")
-    release_date="06-May-2020"
+    release_date="08-May-2020"
     # release_date="28-Apr-2020"
-    dir_input = r"//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200429/COEM".replace("\\", "\\\\") + "\\" + release_date
+    dir_input = r"//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200506/COEM".replace("\\", "\\\\") + "\\" + release_date
     # dir_input="\\\\10.184.143.103\\d\\vivi\\BV\\Release\\JOEM\\28-Apr-2020"
     # dir_input="C:\\Users\\nhi5hc\\Desktop\\bbbb\\24-Apr-2020"
     dir_output = r"C:/Users/nhi5hc/Desktop/OUTPUT".replace("/", "\\") + "\\" + release_date
@@ -546,7 +546,8 @@ def main():
     # l_taskids = [1426302,1425475,1420442,1404793] # Group 29-Apr-2020
     # l_taskids = [1416607,1416606,1417780] # Group 30-Apr-2020
     # l_taskids = [1435905,1439160,1439436,1417033] # Group 5-May-2020
-    l_taskids = [1439430,1416489,1442021] # Group 6-May-2020
+    # l_taskids = [1439430,1416489,1442021] # Group 6-May-2020
+    l_taskids = [1449890,1446629,1449424,1449711] # Group 8-May-2020
 
     check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
     check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)

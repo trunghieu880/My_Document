@@ -30,6 +30,7 @@ def get_infor_ctr(path, tc_index=1):
     try:
         flag_start_test = False
         flag_start_collect = False
+        flag_start_access = False
         data = dict()
         result = dict()
         key = ""
@@ -56,31 +57,43 @@ def get_infor_ctr(path, tc_index=1):
                             flag_start_collect = True
                             if 'Check:' in line:
                                 temp = re.sub("^>>.*Check: ", "", line)
-                                if re.search("=$", line):
+                                if re.search("ACCESS_VARIABLE", line):
+                                    flag_start_access = True
+                                    key = temp
+                                elif re.search("=$", line):
                                     key = temp.split("=")[0].strip()
                                 else:
                                     key = temp.split("=")[1].strip()
-#HieuNguyen                                     if key.isdigit():
-#HieuNguyen                                         key = temp.split("=")[0].strip()
 
-
-                                if not re.search('^expected_', key):
-                                    key = "expected_" + key
                             elif 'Check Memory:':
                                 temp = re.sub("^>>.*Check Memory: ", "", line)
                                 key = temp.strip()
-                        else:
-                            if 'No match' in line:
-                                print("BUG check:" + line)
-                                next
+
+                            if re.search("ACCESS_VARIABLE", line):
+                                key = re.sub("ACCESS_VARIABLE", "ACCESS_EXPECTED_VARIABLE", key)
+                            elif not re.search('^expected_', key):
+                                key = "expected_" + key
                             else:
-                                print("BUG check:" + line)
+                                continue
+                        else:
+                            if 'No match for' in line:
+                                temp = re.sub("^>>.*for ", "", line)
+                                temp = re.sub(" in expected.*$", "", temp)
+                                data = {**data, temp : "#default"}
+                                continue
+                            else:
+                                print("BUG check:")
 
 #HieuNguyen                            print(temp)
 #HieuNguyen                            print("Fuck" + key)
 
                     if (flag_start_collect):
 #HieuNguyen                         print(line)
+                        if flag_start_access:
+                            if re.search("=$", line):
+                                key = key + " " + line.split("=")[0].strip()
+                                flag_start_access = False
+
                         if 'actual:' in line:
                             temp = re.sub("\s*\s<.*>$", "", line)
                             temp = re.sub("\s*\s", " ", temp)
@@ -141,14 +154,13 @@ def print_infor(l_d):
 
 def main():
     #directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
-    #directory = "C:\\0000_Prj\\002_Working_COEM\\20200414\\NextEV_IB2_Int\\rba_BldrCmp_22ReadDataByIdentifier"
-    directory = "C:\\0000_Prj\\002_Working_COEM\\20200416_1\\BYD_IPB_BL05_Int\\NET_SCL_Rx_TPMS\\Cantata\\tests\\test_NET_SCL_Rx_TPMS"
+    directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.ctr')
 
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase(new_file)
-        #l_tc = [1]
+        # l_tc = [16]
 
         if(len(l_tc) > 0):
             l_d = []

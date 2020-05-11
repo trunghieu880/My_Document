@@ -39,7 +39,6 @@ filetype indent on
 
 " Set to auto read when a file is changed from the outside
 set autoread
-au FocusGained,BufEnter * checktime
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
@@ -50,7 +49,7 @@ nmap <leader>w :w!<cr>
 
 " :W sudo saves the file 
 " (useful for handling the permission-denied error)
-command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
+command W w !sudo tee % > /dev/null
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -80,7 +79,7 @@ endif
 set ruler
 
 " Height of the command bar
-set cmdheight=1
+set cmdheight=2
 
 " A buffer becomes hidden when it is abandoned
 set hid
@@ -164,7 +163,7 @@ set ffs=unix,dos,mac
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Files, backups and undo
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Turn backup off, since most stuff is in SVN, git etc. anyway...
+" Turn backup off, since most stuff is in SVN, git et.c anyway...
 set nobackup
 set nowb
 set noswapfile
@@ -180,8 +179,8 @@ set expandtab
 set smarttab
 
 " 1 tab == 4 spaces
-set shiftwidth=4
-set tabstop=4
+set shiftwidth=2
+set tabstop=2
 
 " Linebreak on 500 characters
 set lbr
@@ -206,7 +205,7 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
 map <space> /
-map <C-space> ?
+map <c-space> ?
 
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
@@ -241,7 +240,7 @@ au TabLeave * let g:lasttab = tabpagenr()
 
 " Opens a new tab with the current buffer's path
 " Super useful when editing files in the same directory
-map <leader>te :tabedit <C-r>=expand("%:p:h")<cr>/
+map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
@@ -382,38 +381,21 @@ function! VisualSelection(direction, extra_filter) range
     let @" = l:saved_reg
 endfunction
 
-""HieuNguyen 20200108 set nu
-set hlsearch
 set cursorline
 set cursorcolumn
 highlight Search       cterm=NONE ctermbg=green     ctermfg=white
-highlight CursorLine   cterm=NONE ctermbg=4         ctermfg=white
-highlight CursorColumn cterm=NONE ctermbg=5         ctermfg=white
+highlight CursorLine   cterm=NONE ctermbg=4 ctermfg=NONE
+highlight CursorColumn cterm=NONE ctermbg=4 ctermfg=NONE
 "highlight DiffText     cterm=none
 
 "" Add By HieuNguyen
 nmap <F2> <Esc>:w!<CR>
+"set _extension_file_ = :echo expand('%:e')
 nmap <F3> <Esc>:wa!<CR>
-
-let extension = expand('%:e')
-let my_time = strftime("%Y%m%d")
-if extension == "c"
-	nmap <F4> <Esc><Insert><Home>//HieuNguyen <C-R>=my_time<CR> <Home><Esc>j
-	nmap <F5> <Esc><Insert><End> //HieuNguyen <C-R>=my_time<CR><Home><Esc>j
-elseif extension == 'py' || extension == "pl" || extension == "sh"
-	nmap <F4> <Esc><Insert><Home>##HieuNguyen <C-R>=my_time<CR> <Home><Esc>j
-	nmap <F5> <Esc><Insert><End> ##HieuNguyen <C-R>=my_time<CR><Home><Esc>j
-elseif extension == 'vimrc'
-	nmap <F4> <Esc><Insert><Home>""HieuNguyen <C-R>=my_time<CR> <Home><Esc>j
-	nmap <F5> <Esc><Insert><End> ""HieuNguyen <C-R>=my_time<CR><Home><Esc>j
-else
-	nmap <F4> <Esc><Insert><Home>##HieuNguyen <C-R>=my_time<CR> <Home><Esc>j
-	nmap <F5> <Esc><Insert><End> ##HieuNguyen <C-R>=my_time<CR><Home><Esc>j
-endif
-nmap <F6> <Esc>:s/^[/#"]\+HieuNguyen [0-9]\+ //g<CR><Home><Esc>j
+nmap <F4> <Esc><Insert><Home>#HieuNguyen <Esc>
+nmap <F6> <Esc><Insert><End> #HieuNguyen<Esc>
 nmap <F7> <Esc>:set mouse=i<CR>
 nmap <F8> <Esc>:set mouse=a<CR>
 nmap <F9> <Esc>:set wrap<CR>
 nmap <F10> <Esc>:set nowrap<CR>
-nmap <F11> <Esc>:echo expand('%:p')<CR>
 nmap <F12> <Esc>:q!<CR>
