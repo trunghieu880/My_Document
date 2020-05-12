@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 
 import re
+import subprocess
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,13 +84,9 @@ def get_infor_ctr(path, tc_index=1):
                                 data = {**data, temp : "#default"}
                                 continue
                             else:
-                                print("BUG check:")
-
-#HieuNguyen                            print(temp)
-#HieuNguyen                            print("Fuck" + key)
+                                print("BUG check: Not find No match for")
 
                     if (flag_start_collect):
-#HieuNguyen                         print(line)
                         if flag_start_access:
                             if re.search("=$", line):
                                 key = key + " " + line.split("=")[0].strip()
@@ -99,7 +97,6 @@ def get_infor_ctr(path, tc_index=1):
                             temp = re.sub("\s*\s", " ", temp)
                             val = temp.split(":")[1].strip()
                             data = {**data, key : val}
-#HieuNguyen                             print(datta)
                             key = ""
                             val = ""
                             flag_start_collect = False
@@ -145,18 +142,18 @@ def print_infor(l_d):
             print("-----------------------------------")
             for key in item[child_key].keys():
                 val = item[child_key][key]
+                subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), 'C:/Users/hieu.nguyen-trung/Desktop/Test_Folder/a.c'])
+
                 print("%s = %s;" % (key, val))
 
         print("***********************************\n")
 
-
-
-
 def main():
-    #directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
-    directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
+    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
+    # directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.ctr')
 
+    subprocess.call(['sed', '-i', '/initialise_expected_global_data/,/START_TEST/\{//!d;\};', 'C:/Users/hieu.nguyen-trung/Desktop/Test_Folder/a.c'])
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase(new_file)
