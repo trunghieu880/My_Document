@@ -63,10 +63,10 @@ def get_infor_c(path, tc_name="test_1", index=1):
                         new = re.sub('".*$', '', new)
                         result[tc_name] = {**data, tc_name: '"{}" -> "{}"'.format(old, new)}
                         
-                        subprocess.call(['sed', '-i', 's@{}@{}@g'.format(line, temp), "'{}'".format(path.as_posix())])
+                        # subprocess.call(['sed', '-i', 's@{}@{}@g'.format(line, temp), "'{}'".format(path.as_posix())])
 
-                        # with open("./script.sh", errors='ignore', mode='a') as f:
-                            # f.write("sed -i 's@{}@{}@g' {}\n".format(line, temp, "'{}'".format(path.as_posix())))
+                        with open("./script.sh", errors='ignore', mode='a') as f:
+                            f.write("sed -i 's@{}@{}@g' {}\n".format(line, temp, "'{}'".format(path.as_posix())))
 
     finally:
         return result
@@ -79,7 +79,7 @@ def get_list_testcase_c(path):
             line = line.strip()
 
             pattern_start = '/* Prototypes for test functions */'
-            pattern_end = '/*******************************************/'
+            pattern_end = '/*****************************************************************************/'
             if pattern_start in line:
                 flag_start_test = True
                 next
@@ -109,10 +109,11 @@ def print_infor_c(l_d):
         print("***********************************\n")
 
 def main():
-    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
+    # directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
+    directory = "C:\\Users\\nhi5hc\\Desktop\\Test"
     # directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.c')
-    # os.remove("./script.sh")
+    os.remove("./script.sh")
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase_c(new_file)
@@ -122,7 +123,7 @@ def main():
         if(len(l_tc) > 0):
             l_d = []
             for index, tc in enumerate(l_tc):
-                l_d.append(get_infor_c(new_file, tc, index + 100))
+                l_d.append(get_infor_c(new_file, tc, index + 1))
 
             print_infor_c(l_d)
         else:
