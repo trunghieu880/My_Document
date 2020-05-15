@@ -1,24 +1,54 @@
 Start checker: Release
 *****************************************************************
-1435905,rba_BldrCmp_Cfg_CheckMem,phuong.nguyen-thanh,OK
-1435905,rba_BldrCmp_Cfg_FlashIf,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_Functions,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_NvmIf,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_PrjFunctions,hau.nguyen-tai,NG
-1435905,rba_BldrCmp_Cfg_SecA,hau.nguyen-tai,NG
-1435905,rba_sbl_main,hau.nguyen-tai,NG
-## Total 1435905: status BAD: Found/Count/Total - 1/1/7
+1460003,AD_ShutDown ,phuong.nguyen-thanh,NG
+1460003,ACC_ShutDown,phuong.nguyen-thanh,NG
+1460003,VLC_ADSignalsChoice ,phuong.nguyen-thanh,NG
+## Total 1460003: status BAD: Found/Count/Total - 0/0/3
+-----------------------------------------------------------------
+1461444,rba_BldrBCLSigChk,bang.nguyen-duy,OK
+1461444,rba_BldrFlsDrv,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_CheckMem,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_FlashIf,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_Functions,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_SecA,bang.nguyen-duy,OK
+1461444,rba_BldrFlsDrv_Cfg,bang.nguyen-duy,OK
+1461444,CubasAdapter,bang.nguyen-duy,OK
+1461444,rba_Bldr_main,bang.nguyen-duy,OK
+1461444,rba_sbl_main,bang.nguyen-duy,OK
+1461444,rba_BldrCMP_27SecurityAccess,bang.nguyen-duy,OK
+1461444,RBLCF_Customized_Hexblocks_Allocation_Signature,hau.nguyen-tai,NG
+1461444,rba_Bmgr_main,hau.nguyen-tai,OK
+1461444,rba_Bldr_Backdoor,hau.nguyen-tai,NG
+## Total 1461444: status BAD: Found/Count/Total - 12/12/14
+-----------------------------------------------------------------
+9.1,HMI09_ConfigOutputDriver_BB91102,hau.nguyen-tai,OK
+## Total 9.1: status GOOD: Found/Count/Total - 1/1/1
 -----------------------------------------------------------------
 FINISH
 Start checker: Archives
 *****************************************************************
-1435905,rba_BldrCmp_Cfg_CheckMem,phuong.nguyen-thanh,NG-DiffInfor
-1435905,rba_BldrCmp_Cfg_FlashIf,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_Functions,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_NvmIf,phuong.nguyen-thanh,NG
-1435905,rba_BldrCmp_Cfg_PrjFunctions,hau.nguyen-tai,NG
-1435905,rba_BldrCmp_Cfg_SecA,hau.nguyen-tai,NG
-1435905,rba_sbl_main,hau.nguyen-tai,NG
-## Total 1435905: status BAD: Found/Count/Total - 1/1/7
+1460003,AD_ShutDown ,phuong.nguyen-thanh,NG
+1460003,ACC_ShutDown,phuong.nguyen-thanh,NG
+1460003,VLC_ADSignalsChoice ,phuong.nguyen-thanh,NG
+## Total 1460003: status BAD: Found/Count/Total - 0/0/3
+-----------------------------------------------------------------
+1461444,rba_BldrBCLSigChk,bang.nguyen-duy,OK
+1461444,rba_BldrFlsDrv,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_CheckMem,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_FlashIf,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_Functions,bang.nguyen-duy,OK
+1461444,rba_BldrCmp_Cfg_SecA,bang.nguyen-duy,OK
+1461444,rba_BldrFlsDrv_Cfg,bang.nguyen-duy,OK
+1461444,CubasAdapter,bang.nguyen-duy,OK
+1461444,rba_Bldr_main,bang.nguyen-duy,OK
+1461444,rba_sbl_main,bang.nguyen-duy,OK
+1461444,rba_BldrCMP_27SecurityAccess,bang.nguyen-duy,OK
+1461444,RBLCF_Customized_Hexblocks_Allocation_Signature,hau.nguyen-tai,NG
+1461444,rba_Bmgr_main,hau.nguyen-tai,OK
+1461444,rba_Bldr_Backdoor,hau.nguyen-tai,NG
+## Total 1461444: status BAD: Found/Count/Total - 12/12/14
+-----------------------------------------------------------------
+9.1,HMI09_ConfigOutputDriver_BB91102,hau.nguyen-tai,NG
+## Total 9.1: status BAD: Found/Count/Total - 0/0/1
 -----------------------------------------------------------------
 FINISH

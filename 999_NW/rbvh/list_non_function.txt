@@ -1,0 +1,12 @@
+,Obd_CalId,|,CNMS_Var_DcmRead,|,EcuM_stub,|,RBFSWBootInterface_HHT,|,RBAPLOBD_Global,|,ASWIF_CommonConfig,|,RBIRS_IRSCalc,|,DemCSMosar_StoreEvtImm_Cfg,|,RBBUTSWI_BLS_Ana,|,RBTSI_RbDiagInit,|,stubPara,
+#Obd_CalId
+#CNMS_Var_DcmRead
+#EcuM_stub
+#RBFSWBootInterface_HHT
+#RBAPLOBD_Global
+#ASWIF_CommonConfig
+#RBIRS_IRSCalc
+#DemCSMosar_StoreEvtImm_Cfg
+#RBBUTSWI_BLS_Ana
+#RBTSI_RbDiagInit
+#stubPara

@@ -1,12 +1,12 @@
 {
-    "file_summary": "D:/Material/GIT/My_Document/999_NW/Test_Folder/Sample/Summary_JOEM_COEM_20200501.xlsm",
-    "dir_input": "C:/Users/hieu.nguyen-trung/Desktop/check",
-    "dir_output": "C:/Users/hieu.nguyen-trung/Desktop/OUTPUT",
+    "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm",
+    "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/COEM/15-May-2020",
+    "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
 
     "sheetname": "Merged_COEM",
     
     "l_taskids": [
-        1435905
+        1460003,1461444,9.1
     ],
     "mode": [
         "check_releases",
