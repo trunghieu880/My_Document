@@ -1,0 +1,30 @@
+{
+    "file_summary": "D:/Material/GIT/My_Document/999_NW/Test_Folder/Sample/Summary_JOEM_COEM_20200501.xlsm",
+    "dir_input": "C:/Users/hieu.nguyen-trung/Desktop/check",
+    "dir_output": "C:/Users/hieu.nguyen-trung/Desktop/OUTPUT",
+
+    "sheetname": "Merged_COEM",
+    
+    "l_taskids": [
+        1435905
+    ],
+    "mode": [
+        "check_releases",
+        "check_archives",
+        "make_archives"
+    ],
+
+    "Tool_7z": "C:/Program Files/7-Zip/7z.exe",
+    "users": {
+        "hieu.nguyen-trung": {"name": "EXTERNAL Nguyen Trung Hieu (Ban Vien), RBVH/EPS45", "id": "nhi5hc"},
+        "hau.nguyen-tai": {"name": "EXTERNAL Nguyen Tai Hau (Ban Vien), RBVH/EPS45", "id": "nah4hc"},
+        "bang.nguyen-duy": {"name": "EXTERNAL Nguyen Duy Bang (Ban Vien), RBVH/EPS45", "id": "nbg7hc"},
+        "dac.luu-cong": {"name": "EXTERNAL Luu Cong Dac (Ban Vien), RBVH/EPS45", "id": "lud5hc"},
+        "duong.nguyen": {"name": "EXTERNAL Nguyen Tuan Duong (Ban Vien), RBVH/EPS45", "id": "ndy4hc"},
+        "loc.do-phu": {"name": "EXTERNAL Do Phu Loc (Ban Vien), RBVH/EPS45", "id": "dol7hc"},
+        "thanh.nguyen-kimhieu": {"name": "EXTERNAL Nguyen Kim Thanh (Ban Vien), RBVH/EPS45", "id": "nut4hc"},
+        "chung.ly": {"name": "EXTERNAL Ly Chung (Ban Vien), RBVH/EPS45", "id": "lyc1hc"},
+        "huy.do-anh": {"name": "EXTERNAL Do Anh Huy (Ban Vien), RBVH/EPS45", "id": "duh7hc"},
+        "phuong.nguyen-thanh": {"name": "EXTERNAL Nguyen Thanh Phuong (Ban Vien), RBVH/EPS45", "id": "gup7hc"}
+    }
+}

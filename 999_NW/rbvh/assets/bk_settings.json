@@ -1,0 +1,38 @@
+{
+    // "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm",
+    // "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200506/COEM",
+    // "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
+
+    "file_summary": "D:/Material/GIT/My_Document/999_NW/Test_Folder/Sample/Summary_JOEM_COEM_20200501.xlsm",
+    "dir_input": "C:/Users/hieu.nguyen-trung/Desktop/check",
+    "dir_output": "C:/Users/hieu.nguyen-trung/Desktop/OUTPUT",
+
+    "l_taskids": [
+        // 1411690,1411700,1417738,1423830,1423829 // Group 24-Apr-2020
+        // 1424417 // Group 28-Apr-2020
+        // 1426302,1425475,1420442,1404793 // Group 29-Apr-2020
+        // 1416607,1416606,1417780 // Group 30-Apr-2020
+        // 1435905,1439160,1439436,1417033 // Group 5-May-2020
+        // 1439430,1416489,1442021 // Group 6-May-2020
+        1449890,1446629,1449424,1449711 // Group 8-May-2020
+    ],
+    "mode": [
+        "check_releases",
+        "check_archives"//,
+        // "make_archieves"
+    ],
+
+    "Tool_7z": "C:/Program Files/7-Zip/7z.exe",
+    "users": [
+        {"hieu.nguyen-trung": {"name": "EXTERNAL Nguyen Trung Hieu (Ban Vien), RBVH/EPS45)"}, "id": "nhi5hc"},
+        {"hau.nguyen-tai": {"name": "EXTERNAL Nguyen Tai Hau (Ban Vien), RBVH/EPS45)"}, "id": "nah4hc"},
+        {"bang.nguyen-duy": {"name": "EXTERNAL Nguyen Duy Bang (Ban Vien), RBVH/EPS45)"}, "id": "nbg7hc"},
+        {"dac.luu-cong": {"name": "EXTERNAL Luu Cong Dac (Ban Vien), RBVH/EPS45)"}, "id": "lud5hc"},
+        {"duong.nguyen": {"name": "EXTERNAL Nguyen Tuan Duong (Ban Vien), RBVH/EPS45)"}, "id": "ndy4hc"},
+        {"loc.do-phu": {"name": "EXTERNAL Do Phu Loc (Ban Vien), RBVH/EPS45)"}, "id": "dol7hc"},
+        {"thanh.nguyen-kimhieu": {"name": "EXTERNAL Nguyen Kim Thanh (Ban Vien), RBVH/EPS45)"}, "id": "nut4hc"},
+        {"chung.ly": {"name": "EXTERNAL Ly Chung (Ban Vien), RBVH/EPS45)"}, "id": "lyc1hc"},
+        {"huy.do-anh": {"name": "EXTERNAL Do Anh Huy (Ban Vien), RBVH/EPS45)"}, "id": "duh7hc"},
+        {"phuong.nguyen-thanh": {"name": "EXTERNAL Nguyen Thanh Phuong (Ban Vien), RBVH/EPS45)"}, "id": "gup7hc"}
+    ]
+}
