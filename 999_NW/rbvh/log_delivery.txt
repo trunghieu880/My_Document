@@ -1,0 +1,24 @@
+Start checker: Release
+*****************************************************************
+1435905,rba_BldrCmp_Cfg_CheckMem,phuong.nguyen-thanh,OK
+1435905,rba_BldrCmp_Cfg_FlashIf,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_Functions,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_NvmIf,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_PrjFunctions,hau.nguyen-tai,NG
+1435905,rba_BldrCmp_Cfg_SecA,hau.nguyen-tai,NG
+1435905,rba_sbl_main,hau.nguyen-tai,NG
+## Total 1435905: status BAD: Found/Count/Total - 1/1/7
+-----------------------------------------------------------------
+FINISH
+Start checker: Archives
+*****************************************************************
+1435905,rba_BldrCmp_Cfg_CheckMem,phuong.nguyen-thanh,NG-DiffInfor
+1435905,rba_BldrCmp_Cfg_FlashIf,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_Functions,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_NvmIf,phuong.nguyen-thanh,NG
+1435905,rba_BldrCmp_Cfg_PrjFunctions,hau.nguyen-tai,NG
+1435905,rba_BldrCmp_Cfg_SecA,hau.nguyen-tai,NG
+1435905,rba_sbl_main,hau.nguyen-tai,NG
+## Total 1435905: status BAD: Found/Count/Total - 1/1/7
+-----------------------------------------------------------------
+FINISH

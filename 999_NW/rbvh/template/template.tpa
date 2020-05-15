@@ -1,0 +1,26 @@
+<TestProcessAttributes>
+	<UnitUnderTest>1</UnitUnderTest>
+	<ExecutionDate>1_1</ExecutionDate>
+	<Test>
+		<TestResult>
+			<NTUserID>2</NTUserID>
+			<Verdict>4</Verdict>
+			
+			<TesterPart>
+				<FileName>3</FileName>
+				<Coverage>
+					<MetricName>C0</MetricName>
+					<Value>
+						<Percentage>5</Percentage>
+					</Value>
+				</Coverage>
+				<Coverage>
+					<MetricName>C1</MetricName>
+					<Value>
+						<Percentage>6</Percentage>
+					</Value>
+				</Coverage>
+			</TesterPart>
+		</TestResult>
+	</Test>
+</TestProcessAttributes>
