@@ -14,6 +14,9 @@ import __init__
 import utils
 import const as CONST
 
+import win32com.client
+from win32com.client import Dispatch
+
 def get_xlsx_raw(xlsx, sheet, begin=1, end=sys.maxsize, headers={}):
     '''Get raw data of table from excel.'''
     def val(cell):

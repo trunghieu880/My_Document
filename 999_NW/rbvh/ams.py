@@ -11,6 +11,8 @@ import const as CONST
 import subprocess
 import re
 from docx.api import Document
+import win32com.client
+from win32com.client import Dispatch
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +51,8 @@ class FileTPA(Base):
 
         lst_Percentage[0].text = data['C0']
         lst_Percentage[1].text = data['C1']
-        # lst_Percentage[2].text = data['MCDCU']
+        if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+            lst_Percentage[2].text = data['MCDCU']
 
         path = re.sub("file:/", "", self.doc.docinfo.URL)
         with open(path, 'wb') as f:
@@ -216,19 +219,75 @@ class FileCoverageReasonXLS(Base):
     def __init__(self, path):
         super().__init__(path)
         self.doc = str(path)
-    # Function parse2json: convert XLSX to json data
-    def parse2json(self, begin=47, end=47):
-        return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
-
-class FileSummaryXLSX(Base):
-    # Class FileSummaryXLSX
-    def __init__(self, path):
-        super().__init__(path)
-        self.doc = str(path)
 
     # Function parse2json: convert XLSX to json data
-    def parse2json(self, begin=47, end=47):
-        return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
+    def parse2json(self):
+        excel = win32com.client.Dispatch('Excel.Application')
+        wb = excel.Workbooks.Open(self.doc)
+
+        excel.Visible = False
+        excel.DisplayAlerts = False
+        wb.DoNotPromptForConvert = True
+        wb.CheckCompatibility = False
+
+        readData = wb.Worksheets(1)
+        allData = readData.UsedRange
+
+        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
+
+        data = {
+            "Tester": allData.Cells(5, 6).value,
+            "Date": allData.Cells(6, 6).value,
+            "Item_Name": allData.Cells(7, 6).value,
+            "C0": allData.Cells(13, 6).value,
+            "C1": allData.Cells(14, 6).value,
+            "MCDC": allData.Cells(15, 6).value
+        }
+
+        wb.Save()
+        wb.Close()
+        excel.Quit()
+        excel = None
+        return data
+
+    # Function update_tpa: update tpa file with the input data
+    def update(self, data):
+        excel = win32com.client.Dispatch('Excel.Application')
+        wb = excel.Workbooks.Open(self.doc)
+
+        excel.Visible = False
+        excel.DisplayAlerts = False
+        wb.DoNotPromptForConvert = True
+        wb.CheckCompatibility = False
+
+        score_c0 = (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA")
+        score_c1 = (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+        score_mcdc = (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")
+
+        data_tpa = {
+            "UnitUnderTest": data.get("ItemName"),
+            "NTUserID": str(convert_name(key=data.get("Tester"), opt="id")),
+            "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%d"),
+            "C0": score_c0,
+            "C1": score_c1,
+            "MCDCU": score_mcdc
+        }
+
+        writeData = wb.Worksheets(1)
+        # Write data here
+        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
+
+        writeData.Range(infor_CoverageReasonXLS.get("Tester")).Value = data_tpa.get("NTUserID")
+        writeData.Range(infor_CoverageReasonXLS.get("Date")).Value = data_tpa.get("ExecutionDate")
+        writeData.Range(infor_CoverageReasonXLS.get("Item_Name")).Value = data_tpa.get("UnitUnderTest")
+        writeData.Range(infor_CoverageReasonXLS.get("C0")).Value = data_tpa.get("C0")
+        writeData.Range(infor_CoverageReasonXLS.get("C1")).Value = data_tpa.get("C1")
+        writeData.Range(infor_CoverageReasonXLS.get("MCDC")).Value = data_tpa.get("MCDCU")
+
+        wb.Save()
+        wb.Close()
+        excel.Quit()
+        excel = None
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, data, key, value):
@@ -239,6 +298,16 @@ class FileSummaryXLSX(Base):
                 d[item] = data[item]
 
         return d
+
+class FileSummaryXLSX(Base):
+    # Class FileSummaryXLSX
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = str(path)
+
+    # Function parse2json: convert XLSX to json data
+    def parse2json(self, begin=47, end=47):
+        return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, data, key, value):
@@ -401,7 +470,7 @@ def value(cell):
         return str(cell)
 
 # Check information between summary xlsx, and test_summay_html is same or not
-def check_information(file_test_summary_html, data):
+def check_information(file_test_summary_html, data, file_test_report_xml="", file_tpa=""):
     data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
 
     logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
@@ -421,7 +490,6 @@ def check_information(file_test_summary_html, data):
         flag = False
         logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
         return False
-        
 
     if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
             and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
@@ -429,12 +497,39 @@ def check_information(file_test_summary_html, data):
         flag = True
     else:
         flag = False
-        logger.error("ItemName {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+        logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
                                                                     data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
                                                                     data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
                                                                     )
         return False
 
+    if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+        data_tpa = FileTPA(file_tpa).get_data()
+        if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_tpa.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("UnitUnderTest"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_tpa.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                        )
+            return = False
+        
+        data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
+
+        if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                        )
+            return = False
     return flag
 
 # Update WalkThrough

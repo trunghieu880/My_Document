@@ -27,6 +27,15 @@
         "make_archives"
     ],
 
+    "CoverageReasonXLS": {
+        "Tester": "G6",
+        "Date": "G7",
+        "Item_Name": "G8",
+        "C0": "G14",
+        "C1": "G15",
+        "MCDC": "G16"
+    },
+
     "Tool_7z": "C:/Program Files/7-Zip/7z.exe",
     "users": {
         "hieu.nguyen-trung": {"name": "EXTERNAL Nguyen Trung Hieu (Ban Vien), RBVH/EPS45", "id": "nhi5hc"},
