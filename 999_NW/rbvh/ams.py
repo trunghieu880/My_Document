@@ -165,19 +165,24 @@ class FileTestSummaryHTML(Base):
     # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
         data = dict()
-        for e in self.doc.iterfind('.//{0}'.format("div")):
-            if "Project:" in e.text or "Overall Result:" in e.text:
-                for item in e:
-                    if "Project:" in e.text:
-                        data = {**data, **{'Project': item.text}}
-                    elif "Overall Result:" in e.text:
-                        data = {**data, **{'Verdict': item.text}}
-                    else:
-                        print("BUG FileTestSummaryHTML get_data")
         try:
+            for e in self.doc.iterfind('.//{0}'.format("div")):
+                if e.text == None:
+                    continue
+                if "Project:" in e.text or "Overall Result:" in e.text:
+                    for item in e:
+                        if "Project:" in e.text:
+                            data = {**data, **{'Project': item.text}}
+                        elif "Overall Result:" in e.text:
+                            data = {**data, **{'Verdict': item.text}}
+                        else:
+                            print("BUG FileTestSummaryHTML get_data")
+        
             key = ""
             flag = False
             for e in self.doc.iterfind('.//{0}'.format("div")):
+                if e.text == None:
+                    continue
                 if e.text == "Statement (S)" or e.text == "Decision (D)" or e.text == "MC/DC - masking (M)" or e.text == "MC/DC - unique cause (U)":
                     flag = True
                     if e.text == "Statement (S)":
@@ -201,7 +206,6 @@ class FileTestSummaryHTML(Base):
                         next
                     else:
                         continue
-
         except Exception as e:
             data = {}
             raise(e)
@@ -307,7 +311,7 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
         data = doc.parse2json(begin=begin, end=end)
 
         file_log = open("log_delivery.txt", "a")
-        
+
         print("Start checker: Archives")
         print("*****************************************************************")
         file_log.write("Start checker: Archives\n")
@@ -355,7 +359,7 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
         print("FINISH")
         file_log.write("FINISH\n")
         file_log.close()
-        
+
     except Exception as e:
         logger.exception(e)
     finally:
@@ -408,8 +412,16 @@ def check_information(file_test_summary_html, data):
         flag = True
     else:
         flag = False
-        logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), data.get("ItemName").repace(".c", "")))
+        logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), data.get("ItemName").replace(".c", "")))
         return False
+
+    if data_test_summary.get("Verdict") == "Pass":
+        flag = True
+    else:
+        flag = False
+        logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
+        return False
+        
 
     if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
             and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
@@ -499,7 +511,7 @@ def sevenzip(filename, zipname):
 def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
     logger.debug("Create Archive Walkthrough")
     try:
-            
+
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
 
@@ -589,6 +601,6 @@ def main():
         logger.exception(e)
     finally:
         logger.debug("Done)")
-        
+
 if __name__ == "__main__":
     main()

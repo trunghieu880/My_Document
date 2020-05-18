@@ -1,14 +1,27 @@
 {
     "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm",
-    "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/COEM/15-May-2020",
+    "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200514/COEM/19-May-2020",
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
 
     "sheetname": "Merged_COEM",
     
     "l_taskids": [
-        1460003,1461444,9.1
+        1433776,1468187,1468172,1468219
     ],
+
+    "l_taskids_1": [
+        1433776,1468187,1468172,1468219
+    ],
+    "l_taskids_2": [
+        1433776,1468187,1468172,1468219
+    ],
+
     "mode": [
+        "check_releases",
+        "check_archives"
+    ],
+
+    "mode1": [
         "check_releases",
         "check_archives",
         "make_archives"
