@@ -220,36 +220,6 @@ class FileCoverageReasonXLS(Base):
         super().__init__(path)
         self.doc = str(path)
 
-    # Function parse2json: convert XLSX to json data
-    def parse2json(self):
-        excel = win32com.client.Dispatch('Excel.Application')
-        wb = excel.Workbooks.Open(self.doc)
-
-        excel.Visible = False
-        excel.DisplayAlerts = False
-        wb.DoNotPromptForConvert = True
-        wb.CheckCompatibility = False
-
-        readData = wb.Worksheets(1)
-        allData = readData.UsedRange
-
-        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
-
-        data = {
-            "Tester": allData.Cells(5, 6).value,
-            "Date": allData.Cells(6, 6).value,
-            "Item_Name": allData.Cells(7, 6).value,
-            "C0": allData.Cells(13, 6).value,
-            "C1": allData.Cells(14, 6).value,
-            "MCDC": allData.Cells(15, 6).value
-        }
-
-        wb.Save()
-        wb.Close()
-        excel.Quit()
-        excel = None
-        return data
-
     # Function update_tpa: update tpa file with the input data
     def update(self, data):
         excel = win32com.client.Dispatch('Excel.Application')
@@ -290,14 +260,34 @@ class FileCoverageReasonXLS(Base):
         excel = None
 
     # Function get_data: to get the array data with specfic key, value of the nested json
-    def get_data(self, data, key, value):
-        item = -1
-        d = dict()
-        for item in data.keys():
-            if(data[item].get(key) == value):
-                d[item] = data[item]
+    def get_data(self):
+        excel = win32com.client.Dispatch('Excel.Application')
+        wb = excel.Workbooks.Open(self.doc)
 
-        return d
+        excel.Visible = False
+        excel.DisplayAlerts = False
+        wb.DoNotPromptForConvert = True
+        wb.CheckCompatibility = False
+
+        readData = wb.Worksheets(1)
+        allData = readData.UsedRange
+
+        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
+
+        data = {
+            "Tester": allData.Cells(5, 6).value,
+            "Date": allData.Cells(6, 6).value,
+            "Item_Name": allData.Cells(7, 6).value,
+            "C0": allData.Cells(13, 6).value,
+            "C1": allData.Cells(14, 6).value,
+            "MCDC": allData.Cells(15, 6).value
+        }
+
+        wb.Save()
+        wb.Close()
+        excel.Quit()
+        excel = None
+        return data
 
 class FileSummaryXLSX(Base):
     # Class FileSummaryXLSX
@@ -322,6 +312,200 @@ class FileSummaryXLSX(Base):
 # Check the directory of function is exist or not
 def check_exist(dir_input, function):
     return Path(dir_input).joinpath(function).exists()
+
+# Convert Tester name to Real Name or USERID
+def convert_name(key, opt="name"):
+    logger.debug("Convert name")
+    try:
+        users = utils.load(CONST.SETTING).get("users")
+
+        if opt == "name" or opt == "id":
+            return str(users[key].get(opt))
+        else:
+            raise("Bug convert name")
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
+
+# Check path : have src extension or not
+def is_have_src(path):
+    return ("\\src" in path or "\\SRC" in path)
+
+# Trim Component Path to find the correct path
+def trim_src(path):
+    result = re.sub("^.*\\\\rb\\\\", "rb\\\\", path)
+    result = re.sub("^.*\\\\rba\\\\", "rba\\\\", result)
+    result = re.sub("\\\\src\\\\.*$", "", result)
+    result = re.sub("\\\\SRC\\\\.*$", "", result)
+    result = re.sub("\\\\src$", "", result)
+    result = re.sub("\\\\SRC$", "", result)
+    return result
+
+def value(cell):
+    if str(cell).isdigit():
+        return str(cell)
+    else:
+        return str(cell)
+
+# Check information between summary xlsx, and test_summay_html is same or not
+def check_information(file_test_summary_html, data, file_test_report_xml="", file_tpa="", file_CoverageReasonXLS=""):
+    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
+
+    logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
+    count = 0
+    flag = False
+
+    if data_test_summary.get("Project") == data.get("ItemName").replace(".c", ""):
+        flag = True
+    else:
+        flag = False
+        logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), data.get("ItemName").replace(".c", "")))
+        return False
+
+    if data_test_summary.get("Verdict") == "Pass":
+        flag = True
+    else:
+        flag = False
+        logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
+        return False
+
+    if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+            and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+            and data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+        flag = True
+    else:
+        flag = False
+        logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                    data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                    data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                    )
+        return False
+
+    if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+        # Check information between FileTPA and Summary
+        data_tpa = FileTPA(file_tpa).get_data()
+        if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_tpa.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("UnitUnderTest"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_tpa.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                        )
+            return = False
+        
+        # Check information between FileTestReportXML and Summary
+        data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
+
+        if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                        )
+            return = False
+
+        # Check information between FileCoverageReasonXLS and Summary
+        data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
+
+        if ((data_CoverageReasonXLS.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_CoverageReasonXLS.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_CoverageReasonXLS.get("MCDC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                        )
+            return = False
+
+    return flag
+
+# Check Release for JOEM is correct ot not
+def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
+    logger.debug("Start checker: Archives")
+    try:
+        doc = FileSummaryXLSX(path_summary)
+        data = doc.parse2json(begin=begin, end=end)
+
+        file_log = open("log_delivery.txt", "a")
+
+        print("Start checker: Archives")
+        print("*****************************************************************")
+        file_log.write("Start checker: Archives\n")
+        file_log.write("*****************************************************************\n")
+        for taskid in taskids["MT_Number"]:
+            data_taskid = doc.get_data(data=data, key="Project", value=taskids["Project"]).get_data(data=data, key="MT_Number", value=taskid)
+            bb_number = taskids["BB"]
+            
+            task_group = data_taskid["TaskGroup"]
+            mt_number = data_taskid["MT_Number"].replace("UT_", "").replace("MT_", "")
+            if "ASW" == data_taskid["Type"]:
+                mt_number = "MT_" + mt_number
+                continue
+            elif "PSW" == data_taskid["Type"]:
+                mt_number = "UT_" + mt_number
+            else:
+                mt_number = "NONE"
+                print("BUG mt_number")
+            
+            path_taskid = Path(dir_input).joinpath(str(taskid), task_group)
+            if (path_taskid.exists()):
+                count = 0
+                for item in data_taskid.keys():
+                    function = data_taskid[item].get("ItemName").replace(".c", "")
+                    folder_mt_function = "{}_{}_{}".format(mt_number, function, bb_number)
+                    user_tester = data_taskid[item].get("Tester")
+
+                    b_check_exist = check_exist(dir_input=path_taskid, function=folder_mt_function)
+                    if (b_check_exist):
+                        count += 1
+                        
+                        file_tpa = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "{}.tpa".format(function))
+                        file_CoverageReasonXLS = Path(path_taskid).joinpath(folder_mt_function, "doc", "{}_{}".format(function, "CodeCoverage_or_Fail_Reason.xls"))
+                        file_test_report_xml = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_report.xml")
+                        file_test_summary = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_summary.html")
+
+                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], file_test_report_xml=file_test_report_xml, file_tpa=file_tpa, file_CoverageReasonXLS=file_CoverageReasonXLS):
+                            print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+                        else:
+                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG-DiffInfor"))
+                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG-DiffInfor"))
+
+                    else:
+                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
+
+                num_tpa = len(utils.scan_files(directory=path_taskid, ext=".tpa")[0])
+                status = ["GOOD" if (num_tpa == len(data_taskid)) and (count == len(data_taskid)) else "BAD"][0]
+                print("## Total {}: status {}: Found/Count/Total - {}/{}/{}".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+                print("-----------------------------------------------------------------\n")
+
+                file_log.write("## Total {}: status {}: Found/Count/Total - {}/{}/{}\n".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+                file_log.write("-----------------------------------------------------------------\n")
+
+            else:
+                logger.warning("{} is not existed".format(path_taskid))
+                file_log.write("{} is not existed\n".format(path_taskid))
+                next
+
+        print("FINISH")
+        file_log.write("FINISH\n")
+        file_log.close()
+
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
 
 # Check Release is correct or not
 def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
@@ -433,104 +617,6 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
         logger.exception(e)
     finally:
         logger.debug("Done")
-
-# Convert Tester name to Real Name or USERID
-def convert_name(key, opt="name"):
-    logger.debug("Convert name")
-    try:
-        users = utils.load(CONST.SETTING).get("users")
-
-        if opt == "name" or opt == "id":
-            return str(users[key].get(opt))
-        else:
-            raise("Bug convert name")
-    except Exception as e:
-        logger.exception(e)
-    finally:
-        logger.debug("Done")
-
-# Check path : have src extension or not
-def is_have_src(path):
-    return ("\\src" in path or "\\SRC" in path)
-
-# Trim Component Path to find the correct path
-def trim_src(path):
-    result = re.sub("^.*\\\\rb\\\\", "rb\\\\", path)
-    result = re.sub("^.*\\\\rba\\\\", "rba\\\\", result)
-    result = re.sub("\\\\src\\\\.*$", "", result)
-    result = re.sub("\\\\SRC\\\\.*$", "", result)
-    result = re.sub("\\\\src$", "", result)
-    result = re.sub("\\\\SRC$", "", result)
-    return result
-
-def value(cell):
-    if str(cell).isdigit():
-        return str(cell)
-    else:
-        return str(cell)
-
-# Check information between summary xlsx, and test_summay_html is same or not
-def check_information(file_test_summary_html, data, file_test_report_xml="", file_tpa=""):
-    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-
-    logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
-    count = 0
-    flag = False
-
-    if data_test_summary.get("Project") == data.get("ItemName").replace(".c", ""):
-        flag = True
-    else:
-        flag = False
-        logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), data.get("ItemName").replace(".c", "")))
-        return False
-
-    if data_test_summary.get("Verdict") == "Pass":
-        flag = True
-    else:
-        flag = False
-        logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
-        return False
-
-    if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-            and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-            and data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
-        flag = True
-    else:
-        flag = False
-        logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                    data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                    data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                                                                    )
-        return False
-
-    if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-        data_tpa = FileTPA(file_tpa).get_data()
-        if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_tpa.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
-            flag = True
-        else:
-            flag = False
-            logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("UnitUnderTest"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_tpa.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                                                                        )
-            return = False
-        
-        data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
-
-        if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
-            flag = True
-        else:
-            flag = False
-            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                                                                        )
-            return = False
-    return flag
 
 # Update WalkThrough
 def update_walkthrough(file, data, file_test_summary_html):
