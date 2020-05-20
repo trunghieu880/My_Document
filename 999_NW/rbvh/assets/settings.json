@@ -1,25 +1,24 @@
 {
     "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm",
-    "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200514/COEM/19-May-2020",
+    "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
+    "dir_input_joem": "C:/test_hieunguyen",
+    "dir_input_joem1": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
+    "dir_input_coem": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200519/COEM/20-May-2020",
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
 
     "sheetname": "Merged_COEM",
     
-    "l_taskids": [
-        1433776,1468187,1468172,1468219
+    "l_taskids_coem": [
+        1445994
     ],
 
     "l_taskids_joem": {
         "Project": "HONDA_CMP_BL11sp02_snapshot05",
-        "BB": "BB82135",
-        "MT_Number": [
-            "MT_223", "MT_225", "MT_200", "MT_201", "MT_202", "MT_203", "MT_204", "MT_205", "MT_206", "MT_207", "MT_004", "MT_009", "MT_012", "MT_028", "MT_054", "MT_081", "MT_083", "MT_085", "MT_086", "MT_087", "MT_088", "MT_090", "MT_095", "MT_096", "MT_097", "MT_099", "MT_108", "MT_112", "MT_125"
+        "BB": "BB80195",
+        "TaskGroup": [
+            "T500", "T501"
         ]
     },
-
-    "l_taskids_2": [
-        1433776,1468187,1468172,1468219
-    ],
 
     "mode": [
         "check_releases",
@@ -28,6 +27,11 @@
 
     "mode1": [
         "check_releases",
+        "check_archives",
+        "make_archives"
+    ],
+
+    "mode_joem": [
         "check_archives",
         "make_archives"
     ],

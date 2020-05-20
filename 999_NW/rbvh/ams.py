@@ -101,15 +101,15 @@ class FileTestReportXML(Base):
 
     # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
-        lst_header = ["status", "statement", "decision", "booleanOperanndEffectivenessMasking", "booleanOperanndEffectivenessUnique", "testScriptName"]
+        lst_header = ["status", "statement", "decision", "booleanOperandEffectivenessMasking", "booleanOperandEffectivenessUnique", "testScriptName"]
         node_summary = self.get_tag("summary")
         status = {'Verdict': node_summary.attrib['status']}
         node_coverageInfo = self.get_tag("coverageInfo")[0]
 
         score = {'C0': item.text for item in node_coverageInfo if item.tag == "statement"}
         score = {**score, **{'C1': item.text for item in node_coverageInfo if item.tag == "decision"}}
-        score = {**score, **{'MCDCM': item.text for item in node_coverageInfo if item.tag == "booleanOperanndEffectivenessMasking"}}
-        score = {**score, **{'MCDCU': item.text for item in node_coverageInfo if item.tag == "booleanOperanndEffectivenessUnique"}}
+        score = {**score, **{'MCDCM': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessMasking"}}
+        score = {**score, **{'MCDCU': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessUnique"}}
 
         testscriptname = {'testScriptName': item.text for item in self.get_tag("info") if item.tag == "testScriptName"}
 
@@ -224,7 +224,6 @@ class FileCoverageReasonXLS(Base):
     def update(self, data):
         excel = win32com.client.Dispatch('Excel.Application')
         wb = excel.Workbooks.Open(self.doc)
-
         excel.Visible = False
         excel.DisplayAlerts = False
         wb.DoNotPromptForConvert = True
@@ -275,12 +274,12 @@ class FileCoverageReasonXLS(Base):
         infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
 
         data = {
-            "Tester": allData.Cells(5, 6).value,
-            "Date": allData.Cells(6, 6).value,
-            "Item_Name": allData.Cells(7, 6).value,
-            "C0": allData.Cells(13, 6).value,
-            "C1": allData.Cells(14, 6).value,
-            "MCDC": allData.Cells(15, 6).value
+            "Tester": value(allData.Cells(1, 2).value),
+            "Date": value(allData.Cells(2, 2).value),
+            "Item_Name": value(allData.Cells(3, 2).value),
+            "C0": value(allData.Cells(9, 2).value),
+            "C1": value(allData.Cells(10, 2).value),
+            "MCDC": value(allData.Cells(11, 2).value)
         }
 
         wb.Save()
@@ -349,85 +348,98 @@ def value(cell):
         return str(cell)
 
 # Check information between summary xlsx, and test_summay_html is same or not
-def check_information(file_test_summary_html, data, file_test_report_xml="", file_tpa="", file_CoverageReasonXLS=""):
-    data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-
-    logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
-    count = 0
-    flag = False
-
-    if data_test_summary.get("Project") == data.get("ItemName").replace(".c", ""):
-        flag = True
-    else:
-        flag = False
-        logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), data.get("ItemName").replace(".c", "")))
-        return False
-
-    if data_test_summary.get("Verdict") == "Pass":
-        flag = True
-    else:
-        flag = False
-        logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
-        return False
-
-    if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-            and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-            and data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
-        flag = True
-    else:
-        flag = False
-        logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                    data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                    data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                    )
-        return False
-
-    if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-        # Check information between FileTPA and Summary
-        data_tpa = FileTPA(file_tpa).get_data()
-        if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_tpa.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
-            flag = True
-        else:
-            flag = False
-            logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("UnitUnderTest"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_tpa.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                        )
-            return = False
+def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt=""):
+    try:
+        data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
         
-        # Check information between FileTestReportXML and Summary
-        data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
+        logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
+        count = 0
+        flag = False
 
-        if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+        temp = ""
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            temp = function_with_prj_name
+        else:
+            temp = data.get("ItemName").replace(".c", "")
+        
+        if data_test_summary.get("Project") == temp:
             flag = True
         else:
             flag = False
-            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                                                                        )
-            return = False
+            logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), temp))
+            return False
 
-        # Check information between FileCoverageReasonXLS and Summary
-        data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
-
-        if ((data_CoverageReasonXLS.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_CoverageReasonXLS.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_CoverageReasonXLS.get("MCDC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+        if data_test_summary.get("Verdict") == "Pass":
             flag = True
         else:
             flag = False
-            logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
-                                                                        )
-            return = False
+            logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
+            return False
 
-    return flag
+        if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                and data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            flag = True
+        else:
+            flag = False
+            logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                        data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                        data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                        )
+            return False
+
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            # Check information between FileTPA and Summary
+            if (opt == "check_tpa_xls"):
+                data_tpa = FileTPA(file_tpa).get_data()
+                data_tpa = data_tpa[data.get("ItemName").replace(".c", "") + ".c"]
+                if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                        and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                        and data_tpa.get("MC/DC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+                    flag = True
+                else:
+                    flag = False
+                    logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                                data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                                data_tpa.get("MC/DC"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                )
+                    return False
+            
+            # Check information between FileTestReportXML and Summary
+            data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
+
+            if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                    and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                    and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+                flag = True
+            else:
+                flag = False
+                logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                            data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                            data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                            )
+                return False
+
+            if (opt == "check_tpa_xls"):
+                # Check information between FileCoverageReasonXLS and Summary
+                data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
+                if ((data_CoverageReasonXLS.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
+                        and data_CoverageReasonXLS.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+                        and data_CoverageReasonXLS.get("MCDC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+                    flag = True
+                else:
+                    flag = False
+                    logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
+                                                                                data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
+                                                                                data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                                                                                )
+                    return False
+
+        return flag
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
 
 # Check Release for JOEM is correct ot not
 def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
@@ -436,34 +448,37 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
 
-        file_log = open("log_delivery.txt", "a")
+        file_log = open("log_delivery.txt", "w")
 
         print("Start checker: Archives")
         print("*****************************************************************")
         file_log.write("Start checker: Archives\n")
         file_log.write("*****************************************************************\n")
-        for taskid in taskids["MT_Number"]:
-            data_taskid = doc.get_data(data=data, key="Project", value=taskids["Project"]).get_data(data=data, key="MT_Number", value=taskid)
+
+        for taskid in taskids["TaskGroup"]:
+            temp_data_prj = doc.get_data(data=data, key="Project", value=taskids["Project"])
+            data_taskid = doc.get_data(data=temp_data_prj, key="TaskGroup", value=taskid)
             bb_number = taskids["BB"]
-            
-            task_group = data_taskid["TaskGroup"]
-            mt_number = data_taskid["MT_Number"].replace("UT_", "").replace("MT_", "")
-            if "ASW" == data_taskid["Type"]:
-                mt_number = "MT_" + mt_number
-                continue
-            elif "PSW" == data_taskid["Type"]:
-                mt_number = "UT_" + mt_number
-            else:
-                mt_number = "NONE"
-                print("BUG mt_number")
-            
-            path_taskid = Path(dir_input).joinpath(str(taskid), task_group)
+            path_taskid = Path(dir_input).joinpath(str(taskid))
             if (path_taskid.exists()):
                 count = 0
                 for item in data_taskid.keys():
                     function = data_taskid[item].get("ItemName").replace(".c", "")
-                    folder_mt_function = "{}_{}_{}".format(mt_number, function, bb_number)
                     user_tester = data_taskid[item].get("Tester")
+                    mt_number = data_taskid[item].get("MT_Number").replace("UT_", "").replace("MT_", "")
+
+                    if "ASW" == data_taskid[item].get("Type"):
+                        mt_number = "MT_" + mt_number
+                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG_MT_Check_Later"))
+                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_MT_Check_Later"))
+                        continue
+                    elif "PSW" == data_taskid[item].get("Type"):
+                        mt_number = "UT_" + mt_number
+                    else:
+                        mt_number = "NONE"
+                        print("BUG mt_number")
+
+                    folder_mt_function = "{}_{}_{}".format(mt_number, function, bb_number)
 
                     b_check_exist = check_exist(dir_input=path_taskid, function=folder_mt_function)
                     if (b_check_exist):
@@ -474,12 +489,107 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
                         file_test_report_xml = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_report.xml")
                         file_test_summary = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_summary.html")
 
-                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], file_test_report_xml=file_test_report_xml, file_tpa=file_tpa, file_CoverageReasonXLS=file_CoverageReasonXLS):
+                        option_check = ""
+                        if (len(str(function)) < 32):
+                            option_check = "check_tpa_xls"
+                        else:
+                            option_check = ""
+
+                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], function_with_prj_name=folder_mt_function, file_test_report_xml=file_test_report_xml, file_tpa=file_tpa, file_CoverageReasonXLS=file_CoverageReasonXLS, opt=option_check):
                             print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                             file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
                         else:
-                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG-DiffInfor"))
-                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG-DiffInfor"))
+                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
+                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
+
+                    else:
+                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
+
+                num_tpa = len(utils.scan_files(directory=path_taskid, ext=".tpa")[0])
+                status = ["GOOD" if (num_tpa == len(data_taskid)) and (count == len(data_taskid)) else "BAD"][0]
+                print("## Total {}: status {}: Found/Count/Total - {}/{}/{}".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+                print("-----------------------------------------------------------------\n")
+
+                file_log.write("## Total {}: status {}: Found/Count/Total - {}/{}/{}\n".format(str(taskid), status, count, num_tpa, len(data_taskid)))
+                file_log.write("-----------------------------------------------------------------\n")
+
+            else:
+                logger.warning("{} is not existed".format(path_taskid))
+                file_log.write("{} is not existed\n".format(path_taskid))
+                next
+
+        print("FINISH")
+        file_log.write("FINISH\n")
+        file_log.close()
+
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
+
+# Check Release for JOEM is correct ot not
+def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
+    logger.debug("Start checker: Make Archives JOEM")
+    try:
+        doc = FileSummaryXLSX(path_summary)
+        data = doc.parse2json(begin=begin, end=end)
+
+        file_log = open("log_delivery.txt", "w")
+
+        print("Start checker: Make Archives JOEM")
+        print("*****************************************************************")
+        file_log.write("Start checker: Make Archives JOEM\n")
+        file_log.write("*****************************************************************\n")
+
+        for taskid in taskids["TaskGroup"]:
+            temp_data_prj = doc.get_data(data=data, key="Project", value=taskids["Project"])
+            data_taskid = doc.get_data(data=temp_data_prj, key="TaskGroup", value=taskid)
+            bb_number = taskids["BB"]
+            path_taskid = Path(dir_input).joinpath(str(taskid))
+            if (path_taskid.exists()):
+                count = 0
+                for item in data_taskid.keys():
+                    function = data_taskid[item].get("ItemName").replace(".c", "")
+                    user_tester = data_taskid[item].get("Tester")
+                    mt_number = data_taskid[item].get("MT_Number").replace("UT_", "").replace("MT_", "")
+
+                    if "ASW" == data_taskid[item].get("Type"):
+                        mt_number = "MT_" + mt_number
+                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG_MT_Check_Later"))
+                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_MT_Check_Later"))
+                        continue
+                    elif "PSW" == data_taskid[item].get("Type"):
+                        mt_number = "UT_" + mt_number
+                    else:
+                        mt_number = "NONE"
+                        print("BUG mt_number")
+
+                    folder_mt_function = "{}_{}_{}".format(mt_number, function, bb_number)
+
+                    b_check_exist = check_exist(dir_input=path_taskid, function=folder_mt_function)
+                    if (b_check_exist):
+                        count += 1
+                        
+                        file_tpa = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "{}.tpa".format(function))
+                        file_CoverageReasonXLS = Path(path_taskid).joinpath(folder_mt_function, "doc", "{}_{}".format(function, "CodeCoverage_or_Fail_Reason.xls"))
+                        file_test_report_xml = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_report.xml")
+                        file_test_summary = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_summary.html")
+
+                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], function_with_prj_name=folder_mt_function, file_test_report_xml=file_test_report_xml, opt=""):
+                            if (len(str(function)) < 32):
+                                FileCoverageReasonXLS(file_CoverageReasonXLS).update(data_taskid[item])
+                                utils.copy(src=Path(CONST.TEMPLATE).joinpath("template_joem.tpa"), dst=file_tpa)
+                                update_tpa(file=file_tpa, data=data_taskid[item], file_test_summary_html=file_test_summary)
+
+                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+                            else:
+                                logger.error("Long Name {},{},{},{}".format(taskid, function, user_tester, "NG_Long_Name"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_Long_Name"))
+                        else:
+                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
+                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
 
                     else:
                         logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
@@ -589,8 +699,8 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
                             print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                             file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
                         else:
-                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG-DiffInfor"))
-                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG-DiffInfor"))
+                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
+                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
 
                     else:
                         logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
@@ -666,7 +776,7 @@ def update_tpa(file, data, file_test_summary_html):
     try:
         data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
         data_tpa = {
-            "UnitUnderTest": data.get("ItemName"),
+            "UnitUnderTest": data.get("ItemName").replace(".c", "") + ".c",
             "NTUserID": str(convert_name(key=data.get("Tester"), opt="id")),
             "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "FileName": data.get("ItemName"),
@@ -766,16 +876,27 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
-        dir_input = utils.load(CONST.SETTING).get("dir_input")
+        dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
         dir_output = utils.load(CONST.SETTING).get("dir_output")
-        l_taskids = utils.load(CONST.SETTING).get("l_taskids")
-        for opt in utils.load(CONST.SETTING).get("mode"):
+        sheetname = utils.load(CONST.SETTING).get("sheetname")
+        
+        l_taskids = utils.load(CONST.SETTING).get("l_taskids_coem")
+        if sheetname == "Merged_JOEM":
+            l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem")
+
+        for opt in utils.load(CONST.SETTING).get("mode1"):
             if opt == "check_releases":
                 check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
             elif opt == "check_archives":
-                check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
+                if sheetname == "Merged_JOEM":
+                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+                else:
+                    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
             elif opt == "make_archives":
-                make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+                if sheetname == "Merged_JOEM":
+                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+                else:
+                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
             else:
                 raise("I dont know your mode")
     except Exception as e:
