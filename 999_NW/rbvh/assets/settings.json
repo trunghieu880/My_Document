@@ -3,13 +3,13 @@
     "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
     "dir_input_joem": "C:/test_hieunguyen",
     "dir_input_joem1": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
-    "dir_input_coem": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200519/COEM/20-May-2020",
+    "dir_input_coem": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200520/COEM/21-May-2020",
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
 
     "sheetname": "Merged_COEM",
     
     "l_taskids_coem": [
-        1445994
+        1478932,1478344
     ],
 
     "l_taskids_joem": {
@@ -20,6 +20,7 @@
         ]
     },
 
+    
     "mode": [
         "check_releases",
         "check_archives"

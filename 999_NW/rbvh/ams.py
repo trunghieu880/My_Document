@@ -13,6 +13,7 @@ import re
 from docx.api import Document
 import win32com.client
 from win32com.client import Dispatch
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -295,8 +296,8 @@ class FileSummaryXLSX(Base):
         self.doc = str(path)
 
     # Function parse2json: convert XLSX to json data
-    def parse2json(self, begin=47, end=47):
-        return dict(parse.parse_summary_json(self.doc, begin=begin, end=end))
+    def parse2json(self, sheetname="", begin=47, end=47):
+        return dict(parse.parse_summary_json(self.doc, sheetname=sheetname, begin=begin, end=end))
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, data, key, value):
@@ -872,10 +873,189 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
     finally:
         logger.debug("Done")
 
+def create_summary_json_file(file_summary, sheetname="", begin=47, end=47):
+    # Generate json file
+    if sheetname == "":
+        sheetname = utils.load(CONST.SETTING).get("sheetname")
+
+    file_log = Path(__file__).parent.joinpath("log_json", "{}_{}_{}.json".format("log_summary", sheetname, datetime.datetime.now().strftime("%Y_%m_%dT%H_%MZ"), ".json"))
+    with open(file_log, errors='ignore', mode='w') as fp:
+        json.dump(FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=47, end=1000), fp, indent=4, sort_keys=True)
+
+def collect_information_deliverables(file_summary, sheetname="", begin=47, end=47):
+    if sheetname == "":
+        sheetname = utils.load(CONST.SETTING).get("sheetname")
+
+    data = FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=47, end=1000)
+
+    item = -1
+    l_prj = list()
+    for item in data.keys():
+        if data[item].get("Project") is not None:
+            l_prj.append(data[item].get("Project"))
+    
+    l_prj = list(set(l_prj))
+    l_prj.sort()
+
+    item = -1
+    d = dict()
+
+    for prj in l_prj:
+        total_assign_asw = 0.0
+        total_assign_psw = 0.0
+        total_deliver_asw = 0.0
+        total_deliver_psw = 0.0
+        total_remain_asw = 0.0
+        total_remain_psw = 0.0
+        percentage_asw = 0.0
+        percentage_psw = 0.0
+        max_date_asw = ""
+        max_date_psw = ""
+        l_date_start_asw = list()
+        l_date_end_asw = list()
+        l_date_release_asw = list()
+        l_date_start_psw = list()
+        l_date_end_psw = list()
+        l_date_release_psw = list()
+
+        total_defect_asw = 0.0
+        total_defect_psw = 0.0
+
+        for item in data.keys():
+            if(data[item].get("Project") == prj):
+                if data[item].get("ELOC Recheck With Tool") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        total_assign_asw += float(data[item].get("ELOC Recheck With Tool"))
+                    elif "PSW" == data[item].get("Type"):
+                        total_assign_psw += float(data[item].get("ELOC Recheck With Tool"))
+                    else:
+                        raise("BUG")
+                else:
+                    continue
+
+                if data[item].get("LOC Complete") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        total_deliver_asw += float(data[item].get("LOC Complete"))
+                    elif "PSW" == data[item].get("Type"):
+                        total_deliver_psw += float(data[item].get("LOC Complete"))
+                    else:
+                        raise("BUG")
+
+                if data[item].get("Planned Start") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        l_date_start_asw.append(data[item].get("Planned Start"))
+                    elif "PSW" == data[item].get("Type"):
+                        l_date_start_psw.append(data[item].get("Planned Start"))
+                    else:
+                        raise("BUG")
+
+                if data[item].get("Planned End") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        l_date_end_asw.append(data[item].get("Planned End"))
+                    elif "PSW" == data[item].get("Type"):
+                        l_date_end_psw.append(data[item].get("Planned End"))
+                    else:
+                        raise("BUG")
+
+                if data[item].get("Release Date") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        l_date_release_asw.append(data[item].get("Release Date"))
+                    elif "PSW" == data[item].get("Type"):
+                        l_date_release_psw.append(data[item].get("Release Date"))
+                    else:
+                        raise("BUG")
+
+                if data[item].get("OPL/Defect") is not None:
+                    if "ASW" == data[item].get("Type"):
+                        if "Defect" == data[item].get("OPL/Defect"):
+                            total_defect_asw += 1
+                    elif "PSW" == data[item].get("Type"):
+                        if "Defect" == data[item].get("OPL/Defect"):
+                            total_defect_psw += 1
+                    else:
+                        raise("BUG")
+                else:
+                    continue
+
+
+        date_start_asw = ""
+        date_end_asw = ""
+        date_release_asw = ""
+
+        date_start_psw = ""
+        date_end_psw = ""
+        date_release_psw = ""
+
+        if len(l_date_start_asw) == 0:
+            date_start_asw = "NA"
+        else:
+            date_start_asw = min(l_date_start_asw)
+
+        if len(l_date_end_asw) == 0:
+            date_end_asw = "NA"
+        else:
+            date_end_asw = max(l_date_end_asw)
+
+        if len(l_date_release_asw) == 0:
+            date_release_asw = "NA"
+        else:
+            date_release_asw = max(l_date_release_asw)
+
+        if len(l_date_start_psw) == 0:
+            date_start_psw = "NA"
+        else:
+            date_start_psw = min(l_date_start_psw)
+
+        if len(l_date_end_psw) == 0:
+            date_end_psw = "NA"
+        else:
+            date_end_psw = max(l_date_end_psw)
+
+        if len(l_date_release_psw) == 0:
+            date_release_psw = "NA"
+        else:
+            date_release_psw = max(l_date_release_psw)
+
+        total_remain_asw = total_assign_asw - total_deliver_asw
+        total_remain_psw = total_assign_psw - total_deliver_psw
+
+        if (total_assign_asw > 0):
+            percentage_asw = total_deliver_asw/total_assign_asw * 100
+        elif (total_assign_asw == 0):
+            percentage_asw = "NA"
+        else:
+            percentage_asw = "NG"
+
+        if (total_assign_psw > 0):
+            percentage_psw = total_deliver_psw/total_assign_psw * 100
+        elif (total_assign_psw == 0):
+            percentage_psw = "NA"
+        else:
+            percentage_psw = "NG"
+
+        # template_json = {
+        #     "Project": prj,
+        #     "Type": "ASW",
+        #     "Assigned task (ELOC)": total_assign_asw,
+        #     "Assigned date": date_start_asw,
+        #     "Target date": date_end_asw,
+        #     "Delivered task (ELOC)": total_deliver_asw,
+        #     "Delivered date": date_release_asw,
+        #     "Remain (ELOC)": total_remain_asw, 
+        #     "% Completion": percentage_asw
+        # }
+
+        print("{},{},{},{},{},{},{},{},{},{}".format(prj, "ASW", total_assign_asw, date_start_asw, date_end_asw, total_deliver_asw, date_release_asw, total_remain_asw, percentage_asw, total_defect_asw))
+        print("{},{},{},{},{},{},{},{},{},{}".format(prj, "PSW", total_assign_psw, date_start_psw, date_end_psw, total_deliver_psw, date_release_psw, total_remain_psw, percentage_psw, total_defect_psw))
+
+
+    # return l_prj
+
 # Main
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
+        # file_summary = "C:/Users/nhi5hc/Desktop/Local_Summary_JOEM_20200401.xlsm"
         dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
         dir_output = utils.load(CONST.SETTING).get("dir_output")
         sheetname = utils.load(CONST.SETTING).get("sheetname")
@@ -884,7 +1064,12 @@ def main():
         if sheetname == "Merged_JOEM":
             l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem")
 
-        for opt in utils.load(CONST.SETTING).get("mode1"):
+        create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
+        create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
+
+        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
+
+        for opt in utils.load(CONST.SETTING).get("mode"):
             if opt == "check_releases":
                 check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
             elif opt == "check_archives":

@@ -14,6 +14,8 @@ import __init__
 import utils
 import const as CONST
 
+import datetime
+
 import win32com.client
 from win32com.client import Dispatch
 
@@ -88,9 +90,12 @@ def get_xlsx_sheets(xlsx):
         wb.close()
         return data
 
-def parse_summary_json(file, begin=47, end=47):
+def parse_summary_json(file, sheetname="", begin=47, end=47):
     try:
-        sheet_name = [str(x) for x in get_xlsx_sheets(file) if x == utils.load(CONST.SETTING).get("sheetname")]
+        if sheetname == "":
+            sheetname = utils.load(CONST.SETTING).get("sheetname")
+    
+        sheet_name = [str(x) for x in get_xlsx_sheets(file) if x == sheetname]
 
         header = [h for h in get_xlsx_raw(file, sheet_name[0], begin=begin, end=begin)[0]]
         data = get_xlsx_raw(file, sheet_name[0], begin=begin+1, end=end)
@@ -102,10 +107,7 @@ def parse_summary_json(file, begin=47, end=47):
                 if key is None:
                     del d_data[key]
             result[index + 1] = dict(d_data)
-        
-        file_log = Path(__file__).parent.joinpath("log_summary_" + datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") + ".json")
-        with open(file_log, errors='ignore', mode='w') as fp:
-            json.dump(result, fp, indent=4, sort_keys=True)
+
     except Exception as e:
         logger.exception(e)
         result = {}
