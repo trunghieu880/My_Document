@@ -103,10 +103,9 @@ def parse_summary_json(file, begin=47, end=47):
                     del d_data[key]
             result[index + 1] = dict(d_data)
         
-        # path = Path(__file__).parent.joinpath("test.json")
-        # Path(path).parent.mkdir(parents=True, exist_ok=True)
-        # with open(path, encoding='shift-jis', errors='ignore', mode='w') as fp:
-        #     json.dump(result, fp, indent=4, sort_keys=True)
+        file_log = Path(__file__).parent.joinpath("log_summary_" + datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") + ".json")
+        with open(file_log, errors='ignore', mode='w') as fp:
+            json.dump(result, fp, indent=4, sort_keys=True)
     except Exception as e:
         logger.exception(e)
         result = {}
