@@ -1045,8 +1045,10 @@ def collect_information_deliverables(file_summary, sheetname="", begin=47, end=4
         #     "% Completion": percentage_asw
         # }
 
-        print("{},{},{},{},{},{},{},{},{},{}".format(prj, "ASW", total_assign_asw, date_start_asw, date_end_asw, total_deliver_asw, date_release_asw, total_remain_asw, percentage_asw, total_defect_asw))
-        print("{},{},{},{},{},{},{},{},{},{}".format(prj, "PSW", total_assign_psw, date_start_psw, date_end_psw, total_deliver_psw, date_release_psw, total_remain_psw, percentage_psw, total_defect_psw))
+        if total_assign_asw > 0:
+            print("{},{},{},{},{},{},{},{},{},{}".format(prj, "ASW", total_assign_asw, date_start_asw, date_end_asw, total_deliver_asw, date_release_asw, total_remain_asw, percentage_asw, total_defect_asw))
+        if total_assign_psw > 0:
+            print("{},{},{},{},{},{},{},{},{},{}".format(prj, "PSW", total_assign_psw, date_start_psw, date_end_psw, total_deliver_psw, date_release_psw, total_remain_psw, percentage_psw, total_defect_psw))
 
 
     # return l_prj
@@ -1055,7 +1057,7 @@ def collect_information_deliverables(file_summary, sheetname="", begin=47, end=4
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
-        # file_summary = "C:/Users/nhi5hc/Desktop/Local_Summary_JOEM_20200401.xlsm"
+        # file_summary = "C:/Users/nhi5hc/Desktop/BK/Local_Summary_JOEM_COEM_20200501.xlsm"
         dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
         dir_output = utils.load(CONST.SETTING).get("dir_output")
         sheetname = utils.load(CONST.SETTING).get("sheetname")
@@ -1067,7 +1069,7 @@ def main():
         create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
         create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
 
-        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
+        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
 
         for opt in utils.load(CONST.SETTING).get("mode"):
             if opt == "check_releases":
