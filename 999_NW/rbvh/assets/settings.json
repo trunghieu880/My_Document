@@ -1,32 +1,30 @@
 {
-    "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200501.xlsm",
+    "file_summary": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200601.xlsm",
     "dir_input": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
-    "dir_input_joem": "C:/test_hieunguyen",
-    "dir_input_joem1": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200511/JOEM/HONDA_CMP_BL11sp02_snapshot05",
-    "dir_input_coem": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200520/COEM/21-May-2020",
+    "dir_input_joem": "//hc-ut40346c/NHI5HC/hieunguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200525/JOEM/RN_SUV_CRBS_BSS7x_dev",
+    "dir_input_coem": "C:/Users/nhi5hc/Desktop/aaaaa/COEM",
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
 
     "sheetname": "Merged_COEM",
     
     "l_taskids_coem": [
-        1452940,1474097
+        1474054,1474071,1475589,1482572,1481766,1482047,1485214,1487960,1487866,1487804,1475660,1474186,1473950
     ],
 
     "l_taskids_joem": {
-        "Project": "HONDA_CMP_BL11sp02_snapshot05",
-        "BB": "BB80195",
+        "Project": "RN_SUV_CRBS_BSS7x_dev",
+        "BB": "BB80081",
         "TaskGroup": [
             "T500", "T501"
         ]
     },
-
     
     "mode": [
         "check_releases",
         "check_archives"
     ],
 
-    "mode1": [
+    "mode_coem": [
         "check_releases",
         "check_archives",
         "make_archives"
@@ -35,6 +33,10 @@
     "mode_joem": [
         "check_archives",
         "make_archives"
+    ],
+
+    "mode_joem_1": [
+        "check_archives"
     ],
 
     "CoverageReasonXLS": {
@@ -54,9 +56,13 @@
         "dac.luu-cong": {"name": "EXTERNAL Luu Cong Dac (Ban Vien), RBVH/EPS45", "id": "lud5hc"},
         "duong.nguyen": {"name": "EXTERNAL Nguyen Tuan Duong (Ban Vien), RBVH/EPS45", "id": "ndy4hc"},
         "loc.do-phu": {"name": "EXTERNAL Do Phu Loc (Ban Vien), RBVH/EPS45", "id": "dol7hc"},
-        "thanh.nguyen-kimhieu": {"name": "EXTERNAL Nguyen Kim Thanh (Ban Vien), RBVH/EPS45", "id": "nut4hc"},
+        "thanh.nguyen-kim": {"name": "EXTERNAL Nguyen Kim Thanh (Ban Vien), RBVH/EPS45", "id": "nut4hc"},
         "chung.ly": {"name": "EXTERNAL Ly Chung (Ban Vien), RBVH/EPS45", "id": "lyc1hc"},
         "huy.do-anh": {"name": "EXTERNAL Do Anh Huy (Ban Vien), RBVH/EPS45", "id": "duh7hc"},
-        "phuong.nguyen-thanh": {"name": "EXTERNAL Nguyen Thanh Phuong (Ban Vien), RBVH/EPS45", "id": "gup7hc"}
+        "phuong.nguyen-thanh": {"name": "EXTERNAL Nguyen Thanh Phuong (Ban Vien), RBVH/EPS45", "id": "gup7hc"},
+        "phuc.le-hong": {"name": "EXTERNAL Le Hong Phuc Ban Vien, RBVH/EPS45", "id": "lho81hc"},
+        "chuong.nguyen-minh": {"name": "EXTERNAL Nguyen Minh Chuong Ban Vien, RBVH/EPS45", "id": "nch7hc"},
+        "nam.phan-the": {"name": "EXTERNAL Phan The Nam Ban Vien, RBVH/EPS45", "id": "pnh7hc"},
+        "huy.nguyen-hoang": {"name": "EXTERNAL Nguyen Tran Hoang Huy Ban Vien, RBVH/EPS45", "id": "hgy7hc"}
     }
 }

@@ -278,9 +278,9 @@ class FileCoverageReasonXLS(Base):
             "Tester": value(allData.Cells(1, 2).value),
             "Date": value(allData.Cells(2, 2).value),
             "Item_Name": value(allData.Cells(3, 2).value),
-            "C0": value(allData.Cells(9, 2).value),
-            "C1": value(allData.Cells(10, 2).value),
-            "MCDC": value(allData.Cells(11, 2).value)
+            "C0": value(int(float(allData.Cells(9, 2).value))),
+            "C1": value(int(float(allData.Cells(10, 2).value))),
+            "MCDC": value(int(float(allData.Cells(11, 2).value)))
         }
 
         wb.Save()
@@ -430,6 +430,7 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                     flag = True
                 else:
                     flag = False
+                    print(value(int(float(data_CoverageReasonXLS.get("C1")))))
                     logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
                                                                                 data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
                                                                                 data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
@@ -631,6 +632,7 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
         file_log.write("Start checker: Release\n")
         file_log.write("*****************************************************************\n")
         for taskid in taskids:
+            print(taskid)
             data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
             path_taskid = Path(dir_input).joinpath(str(taskid), "RV")
             if (path_taskid.exists()):
@@ -673,7 +675,6 @@ def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
     try:
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
-
         file_log = open("log_delivery.txt", "a")
 
         print("Start checker: Archives")
@@ -880,13 +881,13 @@ def create_summary_json_file(file_summary, sheetname="", begin=47, end=47):
 
     file_log = Path(__file__).parent.joinpath("log_json", "{}_{}_{}.json".format("log_summary", sheetname, datetime.datetime.now().strftime("%Y_%m_%dT%H_%MZ"), ".json"))
     with open(file_log, errors='ignore', mode='w') as fp:
-        json.dump(FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=47, end=1000), fp, indent=4, sort_keys=True)
+        json.dump(FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=begin, end=end), fp, indent=4, sort_keys=True)
 
 def collect_information_deliverables(file_summary, sheetname="", begin=47, end=47):
     if sheetname == "":
         sheetname = utils.load(CONST.SETTING).get("sheetname")
 
-    data = FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=47, end=1000)
+    data = FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=begin, end=end)
 
     item = -1
     l_prj = list()
@@ -934,6 +935,7 @@ def collect_information_deliverables(file_summary, sheetname="", begin=47, end=4
                     continue
 
                 if data[item].get("LOC Complete") is not None:
+                    # print("{},{},{},{}".format(item, prj, data[item].get("ItemName"),data[item].get("LOC Complete")))
                     if "ASW" == data[item].get("Type"):
                         total_deliver_asw += float(data[item].get("LOC Complete"))
                     elif "PSW" == data[item].get("Type"):
@@ -1020,30 +1022,30 @@ def collect_information_deliverables(file_summary, sheetname="", begin=47, end=4
         total_remain_psw = total_assign_psw - total_deliver_psw
 
         if (total_assign_asw > 0):
-            percentage_asw = total_deliver_asw/total_assign_asw * 100
+            percentage_asw = round(total_deliver_asw/total_assign_asw * 100,2)
         elif (total_assign_asw == 0):
             percentage_asw = "NA"
         else:
             percentage_asw = "NG"
 
         if (total_assign_psw > 0):
-            percentage_psw = total_deliver_psw/total_assign_psw * 100
+            percentage_psw = round(total_deliver_psw/total_assign_psw * 100,2)
         elif (total_assign_psw == 0):
             percentage_psw = "NA"
         else:
             percentage_psw = "NG"
 
-        # template_json = {
-        #     "Project": prj,
-        #     "Type": "ASW",
-        #     "Assigned task (ELOC)": total_assign_asw,
-        #     "Assigned date": date_start_asw,
-        #     "Target date": date_end_asw,
-        #     "Delivered task (ELOC)": total_deliver_asw,
-        #     "Delivered date": date_release_asw,
-        #     "Remain (ELOC)": total_remain_asw, 
-        #     "% Completion": percentage_asw
-        # }
+        template_json = {
+            "Project": prj,
+            "Type": "ASW",
+            "Assigned task (ELOC)": total_assign_asw,
+            "Assigned date": date_start_asw,
+            "Target date": date_end_asw,
+            "Delivered task (ELOC)": total_deliver_asw,
+            "Delivered date": date_release_asw,
+            "Remain (ELOC)": total_remain_asw, 
+            "% Completion": percentage_asw
+        }
 
         if total_assign_asw > 0:
             print("{},{},{},{},{},{},{},{},{},{}".format(prj, "ASW", total_assign_asw, date_start_asw, date_end_asw, total_deliver_asw, date_release_asw, total_remain_asw, percentage_asw, total_defect_asw))
@@ -1051,39 +1053,75 @@ def collect_information_deliverables(file_summary, sheetname="", begin=47, end=4
             print("{},{},{},{},{},{},{},{},{},{}".format(prj, "PSW", total_assign_psw, date_start_psw, date_end_psw, total_deliver_psw, date_release_psw, total_remain_psw, percentage_psw, total_defect_psw))
 
 
-    # return l_prj
+    return l_prj
+
+def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
+    logger.debug("make_folder_release")
+    try:
+        doc = FileSummaryXLSX(path_summary)
+        data = doc.parse2json(begin=begin, end=end)
+
+        for package in l_packages:
+            data_package = doc.get_data(data=data, key="Package", value=package)
+            path_package = Path(dir_output).joinpath(str(package))
+            for item in data_package.keys():
+                Path(path_package).mkdir(exist_ok=True)
+
+                taskid = data_package[item].get("TaskID")
+                if taskid is not "None":
+                    date_end = data_package[item].get("Planned End") if data_package[item].get("Planned End") != "None" else None
+                    if date_end is not None:
+                        date_end = datetime.datetime.strptime(date_end, "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")
+                        dir_taskid = Path(path_package).joinpath(str(date_end), str(taskid))
+                        dir_taskid_RV = Path(dir_taskid).joinpath(str("RV"))
+                        dir_taskid_AR = Path(dir_taskid).joinpath(str("AR"))
+                        Path(dir_taskid).parent.mkdir(parents=True, exist_ok=True)
+                        Path(dir_taskid).mkdir(exist_ok=True)
+                        Path(dir_taskid_RV).mkdir(exist_ok=True)
+                        Path(dir_taskid_AR).mkdir(exist_ok=True)
+
+                    else:
+                        log.warning("Not filling Planned Start/Planned End")
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
 
 # Main
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
-        # file_summary = "C:/Users/nhi5hc/Desktop/BK/Local_Summary_JOEM_COEM_20200501.xlsm"
         dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
         dir_output = utils.load(CONST.SETTING).get("dir_output")
         sheetname = utils.load(CONST.SETTING).get("sheetname")
-        
+
         l_taskids = utils.load(CONST.SETTING).get("l_taskids_coem")
         if sheetname == "Merged_JOEM":
-            l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem")
+            l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem_20200525")
 
-        create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
-        create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
+        """Make folder release"""
+        # make_folder_release(path_summary=file_summary, l_packages=[20200601], dir_output=dir_output, begin=59, end=1000)
 
-        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
+        """Create json file of summary to backup"""
+        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
+        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
 
-        for opt in utils.load(CONST.SETTING).get("mode"):
+        """Collect information for deliverables"""
+        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_COEM", begin=59, end=1000)
+
+        for opt in utils.load(CONST.SETTING).get("mode_coem"):
             if opt == "check_releases":
-                check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
+                check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
             elif opt == "check_archives":
                 if sheetname == "Merged_JOEM":
-                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=400)
+                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=400)
                 else:
-                    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=47, end=1000)
+                    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
             elif opt == "make_archives":
                 if sheetname == "Merged_JOEM":
-                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=400)
                 else:
-                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=47, end=400)
+                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=400)
             else:
                 raise("I dont know your mode")
     except Exception as e:
