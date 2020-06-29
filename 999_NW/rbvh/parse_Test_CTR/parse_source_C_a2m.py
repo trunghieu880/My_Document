@@ -52,9 +52,13 @@ def get_infor_c(path, tc_name="test_1", index=1):
                     next
                 if (flag_start_test):
                     if 'START_TEST' in line:
-                        temp = re.sub("[0-9]+:", str(index) + ":", line)
-                        temp = re.sub("[0-9]+: ", str(index) + ": ", temp)
-                        temp = re.sub("[0-9]+_", str(index) + ": ", temp)
+                        temp = re.sub('"[0-9]+:', '"' + str(index) + ":", line)
+                        temp = re.sub('"[0-9]+: ', '"' + str(index) + ": ", temp)
+                        temp = re.sub('"[0-9]+_', '"' + str(index) + ": ", temp)
+                        if "test_" in temp:
+                            temp = re.sub("(\d+): (test_){1,}(\w.*)_(\d+)$", r'\1: test_\2_' + str(index), temp)
+                        else:
+                            temp = re.sub('(\d+): (\w.*)",', r'\1: test_\2_\1",', temp)
 
                         old = re.sub('^.*\("', '', line)
                         old = re.sub('".*$', '', old)
@@ -65,9 +69,15 @@ def get_infor_c(path, tc_name="test_1", index=1):
                         
                         # subprocess.call(['sed', '-i', 's@{}@{}@g'.format(line, temp), "'{}'".format(path.as_posix())])
 
-                        with open("./script.sh", errors='ignore', mode='a') as f:
-                            f.write("sed -i 's@{}@{}@g' {}\n".format(line, temp, "'{}'".format(path.as_posix())))
+                        function_name = re.sub('(\d+): (.*)', r'\2', new)
+                        old_function = str(tc_name) + "("
+                        new_function = function_name + "("
 
+                        with open("./script_convert_index.sh", errors='ignore', mode='a') as f:
+                            f.write("sed -i 's@{}@{}@g' {}\n".format(line, temp, "'{}'".format(path.as_posix())))
+                        
+                        with open("./script_convert_auto2manual.sh", errors='ignore', mode='a') as f:
+                            f.write("sed -i 's@{}@{}@g' {}\n".format(old_function, new_function, "'{}'".format(path.as_posix())))
     finally:
         return result
 
@@ -114,10 +124,19 @@ def main():
     # directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.c')
     # os.remove("./script.sh")
+    if Path("./script_convert_auto2manual.sh").exists():
+        os.remove("./script_convert_auto2manual.sh")
+    if Path("./script_convert_index.sh").exists():        
+        os.remove("./script_convert_index.sh")
+
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase_c(new_file)
-        print(l_tc)
+
+        print(new_file.as_posix())
+        with open("./script_convert_auto2manual.sh", errors='ignore', mode='a') as f:
+            f.write("sed -i '/^\s*\sIF_INSTANCE/,/}/{/CHECK.*/d;};' " + "'" + new_file.as_posix() + "'\n")
+
         # l_tc = ["test_1"]
         print(l_tc)
 
@@ -129,5 +148,9 @@ def main():
             print_infor_c(l_d)
         else:
             print("Not found TEST CASE in LOG FILE")
+
+
+
+
 
 main()

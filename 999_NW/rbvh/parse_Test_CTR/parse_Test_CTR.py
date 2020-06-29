@@ -143,7 +143,7 @@ def print_infor(l_d):
             print("-----------------------------------")
             for key in item[child_key].keys():
                 val = item[child_key][key]
-                subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), 'C:/Users/nhi5hc/Desktop/Test/a.c'])
+                subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), 'C:/Users/nhi5hc/Desktop/Test_Ctr/test.c'])
 
                 print("%s = %s;" % (key, val))
 
@@ -151,11 +151,11 @@ def print_infor(l_d):
 
 def main():
     # directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder"
-    directory = "C:\\Users\\nhi5hc\\Desktop\\Test\\ctr"
+    directory = "C:\\Users\\nhi5hc\\Desktop\\Test_Ctr"
     # directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.ctr')
-
-    # subprocess.call(['sed', '-i', '/^\s*\sinitialise_expected_global_data/,/START_TEST/\{//!d;\};', 'C:/Users/nhi5hc/Desktop/Test/a.c'])
+    
+    # subprocess.call(['sed', '-i', '/^\s*\sinitialise_expected_global_data/,/START_TEST/\{//!d;\};', 'C:/Users/nhi5hc/Desktop/Test_Ctr/test.c'])
     for f in data[0]:
         new_file = Path(f.parent, f.name)
         l_tc = get_list_testcase(new_file)
