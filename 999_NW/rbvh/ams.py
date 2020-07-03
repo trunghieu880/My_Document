@@ -210,6 +210,22 @@ class FileTestSummaryHTML(Base):
                         next
                     else:
                         continue
+
+            flag = False
+            for e in self.doc.iterfind('.//{0}'.format("div")):
+                if e.text == None:
+                    continue
+                if e.text == "Summary generated":
+                    flag = True
+                    key = "date"
+                    next
+                else:
+                    if flag == True:
+                        flag = False
+                        val = e.text
+                        data = {**data, key : val}
+                        break
+            
         except Exception as e:
             data = {}
             raise(e)
@@ -430,12 +446,18 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                     flag = True
                 else:
                     flag = False
-                    print(value(int(float(data_CoverageReasonXLS.get("C1")))))
                     logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
                                                                                 data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
                                                                                 data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
                                                                                 )
                     return False
+
+        # if (datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y") == datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")):
+        #     flag = True
+        # else:
+        #     flag = False
+        #     logger.warning("ItemName {} got wrong date end: {} - {}".format(data_test_summary.get("Project"), datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y"), datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")))
+        #     return flag
 
         return flag
     except Exception as e:
@@ -632,7 +654,6 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
         file_log.write("Start checker: Release\n")
         file_log.write("*****************************************************************\n")
         for taskid in taskids:
-            print(taskid)
             data_taskid = doc.get_data(data=data, key="TaskID", value=taskid)
             path_taskid = Path(dir_input).joinpath(str(taskid), "RV")
             if (path_taskid.exists()):
@@ -735,19 +756,21 @@ def update_walkthrough(file, data, file_test_summary_html):
     logger.debug("Update Walkthrough {}", file)
     try:
         data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-        temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID"))
+        temp = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID")) + "\\" + data.get("ItemName").replace(".c", "")
 
         data_baseline = data.get("Baseline")
         if data_baseline == "None" or data_baseline == "":
             data_baseline = ""
-
+        
+        reviewer = convert_name(key=utils.load(CONST.SETTING, "reviewer"), opt="name")
+        
         dict_walkthrough = {
             'date': datetime.datetime.now().strftime("%m/%d/%Y"),
             'project': data.get("ItemName"),
             'review initiator': convert_name(key=data.get("Tester"), opt="name"),
             'effort': str(0.5),
             'baseline': data_baseline,
-            'review partner' : "Pham Thi Cam Vien (RBVH/EPS45)", #data.get("Owner Contact"),
+            'review partner' : reviewer,
             'path_testscript': temp + "\\Test_Spec",
             'path_test_summary': temp + "\\Test_Result",
             'ScoreC0C1': " Test summary\n\tC0: " + data_test_summary.get("C0") + "%\tC1: " + data_test_summary.get("C1") + "%",
@@ -820,6 +843,8 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
                     function = data_taskid[item].get("ItemName").replace(".c", "")
                     user_tester = data_taskid[item].get("Tester")
 
+                    # if user_tester == "bang.nguyen-duy" or user_tester ==  "hau.nguyen-tai":
+                    #     continue
                     # if function == "RBAPLCUST_RDBI_IOCtrlState" and taskid == 1416606:
                         # print("HERE")
                         # continue
@@ -1061,12 +1086,18 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
 
+        print("Start Making Folder Release")
         for package in l_packages:
             data_package = doc.get_data(data=data, key="Package", value=package)
             path_package = Path(dir_output).joinpath(str(package))
-            for item in data_package.keys():
-                Path(path_package).mkdir(exist_ok=True)
+            Path(path_package).mkdir(exist_ok=True)
+            if utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM":
+                path_package = Path(path_package).joinpath(str("COEM"))
+            else:
+                path_package = Path(path_package).joinpath(str("JOEM"))
+            Path(path_package).mkdir(exist_ok=True)
 
+            for item in data_package.keys():
                 taskid = data_package[item].get("TaskID")
                 if taskid is not "None":
                     date_end = data_package[item].get("Planned End") if data_package[item].get("Planned End") != "None" else None
@@ -1080,8 +1111,11 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
                         Path(dir_taskid_RV).mkdir(exist_ok=True)
                         Path(dir_taskid_AR).mkdir(exist_ok=True)
 
+                        print("{},{},{}".format(package, taskid,"OK"))
                     else:
-                        log.warning("Not filling Planned Start/Planned End")
+                        log.warning("Not filling Planned Start/Planned End: {},{},{}".format(package, taskid,"OK"))
+        
+        print("Finish Making Folder Release")
     except Exception as e:
         logger.exception(e)
     finally:
@@ -1091,37 +1125,37 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
-        dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
+        dir_input = utils.load(CONST.SETTING).get("dir_input_coem_1")
         dir_output = utils.load(CONST.SETTING).get("dir_output")
         sheetname = utils.load(CONST.SETTING).get("sheetname")
 
         l_taskids = utils.load(CONST.SETTING).get("l_taskids_coem")
         if sheetname == "Merged_JOEM":
-            l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem_20200525")
+            l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem")
 
         """Make folder release"""
-        # make_folder_release(path_summary=file_summary, l_packages=[20200601], dir_output=dir_output, begin=59, end=1000)
+        # make_folder_release(path_summary=file_summary, l_packages=[20200626], dir_output=dir_output, begin=59, end=1000)
 
         """Create json file of summary to backup"""
         # create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
         # create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
 
         """Collect information for deliverables"""
-        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_COEM", begin=59, end=1000)
+        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=59, end=1000)
 
         for opt in utils.load(CONST.SETTING).get("mode_coem"):
             if opt == "check_releases":
                 check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
             elif opt == "check_archives":
                 if sheetname == "Merged_JOEM":
-                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=400)
+                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
                 else:
                     check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
             elif opt == "make_archives":
                 if sheetname == "Merged_JOEM":
-                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=400)
+                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=1000)
                 else:
-                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=400)
+                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=1000)
             else:
                 raise("I dont know your mode")
     except Exception as e:

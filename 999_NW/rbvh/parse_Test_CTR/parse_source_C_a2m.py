@@ -54,8 +54,9 @@ def get_infor_c(path, tc_name="test_1", index=1):
                         temp = re.sub('"[0-9]+:', '"' + str(index) + ":", line)
                         temp = re.sub('"[0-9]+: ', '"' + str(index) + ": ", temp)
                         temp = re.sub('"[0-9]+_', '"' + str(index) + ": ", temp)
+                        temp = re.sub('_(\d+)",$', '",', temp)
                         if "test_" in temp:
-                            temp = re.sub("(\d+): (test_){1,}(\w.*)_(\d+)$", r'\1: test_\2_' + str(index), temp)
+                            temp = re.sub('(\d+): (test_){1,}(\w.*)(?!_(\d+))",', r'\1: test_\3_\1",', temp)
                         else:
                             temp = re.sub('(\d+): (\w.*)",', r'\1: test_\2_\1",', temp)
 
@@ -150,6 +151,7 @@ def update_comment(path, l_d):
                         f.write(line)
                         for child_key in l_d[index_tc].keys():
                             print("Test case name: %s" % child_key)
+                            print(l_d[index_tc][child_key]["description"])
                             for cmt in l_d[index_tc][child_key]["description"].split(";"):
                                 f.write("{}- {}\n".format(" "*12, cmt.strip()))
                     else:
@@ -165,8 +167,8 @@ def update_comment(path, l_d):
     print("-----------------------------------")
 
 def main():
-    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder\\source"
-    # directory = "C:\\Users\\nhi5hc\\Desktop\\Test_Ctr"
+    # directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\Test_Folder\\source"
+    directory = "C:\\Users\\nhi5hc\\Desktop\\Test_Ctr"
     # directory = "C:\\0000_Prj\\002_Working_COEM\\20200507\\COEM\\OUTPUT\\RBAPLEOL_ValvesToggling\\Cantata\\tests\\atest_RBAPLEOL_ValvesToggling_3"
     data = scan_files(directory, ext='.c')
     # os.remove("./script.sh")
@@ -190,8 +192,8 @@ def main():
             for index, tc in enumerate(l_tc):
                 l_d.append(get_infor_c(new_file, tc, index + 1))
 
-            # print_infor_c(l_d)
-            update_comment(path=new_file, l_d=l_d)
+            print_infor_c(l_d)
+            # update_comment(path=new_file, l_d=l_d)
         else:
             print("Not found TEST CASE in LOG FILE")
 

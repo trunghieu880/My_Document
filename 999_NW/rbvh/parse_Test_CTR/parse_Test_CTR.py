@@ -143,7 +143,7 @@ def print_infor(l_d):
             print("-----------------------------------")
             for key in item[child_key].keys():
                 val = item[child_key][key]
-                subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), 'C:/Users/nhi5hc/Desktop/Test_Ctr/test.c'])
+                subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), 'C:/Users/nhi5hc/Desktop/Test_Ctr/src.c'])
 
                 print("%s = %s;" % (key, val))
 
