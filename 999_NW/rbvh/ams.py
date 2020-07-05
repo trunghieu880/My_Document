@@ -232,6 +232,51 @@ class FileTestSummaryHTML(Base):
         finally:
             return data
 
+class FileWalkThroughDoc(Base):
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = str(path)
+
+    # Function update_tpa: update tpa file with the input data
+    def update(self, data):
+        document = Document(self.doc)
+        table_infor = document.tables[1]
+        table_infor.cell(0,1).text = data['date']
+        table_infor.cell(0,3).text = data['project']
+        table_infor.cell(0,5).text = data['review initiator']
+        table_infor.cell(1,1).text = str(data['effort'])
+        table_infor.cell(1,3).text = data['baseline']
+        table_infor.cell(1,5).text = data['review partner']
+        table_attach = document.tables[2]
+        table_attach.cell(1, 2).text = data['path_testscript']
+        table_attach.cell(3, 2).text = data['path_test_summary']
+        table_attach.cell(3, 1).text = data['ScoreC0C1']
+        document.save(self.doc)
+
+    # Function get_data: to get the array data with specfic key, value of the nested json
+    def get_data(self):
+        document = Document(self.doc)
+        table_infor = document.tables[1]
+        table_attach = document.tables[2]
+
+        temp = re.sub("[\n\t]", " ", table_attach.cell(3, 1).text).strip()
+        [score_c0, score_c1] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%", r'\1 \2', temp).split(" ")
+
+        dict_walkthrough = {
+            'date': table_infor.cell(0,1).text,
+            'project': table_infor.cell(0,3).text,
+            'review initiator': table_infor.cell(0,5).text,
+            'effort': table_infor.cell(1,1).text,
+            'baseline':table_infor.cell(1,3).text,
+            'review partner' : table_infor.cell(1,5).text,
+            'path_testscript': table_attach.cell(1, 2).text,
+            'path_test_summary': table_attach.cell(3, 2).text,
+            'C0': score_c0,
+            'C1': score_c1
+        }
+
+        return dict_walkthrough
+
 class FileCoverageReasonXLS(Base):
     def __init__(self, path):
         super().__init__(path)
@@ -246,9 +291,9 @@ class FileCoverageReasonXLS(Base):
         wb.DoNotPromptForConvert = True
         wb.CheckCompatibility = False
 
-        score_c0 = (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA")
-        score_c1 = (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-        score_mcdc = (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")
+        score_c0 = (value(formatNumber(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA")
+        score_c1 = (value(formatNumber(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+        score_mcdc = (value(formatNumber(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")
 
         data_tpa = {
             "UnitUnderTest": data.get("ItemName"),
@@ -294,9 +339,9 @@ class FileCoverageReasonXLS(Base):
             "Tester": value(allData.Cells(1, 2).value),
             "Date": value(allData.Cells(2, 2).value),
             "Item_Name": value(allData.Cells(3, 2).value),
-            "C0": value(int(float(allData.Cells(9, 2).value))),
-            "C1": value(int(float(allData.Cells(10, 2).value))),
-            "MCDC": value(int(float(allData.Cells(11, 2).value)))
+            "C0": value(formatNumber(float(allData.Cells(9, 2).value))),
+            "C1": value(formatNumber(float(allData.Cells(10, 2).value))),
+            "MCDC": value(formatNumber(float(allData.Cells(11, 2).value)))
         }
 
         wb.Save()
@@ -312,7 +357,80 @@ class FileSummaryXLSX(Base):
         self.doc = str(path)
 
     # Function parse2json: convert XLSX to json data
-    def parse2json(self, sheetname="", begin=47, end=47):
+    def parse2json(self, sheetname="", begin=59, end=59):
+        return dict(parse.parse_summary_json(self.doc, sheetname=sheetname, begin=begin, end=end))
+
+    # Function get_data: to get the array data with specfic key, value of the nested json
+    def get_data(self, data, key, value):
+        item = -1
+        d = dict()
+        for item in data.keys():
+            if(data[item].get(key) == value):
+                d[item] = data[item]
+
+        return d
+
+class FileRTRTCov(Base):
+    # Class FileRTRTCov
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = str(path)
+
+    def parse2json(self):
+        try:
+            flag_count = 0
+
+            data = dict()
+            with open(self.doc, encoding='shift-jis', errors='ignore') as fp:
+                for line in fp.readlines()[:100]:
+                    line = line.strip()
+                    if flag_count > 1:
+                        break
+
+                    if '---------------------------------------------------------' in line:
+                        flag_count = flag_count + 1
+                        next
+                    if (flag_count == 1):
+                        if 'Statement blocks' in line or 'Decisions' in line or 'Modified conditions' in line:
+                            temp = re.sub("\s+\.+\s+", ":", line)
+                            temp = re.sub("%\s\(.*\)$", "", temp)
+                            
+                            key = temp.split(":")[0]
+                            val = convert_score_percentage(temp.split(":")[1], opt='nomul')
+                            if key == "Statement blocks":
+                                key = "C0"
+                            elif key == "Decisions":
+                                key = 'C1'
+                            elif key == "Modified conditions":
+                                key = 'MCDC'
+                                rst = True
+
+                            data = {**data, key : val}
+
+        except:
+            data = {}
+        finally:
+            return data
+
+    # Function get_data: to get the array data with specfic key, value of the nested json
+    def get_data(self, data, key, value):
+        item = -1
+        d = dict()
+        for item in data.keys():
+            if(data[item].get(key) == value):
+                d[item] = data[item]
+
+        return d
+
+class FileTestDesignXLSX(Base):
+    # Class FileTestDesignXLSX
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = str(path)
+
+    # Function parse2json: convert XLSX to json data
+    def parse2json(self, sheetname="", begin=59, end=59):
+        pass
         return dict(parse.parse_summary_json(self.doc, sheetname=sheetname, begin=begin, end=end))
 
     # Function get_data: to get the array data with specfic key, value of the nested json
@@ -364,6 +482,18 @@ def value(cell):
     else:
         return str(cell)
 
+def convert_score_percentage(num, opt="nomul"):
+    if opt == 'nomul':
+        return value(formatNumber(float(value(num))))
+    else:
+        return value(formatNumber(float(value(num)) * 100))
+
+def check_score(score_test_summary, score_exel):
+    return ((score_test_summary == convert_score_percentage(score_exel) if (value(score_exel) != "-" and score_exel != None) else "NA"))
+
+def formatNumber(num):
+    return int(num) if num % 1 == 0 else num
+
 # Check information between summary xlsx, and test_summay_html is same or not
 def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt=""):
     try:
@@ -393,15 +523,19 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
             logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
             return False
 
-        if ((data_test_summary.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                and data_test_summary.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                and data_test_summary.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+        score_c0 = convert_score_percentage(data.get("C0"))
+        score_c1 = convert_score_percentage(data.get("C1"))
+        score_mcdc = convert_score_percentage(data.get("MCDC"))
+
+        if check_score(score_test_summary=data_test_summary.get("C0"), score_exel=data.get("C0")) \
+                and check_score(score_test_summary=data_test_summary.get("C1"), score_exel=data.get("C1")) \
+                and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC")):
             flag = True
         else:
             flag = False
-            logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                        data_test_summary.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                        data_test_summary.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+            logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
+                                                                        data_test_summary.get("C1"), score_c1,
+                                                                        data_test_summary.get("MCDCU"), score_mcdc)
                         )
             return False
 
@@ -410,45 +544,45 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
             if (opt == "check_tpa_xls"):
                 data_tpa = FileTPA(file_tpa).get_data()
                 data_tpa = data_tpa[data.get("ItemName").replace(".c", "") + ".c"]
-                if ((data_tpa.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                        and data_tpa.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                        and data_tpa.get("MC/DC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+                if check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
+                        and check_score(score_test_summary=data_tpa.get("C1"), score_exel=data.get("C1")) \
+                        and check_score(score_test_summary=data_tpa.get("MC/DC"), score_exel=data.get("MCDC")):
                     flag = True
                 else:
                     flag = False
-                    logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                                data_tpa.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                                data_tpa.get("MC/DC"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                    logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
+                                                                                data_tpa.get("C1"), score_c1,
+                                                                                data_tpa.get("MC/DC"), score_mcdc)
                                 )
                     return False
             
             # Check information between FileTestReportXML and Summary
             data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
 
-            if ((data_test_report_xml.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                    and data_test_report_xml.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                    and data_test_report_xml.get("MCDCU") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+            if check_score(score_test_summary=data_test_report_xml.get("C0"), score_exel=data.get("C0")) \
+                    and check_score(score_test_summary=data_test_report_xml.get("C1"), score_exel=data.get("C1")) \
+                    and check_score(score_test_summary=data_test_report_xml.get("MCDCU"), score_exel=data.get("MCDC")):
                 flag = True
             else:
                 flag = False
-                logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                            data_test_report_xml.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                            data_test_report_xml.get("MCDCU"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), score_c0,
+                                                                            data_test_report_xml.get("C1"), score_c1,
+                                                                            data_test_report_xml.get("MCDCU"), score_mcdc)
                                                                             )
                 return False
 
             if (opt == "check_tpa_xls"):
                 # Check information between FileCoverageReasonXLS and Summary
                 data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
-                if ((data_CoverageReasonXLS.get("C0") == (value(int(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA"))
-                        and data_CoverageReasonXLS.get("C1") == (value(int(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-                        and data_CoverageReasonXLS.get("MCDC") == (value(int(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")):
+                if check_score(score_test_summary=data_CoverageReasonXLS.get("C0"), score_exel=data.get("C0")) \
+                        and check_score(score_test_summary=data_CoverageReasonXLS.get("C1"), score_exel=data.get("C1")) \
+                        and check_score(score_test_summary=data_CoverageReasonXLS.get("MCDC"), score_exel=data.get("MCDC")):
                     flag = True
                 else:
                     flag = False
-                    logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), (value(int(float(value(data.get("C0"))) * 100))),
-                                                                                data_CoverageReasonXLS.get("C1"), (value(int(float(value(data.get("C1"))) * 100))),
-                                                                                data_CoverageReasonXLS.get("MCDC"), (value(int(float(value(data.get("MCDC"))) * 100))))
+                    logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), score_c0,
+                                                                                data_CoverageReasonXLS.get("C1"), score_c1,
+                                                                                data_CoverageReasonXLS.get("MCDC"), score_mcdc)
                                                                                 )
                     return False
 
@@ -466,7 +600,7 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         logger.debug("Done")
 
 # Check Release for JOEM is correct ot not
-def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
+def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
     logger.debug("Start checker: Archives")
     try:
         doc = FileSummaryXLSX(path_summary)
@@ -553,7 +687,7 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=47, end=47):
         logger.debug("Done")
 
 # Check Release for JOEM is correct ot not
-def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
+def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=59, end=59):
     logger.debug("Start checker: Make Archives JOEM")
     try:
         doc = FileSummaryXLSX(path_summary)
@@ -642,7 +776,7 @@ def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=47, e
         logger.debug("Done")
 
 # Check Release is correct or not
-def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
+def check_releases(path_summary, dir_input, taskids, begin=59, end=59):
     logger.debug("Start checker: Release")
 
     try:
@@ -691,7 +825,7 @@ def check_releases(path_summary, dir_input, taskids, begin=47, end=47):
         logger.debug("Done")
 
 # Check Archive is correct or not
-def check_archives(path_summary, dir_input, taskids, begin=47, end=47):
+def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
     logger.debug("Start checker: Archives")
     try:
         doc = FileSummaryXLSX(path_summary)
@@ -776,19 +910,8 @@ def update_walkthrough(file, data, file_test_summary_html):
             'ScoreC0C1': " Test summary\n\tC0: " + data_test_summary.get("C0") + "%\tC1: " + data_test_summary.get("C1") + "%",
         }
 
-        document = Document(file)
-        table_infor = document.tables[1]
-        table_infor.cell(0,1).text = dict_walkthrough['date']
-        table_infor.cell(0,3).text = dict_walkthrough['project']
-        table_infor.cell(0,5).text = dict_walkthrough['review initiator']
-        table_infor.cell(1,1).text = str(dict_walkthrough['effort'])
-        table_infor.cell(1,3).text = dict_walkthrough['baseline']
-        table_infor.cell(1,5).text = dict_walkthrough['review partner']
-        table_attach = document.tables[2]
-        table_attach.cell(1, 2).text = dict_walkthrough['path_testscript']
-        table_attach.cell(3, 2).text = dict_walkthrough['path_test_summary']
-        table_attach.cell(3, 1).text = dict_walkthrough['ScoreC0C1']
-        document.save(file)
+        FileWalkThroughDoc(file).update(dict_walkthrough)
+
     except Exception as e:
         logger.exception(e)
     finally:
@@ -824,7 +947,7 @@ def sevenzip(filename, zipname):
         subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename], stdout=null, stderr=null)
 
 # Create Archive Walkthrough
-def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=47):
+def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=59):
     logger.debug("Create Archive Walkthrough")
     try:
 
@@ -899,7 +1022,7 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=47, end=4
     finally:
         logger.debug("Done")
 
-def create_summary_json_file(file_summary, sheetname="", begin=47, end=47):
+def create_summary_json_file(file_summary, sheetname="", begin=59, end=59):
     # Generate json file
     if sheetname == "":
         sheetname = utils.load(CONST.SETTING).get("sheetname")
@@ -908,7 +1031,7 @@ def create_summary_json_file(file_summary, sheetname="", begin=47, end=47):
     with open(file_log, errors='ignore', mode='w') as fp:
         json.dump(FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=begin, end=end), fp, indent=4, sort_keys=True)
 
-def collect_information_deliverables(file_summary, sheetname="", begin=47, end=47):
+def collect_information_deliverables(file_summary, sheetname="", begin=59, end=59):
     if sheetname == "":
         sheetname = utils.load(CONST.SETTING).get("sheetname")
 
@@ -1113,7 +1236,7 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
 
                         print("{},{},{}".format(package, taskid,"OK"))
                     else:
-                        log.warning("Not filling Planned Start/Planned End: {},{},{}".format(package, taskid,"OK"))
+                        logger.warning("Not filling Planned Start/Planned End: {},{},{}".format(package, taskid,"OK"))
         
         print("Finish Making Folder Release")
     except Exception as e:
@@ -1137,8 +1260,8 @@ def main():
         # make_folder_release(path_summary=file_summary, l_packages=[20200626], dir_output=dir_output, begin=59, end=1000)
 
         """Create json file of summary to backup"""
-        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=47, end=1000)
-        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=47, end=1000)
+        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=59, end=1000)
+        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=59, end=1000)
 
         """Collect information for deliverables"""
         # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=59, end=1000)
@@ -1163,5 +1286,13 @@ def main():
     finally:
         logger.debug("Done)")
 
+def test():
+    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT\\1435905\\AR\\rba\\Bldr\\config\\ApplicationLayer\\rba_BldrCmp\\Unit_tst\\1435905\\rba_BldrCmp_Cfg_CheckMem\\Test_Result\\Walkthrough_Protocol_rba_BldrCmp_Cfg_CheckMem.docx"
+    data = utils.scan_files(directory, ext='ReportRTRT.txt')
+    for f in data[0]:
+        new_file = Path(f.parent, 'ReportRTRT.txt')
+        print(FileRTRTCov(new_file).parse2json())
+
 if __name__ == "__main__":
-    main()
+    # main()
+    test()
