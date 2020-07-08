@@ -132,26 +132,6 @@ class FileTestReportHTML(Base):
 
     # T.B.D
     def get_data(self):
-        # file_test_report_html=`grep "results/test_report.html" ./_lst_find_`
-        # const_FileName="Source File"
-        # const_testScriptInfo="Test Script Info"
-
-        # const_test_report_html_coverageReport="Coverage Report"
-        # const_test_report_html_C0="Statement"
-        # const_test_report_html_C1="Decision"
-        # const_test_report_html_MCDC="Boolean Operand Effectiveness (Unique-Cause)"
-
-        # temp="$const_test_report_html_coverageReport"
-
-        # test_report_html_FileName=`grep -A 36 ">${temp}<" ${file_test_report_html} | grep -o "${const_FileName} .*" | sed 's/\s*\s/ /g' | sed 's/<.*>//g' | awk '{print $NF}' | awk -F '\' '{print $NF}'`
-
-        # temp="$const_testScriptInfo"
-        # test_report_html_status=`grep -A 6 ">${temp}<" ${file_test_report_html} | grep -o ">Summary status<.*" | sed 's/Summary status.*<TD>//g' | sed 's/<.*>//g' | sed 's/>//g'`
-
-        # temp="$const_test_report_html_coverageReport"
-        # test_report_html_data_score_C0=`grep -A 36 ">${temp}<" ${file_test_report_html} | grep -o "${const_test_report_html_C0}<.*>" | sed -e "s/${const_test_report_html_C0}.*<TD>//g" | sed 's/<.*>//g' | sed 's/<//g' | sed 's/%//g'`
-        # test_report_html_data_score_C1=`grep -A 36 ">${temp}<" ${file_test_report_html} | grep -o "${const_test_report_html_C1}<.*>" | sed -e "s/${const_test_report_html_C1}.*<TD>//g" | sed 's/<.*>//g' | sed 's/<//g' | sed 's/%//g'`
-        # test_report_html_data_score_MCDC=`grep -A 36 ">${temp}<" ${file_test_report_html} | grep -o "${const_test_report_html_MCDC}<.*>" | sed -e "s/${const_test_report_html_MCDC}.*<TD>//g" | sed 's/<.*>//g' | sed 's/<//g' | sed 's/%//g'`
         pass
 
 class FileTestSummaryHTML(Base):
@@ -258,9 +238,15 @@ class FileWalkThroughDoc(Base):
         document = Document(self.doc)
         table_infor = document.tables[1]
         table_attach = document.tables[2]
+        table_finding = document.tables[3]
+        table_check_list = document.tables[6]
 
         temp = re.sub("[\n\t]", " ", table_attach.cell(3, 1).text).strip()
         [score_c0, score_c1] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%", r'\1 \2', temp).split(" ")
+
+        finding = table_finding.cell(1, 1).text
+        impact = table_finding.cell(1, 3).text
+        confirm_UT9 = table_check_list.cell(12, 3).text
 
         dict_walkthrough = {
             'date': table_infor.cell(0,1).text,
@@ -272,7 +258,12 @@ class FileWalkThroughDoc(Base):
             'path_testscript': table_attach.cell(1, 2).text,
             'path_test_summary': table_attach.cell(3, 2).text,
             'C0': score_c0,
-            'C1': score_c1
+            'C1': score_c1,
+            'tbl_finding': {
+                "finding": finding,
+                "impact": impact,
+                "confirm_UT9": confirm_UT9
+            }
         }
 
         return dict_walkthrough
@@ -376,7 +367,8 @@ class FileRTRTCov(Base):
         super().__init__(path)
         self.doc = str(path)
 
-    def parse2json(self):
+    # Function get_data: to get the array data with specfic key, value of the nested json
+    def get_data(self):
         try:
             flag_count = 0
 
@@ -387,7 +379,7 @@ class FileRTRTCov(Base):
                     if flag_count > 1:
                         break
 
-                    if '---------------------------------------------------------' in line:
+                    if 'Conclusion :' in line:
                         flag_count = flag_count + 1
                         next
                     if (flag_count == 1):
@@ -412,16 +404,6 @@ class FileRTRTCov(Base):
         finally:
             return data
 
-    # Function get_data: to get the array data with specfic key, value of the nested json
-    def get_data(self, data, key, value):
-        item = -1
-        d = dict()
-        for item in data.keys():
-            if(data[item].get(key) == value):
-                d[item] = data[item]
-
-        return d
-
 class FileTestDesignXLSX(Base):
     # Class FileTestDesignXLSX
     def __init__(self, path):
@@ -431,17 +413,42 @@ class FileTestDesignXLSX(Base):
     # Function parse2json: convert XLSX to json data
     def parse2json(self, sheetname="", begin=59, end=59):
         pass
-        return dict(parse.parse_summary_json(self.doc, sheetname=sheetname, begin=begin, end=end))
 
     # Function get_data: to get the array data with specfic key, value of the nested json
-    def get_data(self, data, key, value):
-        item = -1
-        d = dict()
-        for item in data.keys():
-            if(data[item].get(key) == value):
-                d[item] = data[item]
+    def get_data(self):
+        [item_name, item_revision] = re.sub("^TD_(\w.*)_v(\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")
 
-        return d
+        data = {
+            "ItemName": item_name,
+            "TM": parse.get_xlsx_cells(xlsx=self.doc, sheet="Testcases", list_cell=['A24']).get('A24'),
+            "ItemRevision": item_revision.replace("_", "."),
+            "Tester": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History ", list_cell=['C17']).get('C17'),
+            "Date": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History ", list_cell=['D17']).get('D17'),
+        }
+
+        return data
+
+class FileATTReportXML(Base):
+    # Class FileTestReportXML
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = lxml.etree.parse(str(path))
+
+    # Function get_tag: get the node of XML file with specific tag
+    def get_tag(self, tag, index=0):
+        '''Get normalized text of tag base on index of tag'''
+        node = [e for e in self.doc.iterfind('.//{0}'.format(tag))][index]
+        return node
+
+    # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
+    def get_data(self):
+        lst_header = ["ClassName", "ClassVersion", "CompleteVerdict", "TestModuleName"]
+        data = dict()
+
+        for index, key in enumerate(lst_header):
+            data = {**data, **{key: self.get_tag(key).text}}
+
+        return data
 
 # Check the directory of function is exist or not
 def check_exist(dir_input, function):
@@ -482,7 +489,7 @@ def value(cell):
     else:
         return str(cell)
 
-def convert_score_percentage(num, opt="nomul"):
+def convert_score_percentage(num, opt=""):
     if opt == 'nomul':
         return value(formatNumber(float(value(num))))
     else:
@@ -494,6 +501,19 @@ def check_score(score_test_summary, score_exel):
 def formatNumber(num):
     return int(num) if num % 1 == 0 else num
 
+# Check the number attachment of OPL
+def check_OPL_Walkthrough(file):
+    w = win32com.client.DispatchEx('Word.Application')
+    w.Visible = 0
+    w.DisplayAlerts = 0
+
+    doc = w.Documents.Open(file.as_posix())
+
+    num_OPL =  doc.InlineShapes.Count
+
+    w.Quit()
+    return num_OPL
+
 # Check information between summary xlsx, and test_summay_html is same or not
 def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt=""):
     try:
@@ -501,91 +521,124 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         
         logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
         count = 0
-        flag = False
+        flag = True
 
-        temp = ""
+        sub_new_func = ""
         if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-            temp = function_with_prj_name
+            sub_new_func = function_with_prj_name
         else:
-            temp = data.get("ItemName").replace(".c", "")
+            sub_new_func = data.get("ItemName").replace(".c", "")
         
-        if data_test_summary.get("Project") == temp:
-            flag = True
-        else:
+        if not (data_test_summary.get("Project") == sub_new_func):
             flag = False
-            logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), temp))
-            return False
+            logger.error("Different ItemName {} - {}".format(data_test_summary.get("Project"), sub_new_func))
 
-        if data_test_summary.get("Verdict") == "Pass":
-            flag = True
-        else:
+        if not (data_test_summary.get("Verdict") == "Pass"):
             flag = False
             logger.error("ItemName {} got Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
-            return False
 
         score_c0 = convert_score_percentage(data.get("C0"))
         score_c1 = convert_score_percentage(data.get("C1"))
         score_mcdc = convert_score_percentage(data.get("MCDC"))
 
-        if check_score(score_test_summary=data_test_summary.get("C0"), score_exel=data.get("C0")) \
+        if not (check_score(score_test_summary=data_test_summary.get("C0"), score_exel=data.get("C0")) \
                 and check_score(score_test_summary=data_test_summary.get("C1"), score_exel=data.get("C1")) \
-                and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC")):
-            flag = True
-        else:
+                and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC"))):
             flag = False
             logger.error("ItemName Test Summary {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
                                                                         data_test_summary.get("C1"), score_c1,
                                                                         data_test_summary.get("MCDCU"), score_mcdc)
                         )
-            return False
 
         if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
             # Check information between FileTPA and Summary
             if (opt == "check_tpa_xls"):
                 data_tpa = FileTPA(file_tpa).get_data()
                 data_tpa = data_tpa[data.get("ItemName").replace(".c", "") + ".c"]
-                if check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
+                if not (check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
                         and check_score(score_test_summary=data_tpa.get("C1"), score_exel=data.get("C1")) \
-                        and check_score(score_test_summary=data_tpa.get("MC/DC"), score_exel=data.get("MCDC")):
-                    flag = True
-                else:
+                        and check_score(score_test_summary=data_tpa.get("MC/DC"), score_exel=data.get("MCDC"))):
                     flag = False
                     logger.error("ItemName TPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
                                                                                 data_tpa.get("C1"), score_c1,
                                                                                 data_tpa.get("MC/DC"), score_mcdc)
                                 )
-                    return False
             
             # Check information between FileTestReportXML and Summary
             data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
 
-            if check_score(score_test_summary=data_test_report_xml.get("C0"), score_exel=data.get("C0")) \
+            if not (check_score(score_test_summary=data_test_report_xml.get("C0"), score_exel=data.get("C0")) \
                     and check_score(score_test_summary=data_test_report_xml.get("C1"), score_exel=data.get("C1")) \
-                    and check_score(score_test_summary=data_test_report_xml.get("MCDCU"), score_exel=data.get("MCDC")):
-                flag = True
-            else:
+                    and check_score(score_test_summary=data_test_report_xml.get("MCDCU"), score_exel=data.get("MCDC"))):
                 flag = False
                 logger.error("ItemName Test Report XML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), score_c0,
                                                                             data_test_report_xml.get("C1"), score_c1,
                                                                             data_test_report_xml.get("MCDCU"), score_mcdc)
-                                                                            )
-                return False
+                            )
 
             if (opt == "check_tpa_xls"):
                 # Check information between FileCoverageReasonXLS and Summary
                 data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
-                if check_score(score_test_summary=data_CoverageReasonXLS.get("C0"), score_exel=data.get("C0")) \
+                if not (check_score(score_test_summary=data_CoverageReasonXLS.get("C0"), score_exel=data.get("C0")) \
                         and check_score(score_test_summary=data_CoverageReasonXLS.get("C1"), score_exel=data.get("C1")) \
-                        and check_score(score_test_summary=data_CoverageReasonXLS.get("MCDC"), score_exel=data.get("MCDC")):
-                    flag = True
-                else:
+                        and check_score(score_test_summary=data_CoverageReasonXLS.get("MCDC"), score_exel=data.get("MCDC"))):
                     flag = False
                     logger.error("ItemName FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), score_c0,
                                                                                 data_CoverageReasonXLS.get("C1"), score_c1,
                                                                                 data_CoverageReasonXLS.get("MCDC"), score_mcdc)
-                                                                                )
-                    return False
+                                )
+        elif (utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM"):
+            if (opt == "check_WT"):
+                file_Walkthrough = utils.scan_files(Path(file_test_summary_html).parent.as_posix(), ext='.docx')[0][0]
+                data_Walkthrough = FileWalkThroughDoc(file_Walkthrough).get_data()
 
+                if not (data_Walkthrough.get("project").replace(".c", "") == sub_new_func):
+                    flag = False
+                    logger.error("Different ItemName {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), sub_new_func))
+
+                if not (check_score(score_test_summary=data_Walkthrough.get("C0"), score_exel=data.get("C0")) \
+                        and check_score(score_test_summary=data_Walkthrough.get("C1"), score_exel=data.get("C1"))):
+                    flag = False
+                    logger.error("ItemName WT {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
+                                                                                data_Walkthrough.get("C1"), score_c1))
+
+                if not (data_Walkthrough.get("review partner") == convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name") \
+                    and data_Walkthrough.get("review initiator") == convert_name(key=data.get("Tester"), opt="name")):
+                    flag = False
+                    logger.error("Different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
+                                                                                  data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name")
+                                                                                 )
+                                )
+
+                if (data.get("OPL/Defect") == "OPL" or data.get("OPL/Defect") == "Defect"):
+                    num_OPL = check_OPL_Walkthrough(file_Walkthrough)
+
+                    if not (num_OPL > 1):
+                        flag = False
+                        logger.error("ItemName WT {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+
+                    if not (data_Walkthrough.get("tbl_finding").get('finding') != "/" \
+                        and data_Walkthrough.get("tbl_finding").get('impact') != "/"):
+                        flag = False
+                        logger.error("ItemName WT {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                                                                                    data_Walkthrough.get("tbl_finding").get('impact'))
+                                    )
+
+                    if (data_Walkthrough.get('C0') == "100" and data_Walkthrough.get('C1') == "100"):
+                        if not (data_Walkthrough.get("tbl_finding").get('confirm_UT9').strip() == "Yes, Documented"):
+                            flag = False
+                            logger.error("ItemName WT {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                                                                                        '"Yes, Documented"')
+                                        )
+                    else:
+                        if not (data_Walkthrough.get("tbl_finding").get('confirm_UT9').strip() == "No, Documented"):
+                            flag = False
+                            logger.error("ItemName WT {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                                                                                        '"No, Documented"')
+                                    )
+
+        else:
+            raise ("No sheet name")
         # if (datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y") == datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")):
         #     flag = True
         # else:
@@ -593,6 +646,74 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         #     logger.warning("ItemName {} got wrong date end: {} - {}".format(data_test_summary.get("Project"), datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y"), datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")))
         #     return flag
 
+        return flag
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
+
+def check_information_ASW(path, data, opt=""):
+    def check_exist_plt(lst, pat):
+        flag = False
+        for f in lst:
+            if f == pat:
+                flag = True
+                break
+        
+        return flag
+    try:
+        logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
+
+        flag = True
+
+        file_test_design = utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0][0]
+        file_RTRT = utils.scan_files(Path(path).as_posix(), ext='ReportRTRT.txt')[0][0]
+        file_ATT = utils.scan_files(Path(path).as_posix(), ext='ATT_Report.xml')[0][0]
+        lst_file_PLT = [os.path.basename(f).replace('.plt', '') for f in utils.scan_files(Path(path).as_posix(), ext='.plt')[0] if re.search('mdfFiles', str(Path(f).as_posix)) == None]
+
+        data_test_design = FileTestDesignXLSX(file_test_design).get_data()
+        data_RTRT = FileRTRTCov(file_RTRT).get_data()
+        data_ATT = FileATTReportXML(file_ATT).get_data()
+
+        temp = ""
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            temp = function_with_prj_name
+        else:
+            temp = data.get("ItemName").replace(".c", "")
+
+        if not (data_test_design.get("ItemName") == temp \
+            and data_ATT.get("ClassName") == temp):
+            flag = False
+            logger.error("Different ItemName {} - {}".format(data_test_design.get("ItemName"), temp))
+
+        if not(data_ATT.get("ClassVersion") == data.get("ItemRevision") and data_test_design.get("ItemRevision") == data.get("ItemRevision")):
+            flag = False
+            logger.error("ItemName {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
+
+        # for tm_ATT in data_ATT.get("TestModuleName"):
+        #     print(tm_ATT)
+        if not check_exist_plt(lst_file_PLT, data_ATT.get("TestModuleName")):
+            flag = False
+            logger.error("ItemName {} got TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
+
+        if not (data_ATT.get("CompleteVerdict") == "Passed"):
+            flag = False
+            logger.error("ItemName {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
+
+        score_c0 = convert_score_percentage(data.get("C0"))
+        score_c1 = convert_score_percentage(data.get("C1"))
+        score_mcdc = convert_score_percentage(data.get("MCDC"))
+
+        if not (check_score(score_test_summary=data_RTRT.get("C0"), score_exel=data.get("C0")) \
+                and check_score(score_test_summary=data_RTRT.get("C1"), score_exel=data.get("C1")) \
+                and check_score(score_test_summary=data_RTRT.get("MCDC"), score_exel=data.get("MCDC"))):
+            flag = False
+            logger.error("ItemName RTRT Report {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
+                                                                        data_RTRT.get("C1"), score_c1,
+                                                                        data_RTRT.get("MCDC"), score_mcdc)
+                        )
+
+        """ Check Walkthrough"""
         return flag
     except Exception as e:
         logger.exception(e)
@@ -845,19 +966,35 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                     function = data_taskid[item].get("ItemName").replace(".c", "")
                     user_tester = data_taskid[item].get("Tester")
 
-                    path_with_component = Path(path_taskid).joinpath(str(trim_src(data_taskid[item].get("ComponentName"))), "Unit_tst", str(data_taskid[item].get("TaskID")))
-
+                    path_with_component = ""
+                    if "ASW" == data_taskid[item].get("Type"):
+                        path_with_component = Path(path_taskid)
+                    elif "PSW" == data_taskid[item].get("Type"):
+                        path_with_component = Path(path_taskid).joinpath(str(trim_src(data_taskid[item].get("ComponentName"))), "Unit_tst", str(data_taskid[item].get("TaskID")))
+                    else:
+                        print("BUG No Type")
+                    
                     b_check_exist = check_exist(dir_input=path_with_component, function=function)
                     if (b_check_exist):
                         count += 1
-                        f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "Test_Result", "test_summary.html")
 
-                        if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item]):
-                            print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
-                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+                        if "ASW" == data_taskid[item].get("Type"):
+                            if check_information_ASW(path=Path.joinpath(path_with_component, function), data=data_taskid[item]):
+                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+                            else:
+                                logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
+                        elif "PSW" == data_taskid[item].get("Type"):
+                            f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "Test_Result", "test_summary.html")
+                            if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item], opt="check_WT"):
+                                print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
+                            else:
+                                logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
+                                file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
                         else:
-                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
-                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
+                            raise "Bug: No type"
 
                     else:
                         logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
@@ -966,55 +1103,59 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=5
                     function = data_taskid[item].get("ItemName").replace(".c", "")
                     user_tester = data_taskid[item].get("Tester")
 
-                    # if user_tester == "bang.nguyen-duy" or user_tester ==  "hau.nguyen-tai":
-                    #     continue
-                    # if function == "RBAPLCUST_RDBI_IOCtrlState" and taskid == 1416606:
-                        # print("HERE")
-                        # continue
                     b_check_exist = check_exist(dir_input=path_taskid, function=function)
                     if (b_check_exist):
                         count += 1
+                        if "ASW" == data_taskid[item].get("Type"):
+                            logger.warning("{},{},{},{}".format(taskid, function, user_tester, "ASW_No_Need"))
+                            continue
+                        elif "PSW" == data_taskid[item].get("Type"):
+                            temp = str(data_taskid[item].get("C0"))
+                            if (temp != "-" or temp != ""):
+                                temp_component = str(data_taskid[item].get("ComponentName"))
+                                if is_have_src(temp_component):
+                                    final_dst = Path(dir_output).joinpath(str(taskid), "AR", trim_src(temp_component), "Unit_tst", str(taskid), function)
+                                    dir_Configuration = Path(final_dst).joinpath("Configuration")
+                                    dir_Test_Spec = Path(final_dst).joinpath("Test_Spec")
+                                    dir_Test_Result = Path(final_dst).joinpath("Test_Result")
 
-                        temp = str(data_taskid[item].get("C0"))
-                        if (temp != "-" or temp != ""):
-                            temp_component = str(data_taskid[item].get("ComponentName"))
-                            if is_have_src(temp_component):
-                                final_dst = Path(dir_output).joinpath(str(taskid), "AR", trim_src(temp_component), "Unit_tst", str(taskid), function)
-                                dir_Configuration = Path(final_dst).joinpath("Configuration")
-                                dir_Test_Spec = Path(final_dst).joinpath("Test_Spec")
-                                dir_Test_Result = Path(final_dst).joinpath("Test_Result")
+                                    f_walkthrough = Path(dir_Test_Result).joinpath("Walkthrough_Protocol_" + function + ".docx")
+                                    f_tpa = Path(dir_Test_Result).joinpath(function + ".tpa")
+                                    f_test_summary = Path(path_taskid).joinpath(function, "Cantata", "results", "test_summary.html")
 
-                                f_walkthrough = Path(dir_Test_Result).joinpath("Walkthrough_Protocol_" + function + ".docx")
-                                f_tpa = Path(dir_Test_Result).joinpath(function + ".tpa")
-                                f_test_summary = Path(path_taskid).joinpath(function, "Cantata", "results", "test_summary.html")
+                                    if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item]):
+                                        Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
+                                        Path(dir_Configuration).mkdir(exist_ok=True)
+                                        Path(dir_Test_Spec).mkdir(exist_ok=True)
+                                        Path(dir_Test_Result).mkdir(exist_ok=True)
 
-                                if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item]):
-                                    Path(dir_Configuration).parent.mkdir(parents=True, exist_ok=True)
-                                    Path(dir_Configuration).mkdir(exist_ok=True)
-                                    Path(dir_Test_Spec).mkdir(exist_ok=True)
-                                    Path(dir_Test_Result).mkdir(exist_ok=True)
+                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("WT_template.docx"), dst=f_walkthrough)
+                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("template.tpa"), dst=f_tpa)
+                                        utils.copy(src=f_test_summary, dst=dir_Test_Result)
 
-                                    utils.copy(src=Path(CONST.TEMPLATE).joinpath("WT_template.docx"), dst=f_walkthrough)
-                                    utils.copy(src=Path(CONST.TEMPLATE).joinpath("template.tpa"), dst=f_tpa)
-                                    utils.copy(src=f_test_summary, dst=dir_Test_Result)
+                                        update_walkthrough(file=f_walkthrough, data=data_taskid[item], file_test_summary_html=f_test_summary)
+                                        update_tpa(file=f_tpa, data=data_taskid[item], file_test_summary_html=f_test_summary)
 
-                                    update_walkthrough(file=f_walkthrough, data=data_taskid[item], file_test_summary_html=f_test_summary)
-                                    update_tpa(file=f_tpa, data=data_taskid[item], file_test_summary_html=f_test_summary)
+                                        sevenzip(filename=Path(path_taskid).joinpath(function).as_posix(), zipname=Path(dir_Configuration).joinpath(str(function) + ".zip").as_posix())
 
-                                    sevenzip(filename=Path(path_taskid).joinpath(function).as_posix(), zipname=Path(dir_Configuration).joinpath(str(function) + ".zip").as_posix())
+                                        for f in utils.scan_files(directory=Path(path_taskid).joinpath(function, "Cantata", "tests"), ext=".c")[0]:
+                                            sevenzip(filename=f.as_posix(), zipname=Path(dir_Test_Spec).joinpath(os.path.basename(f).replace(".c", ".zip")).as_posix())
 
-                                    for f in utils.scan_files(directory=Path(path_taskid).joinpath(function, "Cantata", "tests"), ext=".c")[0]:
-                                        sevenzip(filename=f.as_posix(), zipname=Path(dir_Test_Spec).joinpath(os.path.basename(f).replace(".c", ".zip")).as_posix())
+                                        print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
+                                    else:
+                                        logger.error("Different information {},{},{},{}".format(taskid, function, user_tester, "NG"))
+                                        next
 
-                                    print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                                 else:
-                                    logger.error("Different information {},{},{},{}".format(taskid, function, user_tester, "NG"))
-                                    next
-
-                            else:
-                                logger.error("Miss src in componentname {},{},{},{}".format(taskid, function, user_tester, "NG"))
+                                    logger.error("Miss src in componentname {},{},{},{}".format(taskid, function, user_tester, "NG"))
+                        else:
+                                raise "BUG No Type"
                     else:
                         logger.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
+
+                status = ["GOOD" if (len(os.listdir(path_taskid)) == len(data_taskid)) and (count == len(data_taskid)) else "BAD"][0]
+                print("## Total {}: status {}: Found/Count/Total - {}/{}/{}".format(str(taskid), status, count, len(os.listdir(path_taskid)), len(data_taskid)))
+                print("-----------------------------------------------------------------\n")                        
             else:
                 next
     except Exception as e:
@@ -1248,37 +1389,46 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
 def main():
     try:
         file_summary = utils.load(CONST.SETTING).get("file_summary")
-        dir_input = utils.load(CONST.SETTING).get("dir_input_coem_1")
-        dir_output = utils.load(CONST.SETTING).get("dir_output")
         sheetname = utils.load(CONST.SETTING).get("sheetname")
+        dir_output = utils.load(CONST.SETTING).get("dir_output")
 
         l_taskids = utils.load(CONST.SETTING).get("l_taskids_coem")
+        dir_input = utils.load(CONST.SETTING).get("dir_input_coem")
+
+        lst_opt = utils.load(CONST.SETTING).get("mode_coem")
+
         if sheetname == "Merged_JOEM":
             l_taskids = utils.load(CONST.SETTING).get("l_taskids_joem")
+            dir_input = utils.load(CONST.SETTING).get("dir_input_joem")
+            l_opt = utils.load(CONST.SETTING).get("mode_joem")
 
-        """Make folder release"""
-        # make_folder_release(path_summary=file_summary, l_packages=[20200626], dir_output=dir_output, begin=59, end=1000)
+        index_begin = utils.load(CONST.SETTING).get("coordinator").get("begin")
+        index_end = utils.load(CONST.SETTING).get("coordinator").get("end")
 
-        """Create json file of summary to backup"""
-        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=59, end=1000)
-        # create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=59, end=1000)
-
-        """Collect information for deliverables"""
-        # collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=59, end=1000)
-
-        for opt in utils.load(CONST.SETTING).get("mode_coem"):
+        for opt in lst_opt:
             if opt == "check_releases":
-                check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
+                check_releases(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=index_begin, end=index_end)
             elif opt == "check_archives":
                 if sheetname == "Merged_JOEM":
-                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
+                    check_archives_joem(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=index_begin, end=index_end)
                 else:
-                    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=59, end=1000)
+                    check_archives(path_summary=file_summary, dir_input=dir_input, taskids=l_taskids, begin=index_begin, end=index_end)
             elif opt == "make_archives":
                 if sheetname == "Merged_JOEM":
-                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=1000)
+                    make_archives_joem(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=index_begin, end=index_end)
                 else:
-                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=59, end=1000)
+                    make_archieves(path_summary=file_summary, dir_input=dir_input, dir_output=dir_output, taskids=l_taskids, begin=index_begin, end=index_end)
+            elif opt == "make_folder_release":
+                """Make folder release"""
+                l_folder_package = utils.load(CONST.SETTING).get("l_folder_package")
+                make_folder_release(path_summary=file_summary, l_packages=l_folder_package, dir_output=dir_output, begin=index_begin, end=index_end)
+            elif opt == "create_summary_json_file":
+                """Create json file of summary to backup"""
+                create_summary_json_file(file_summary=file_summary, sheetname="Merged_COEM", begin=index_begin, end=index_end)
+                create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=index_begin, end=index_end)
+            elif opt == "collect_information_deliverables":
+                """Collect information for deliverables"""
+                collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=index_begin, end=index_end)
             else:
                 raise("I dont know your mode")
     except Exception as e:
@@ -1287,12 +1437,16 @@ def main():
         logger.debug("Done)")
 
 def test():
-    directory = "C:\\Users\\hieu.nguyen-trung\\Desktop\\OUTPUT\\1435905\\AR\\rba\\Bldr\\config\\ApplicationLayer\\rba_BldrCmp\\Unit_tst\\1435905\\rba_BldrCmp_Cfg_CheckMem\\Test_Result\\Walkthrough_Protocol_rba_BldrCmp_Cfg_CheckMem.docx"
-    data = utils.scan_files(directory, ext='ReportRTRT.txt')
-    for f in data[0]:
-        new_file = Path(f.parent, 'ReportRTRT.txt')
-        print(FileRTRTCov(new_file).parse2json())
+    directory = "C:\\Users\\nhi5hc\\Desktop\\Input\\1545266\\RV\\HMI_ApbErrorLamp_Conti"
+    data = utils.scan_files(directory, ext="ATT_Report.xml")
+    print(FileATTReportXML(data[0][0]).get_data())
+    # check_information_ASW(path=directory, data="", opt="")
+    # data = utils.scan_files(directory, ext='.xlsm')
+    # for f in data[0]:
+    #     new_file = Path(f)
+    #     print(FileTestDesignXLSX(new_file).get_data())
 
 if __name__ == "__main__":
-    # main()
-    test()
+    main()
+    os.system("pause")
+    # test()

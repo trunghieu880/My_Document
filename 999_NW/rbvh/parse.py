@@ -92,6 +92,8 @@ def get_xlsx_sheets(xlsx):
 
 def parse_summary_json(file, sheetname="", begin=47, end=47):
     try:
+        result = dict()
+
         if sheetname == "":
             sheetname = utils.load(CONST.SETTING).get("sheetname")
     
