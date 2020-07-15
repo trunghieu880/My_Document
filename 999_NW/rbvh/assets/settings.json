@@ -1,6 +1,6 @@
 {
-    "file_summary": "//hc-ut40070c/duongnguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200701.xlsm",
-    "dir_input_joem": "//hc-ut40070c/duongnguyen/0000_Project/001_Prj/02_JOEM/01_Output_Package/20200528/JOEM/RN_SUV_CRBS_BSS7x_dev",
+    "file_summary": "//hc-ut40070c/duongnguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200801.xlsm",
+    "dir_input_joem": "C:/Test",
     "dir_input_coem": "C:/Users/nhi5hc/Desktop/Input",
 
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
@@ -14,14 +14,15 @@
     ],
 
     "l_taskids_coem": [
-        1550364
+        1553109
     ],
 
     "l_taskids_joem": {
-        "Project": "RN_SUV_CRBS_BSS7x_dev",
-        "BB": "BB80081",
+        "Package": 20200801,
+        "Project": "TOY_800B_780B_CV1_Snapshot5",
+        "BB": "",
         "TaskGroup": [
-            "T501", "T502"
+            "T503"
         ]
     },
     
@@ -32,6 +33,10 @@
     ],
 
     "mode_joem": [
+        "check_archives"
+    ],
+
+    "mode_joem_bk": [
         "check_archives",
         "make_archives"
     ],
@@ -57,7 +62,7 @@
         "bang.nguyen-duy": {"name": "EXTERNAL Nguyen Duy Bang (Ban Vien), RBVH/EPS45", "id": "nbg7hc", "reviewer": "hau.nguyen-tai"},
         "dac.luu-cong": {"name": "EXTERNAL Luu Cong Dac (Ban Vien), RBVH/EPS45", "id": "lud5hc", "reviewer": "huy.do-anh"},
         "duong.nguyen-tuan": {"name": "EXTERNAL Nguyen Tuan Duong (Ban Vien), RBVH/EPS45", "id": "ndy4hc", "reviewer": "hieu.nguyen-trung"},
-        "loc.do-phu": {"name": "EXTERNAL Do Phu Loc (Ban Vien), RBVH/EPS45", "id": "dol7hc", "reviewer": "duong.nguyen-tuan"},
+        "loc.do-phu": {"name": "EXTERNAL Do Phu Loc (Ban Vien), RBVH/EPS45", "id": "dol7hc", "reviewer": "hieu.nguyen-trung"},
         "thanh.nguyen-kim": {"name": "EXTERNAL Nguyen Kim Thanh (Ban Vien), RBVH/EPS45", "id": "nut4hc", "reviewer": "chuong.nguyen-minh"},
         "chung.ly": {"name": "EXTERNAL Ly Chung (Ban Vien), RBVH/EPS45", "id": "lyc1hc", "reviewer": "nam.phan-the"},
         "huy.do-anh": {"name": "EXTERNAL Do Anh Huy (Ban Vien), RBVH/EPS45", "id": "duh7hc", "reviewer": "dac.luu-cong"},
