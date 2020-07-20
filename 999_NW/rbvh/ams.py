@@ -13,7 +13,7 @@ import re
 from docx.api import Document
 import win32com.client
 from win32com.client import Dispatch
-import json
+import json, copy
 import time
 
 logger = logging.getLogger(__name__)
@@ -43,51 +43,65 @@ class FileTPA(Base):
 
     # Function update_tpa: update tpa file with the input data
     def update_tpa(self, data):
-        lst_header = ["UnitUnderTest", "ExecutionDate", "NTUserID", "FileName", "Verdict"]
+        flag = False
+        try:
+            lst_header = ["UnitUnderTest", "ExecutionDate", "NTUserID", "FileName", "Verdict"]
 
-        for h in lst_header:
-            self.update_tag(h, data[h])
+            for h in lst_header:
+                self.update_tag(h, data[h])
 
-        # collect Percentage Coverage
-        lst_Percentage = [e for e in self.doc.iterfind('.//{0}'.format("Percentage"))]
+            # collect Percentage Coverage
+            lst_Percentage = [e for e in self.doc.iterfind('.//{0}'.format("Percentage"))]
 
-        lst_Percentage[0].text = data['C0']
-        lst_Percentage[1].text = data['C1']
-        if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
-            lst_Percentage[2].text = data['MCDCU']
+            lst_Percentage[0].text = data['C0']
+            lst_Percentage[1].text = data['C1']
+            if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+                lst_Percentage[2].text = data['MCDCU']
 
-        path = re.sub("file:/", "", self.doc.docinfo.URL)
-        with open(path, 'wb') as f:
-            self.doc.write(f)
+            path = re.sub("file:/", "", self.doc.docinfo.URL)
+            with open(path, 'wb') as f:
+                self.doc.write(f)
+            flag = True
+        except Exception as e:
+            flag = False
+            logger.exception(e)
+        finally:
+            return flag
 
     # Function get_data: get the information in the Summary HTML file : "UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"
     def get_data(self):
-        lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
-        ut = self.get_tag("UnitUnderTest").text
-        user = self.get_tag("NTUserID").text
-        func = self.get_tag("FileName").text
-        result = self.get_tag("Verdict").text
-        # collect title C0, C1, MC/DC
-        lst_MetricName = [e.text for e in self.doc.iterfind('.//{0}'.format("MetricName"))]
-        # collect Percentage Coverage
-        lst_Percentage = [e.text for e in self.doc.iterfind('.//{0}'.format("Percentage"))]
-
         d = dict()
-        lst_data = list()
-        lst_data.append("NTUserID")
-        lst_data.append(user)
-        lst_data.append("FileName")
-        lst_data.append(func)
-        lst_data.append("TestResult")
-        lst_data.append(result)
+        try:
+            lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
+            ut = self.get_tag("UnitUnderTest").text
+            user = self.get_tag("NTUserID").text
+            func = self.get_tag("FileName").text
+            result = self.get_tag("Verdict").text
+            # collect title C0, C1, MC/DC
+            lst_MetricName = [e.text for e in self.doc.iterfind('.//{0}'.format("MetricName"))]
+            # collect Percentage Coverage
+            lst_Percentage = [e.text for e in self.doc.iterfind('.//{0}'.format("Percentage"))]
 
-        for index, key in enumerate(lst_MetricName):
-            lst_data.append(key)
-            lst_data.append(lst_Percentage[index])
+            lst_data = list()
+            lst_data.append("NTUserID")
+            lst_data.append(user)
+            lst_data.append("FileName")
+            lst_data.append(func)
+            lst_data.append("TestResult")
+            lst_data.append(result)
 
-        # convert list to json
-        d[ut] = {lst_data[i]: lst_data[i + 1] for i in range(0, len(lst_data), 2)}
-        return d
+            for index, key in enumerate(lst_MetricName):
+                lst_data.append(key)
+                lst_data.append(lst_Percentage[index])
+
+            # convert list to json
+            d[ut] = {lst_data[i]: lst_data[i + 1] for i in range(0, len(lst_data), 2)}
+        except Exception as e:
+            d = {}
+            logger.exception(e)
+        finally:
+            return d
+
 
 class FileTestReportXML(Base):
     # Class FileTestReportXML
@@ -103,21 +117,26 @@ class FileTestReportXML(Base):
 
     # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
-        lst_header = ["status", "statement", "decision", "booleanOperandEffectivenessMasking", "booleanOperandEffectivenessUnique", "testScriptName"]
-        node_summary = self.get_tag("summary")
-        status = {'Verdict': node_summary.attrib['status']}
-        node_coverageInfo = self.get_tag("coverageInfo")[0]
-
-        score = {'C0': item.text for item in node_coverageInfo if item.tag == "statement"}
-        score = {**score, **{'C1': item.text for item in node_coverageInfo if item.tag == "decision"}}
-        score = {**score, **{'MCDCM': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessMasking"}}
-        score = {**score, **{'MCDCU': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessUnique"}}
-
-        testscriptname = {'testScriptName': item.text for item in self.get_tag("info") if item.tag == "testScriptName"}
-
         data = dict()
-        data = {**status, **score, **testscriptname}
-        return data
+        try:
+            lst_header = ["status", "statement", "decision", "booleanOperandEffectivenessMasking", "booleanOperandEffectivenessUnique", "testScriptName"]
+            node_summary = self.get_tag("summary")
+            status = {'Verdict': node_summary.attrib['status']}
+            node_coverageInfo = self.get_tag("coverageInfo")[0]
+
+            score = {'C0': item.text for item in node_coverageInfo if item.tag == "statement"}
+            score = {**score, **{'C1': item.text for item in node_coverageInfo if item.tag == "decision"}}
+            score = {**score, **{'MCDCM': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessMasking"}}
+            score = {**score, **{'MCDCU': item.text for item in node_coverageInfo if item.tag == "booleanOperandEffectivenessUnique"}}
+
+            testscriptname = {'testScriptName': item.text for item in self.get_tag("info") if item.tag == "testScriptName"}
+
+            data = {**status, **score, **testscriptname}
+        except Exception as e:
+            data = {}
+            logger.exception(e)
+        finally:
+            return data
 
 class FileTestReportHTML(Base):
     # Class FileTestReportHTML
@@ -179,7 +198,7 @@ class FileTestSummaryHTML(Base):
                     elif e.text == "MC/DC - unique cause (U)":
                         key = 'MCDCU'
                     else:
-                        raise("BUG")
+                        print("BUG")
                     next
                 else:
                     if "%" in e.text and flag == True:
@@ -209,7 +228,7 @@ class FileTestSummaryHTML(Base):
 
         except Exception as e:
             data = {}
-            raise(e)
+            logger.exception(e)
         finally:
             return data
 
@@ -225,146 +244,164 @@ class FileWalkThroughDoc(Base):
 
     # Function update_tpa: update tpa file with the input data
     def update(self, data, opt="PSW"):
-        if opt == "PSW":
-            document = Document(self.doc)
-            table_infor = document.tables[1]
-            table_infor.cell(0,1).text = data['date']
-            table_infor.cell(0,3).text = data['project']
-            table_infor.cell(0,5).text = data['review initiator']
-            table_infor.cell(1,1).text = str(data['effort'])
-            table_infor.cell(1,3).text = data['baseline']
-            table_infor.cell(1,5).text = data['review partner']
-            table_attach = document.tables[2]
-            table_attach.cell(1, 2).text = data['path_testscript']
-            table_attach.cell(3, 2).text = data['path_test_summary']
-            table_attach.cell(3, 1).text = data['ScoreC0C1']
-            document.save(self.doc)
-        elif opt == "ASW":
-            pass
-            # word = win32com.client.DispatchEx('Word.Application')
-            # word.Visible = 0
-            # word.DisplayAlerts = 0
+        flag = False
+        try:
+            if opt == "PSW":
+                document = Document(self.doc)
+                table_infor = document.tables[1]
+                table_infor.cell(0,1).text = data['date']
+                table_infor.cell(0,3).text = data['project']
+                table_infor.cell(0,5).text = data['review initiator']
+                table_infor.cell(1,1).text = str(data['effort'])
+                table_infor.cell(1,3).text = data['baseline']
+                table_infor.cell(1,5).text = data['review partner']
+                table_attach = document.tables[2]
+                table_attach.cell(1, 2).text = data['path_testscript']
+                table_attach.cell(3, 2).text = data['path_test_summary']
+                table_attach.cell(3, 1).text = data['ScoreC0C1']
+                document.save(self.doc)
+            elif opt == "ASW":
+                pass
+                # word = win32com.client.DispatchEx('Word.Application')
+                # word.Visible = 0
+                # word.DisplayAlerts = 0
 
-            # doc = word.Documents.Open(self.doc)
+                # doc = word.Documents.Open(self.doc)
 
-            # table_infor = doc.Tables(2)
-            # table_attach = doc.Tables(3)
-            # table_finding = doc.Tables(4)
-            # table_check_list = doc.Tables(8)
+                # table_infor = doc.Tables(2)
+                # table_attach = doc.Tables(3)
+                # table_finding = doc.Tables(4)
+                # table_check_list = doc.Tables(8)
 
-            # finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
-            # impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
-            # confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
+                # finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
+                # impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
+                # confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
 
-            # temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
-            # [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%.*MCDC: ([0-9]+)%", r'\1 \2 \3', temp).split(" ")
+                # temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
+                # [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%.*MCDC: ([0-9]+)%", r'\1 \2 \3', temp).split(" ")
 
-            # dict_walkthrough = {
-            #     'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
-            #     'project': reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text),
-            #     'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
-            #     'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
-            #     'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
-            #     'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
-            #     'C0': score_c0,
-            #     'C1': score_c1,
-            #     'MCDC': score_mcdc,
-            #     'tbl_finding': {
-            #         "finding": finding,
-            #         "impact": impact,
-            #         "confirm_UT26": confirm_UT26
-            #     }
-            # }
+                # dict_walkthrough = {
+                #     'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
+                #     'project': reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text),
+                #     'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
+                #     'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
+                #     'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
+                #     'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
+                #     'C0': score_c0,
+                #     'C1': score_c1,
+                #     'MCDC': score_mcdc,
+                #     'tbl_finding': {
+                #         "finding": finding,
+                #         "impact": impact,
+                #         "confirm_UT26": confirm_UT26
+                #     }
+                # }
 
-            # doc.Save()
-            # doc.Close()
-            # word.Quit()
-            # word = None
-        else:
-            raise "BUG No Type"
+                # doc.Save()
+                # doc.Close()
+                # word.Quit()
+                # word = None
+            else:
+                logger.error("None Bug Type")
+            
+            flag = True
+        except Exception as e:
+            flag = False
+            logger.exception(e)
+        finally:
+            return flag
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, opt="PSW"):
         dict_walkthrough = dict()
-        if opt == "PSW":
-            document = Document(self.doc)
-            table_infor = document.tables[1]
-            table_attach = document.tables[2]
-            table_finding = document.tables[3]
-            table_check_list = document.tables[6]
+        try:
+            if opt == "PSW":
+                document = Document(self.doc)
+                table_infor = document.tables[1]
+                table_attach = document.tables[2]
+                table_finding = document.tables[3]
+                table_check_list = document.tables[6]
 
-            temp = re.sub("[\n\t]", " ", table_attach.cell(3, 1).text).strip()
-            [score_c0, score_c1] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%", r'\1 \2', temp).split(" ")
+                temp = re.sub("[\n\t]", " ", table_attach.cell(3, 1).text).strip()
+                [score_c0, score_c1] = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+)", r'\1 \2', temp).replace("%", "").split(" ")
 
-            finding = table_finding.cell(1, 1).text
-            impact = table_finding.cell(1, 3).text
-            confirm_UT9 = table_check_list.cell(12, 3).text
+                finding = table_finding.cell(1, 1).text
+                impact = table_finding.cell(1, 3).text
+                confirm_UT9 = table_check_list.cell(12, 3).text
 
-            dict_walkthrough = {
-                'date': table_infor.cell(0,1).text,
-                'project': table_infor.cell(0,3).text,
-                'review initiator': table_infor.cell(0,5).text,
-                'effort': table_infor.cell(1,1).text,
-                'baseline': table_infor.cell(1,3).text,
-                'review partner' : table_infor.cell(1,5).text,
-                'path_testscript': table_attach.cell(1, 2).text,
-                'path_test_summary': table_attach.cell(3, 2).text,
-                'C0': score_c0,
-                'C1': score_c1,
-                'tbl_finding': {
-                    "finding": finding,
-                    "impact": impact,
-                    "confirm_UT9": confirm_UT9
+                dict_walkthrough = {
+                    'date': table_infor.cell(0,1).text,
+                    'project': table_infor.cell(0,3).text,
+                    'review initiator': table_infor.cell(0,5).text,
+                    'effort': table_infor.cell(1,1).text,
+                    'baseline': table_infor.cell(1,3).text,
+                    'review partner' : table_infor.cell(1,5).text,
+                    'path_testscript': table_attach.cell(1, 2).text,
+                    'path_test_summary': table_attach.cell(3, 2).text,
+                    'C0': score_c0,
+                    'C1': score_c1,
+                    'tbl_finding': {
+                        "finding": finding,
+                        "impact": impact,
+                        "confirm_UT9": confirm_UT9
+                    }
                 }
-            }
-            
-        elif opt == "ASW":
-            word = win32com.client.DispatchEx('Word.Application')
-            word.Visible = 0
-            word.DisplayAlerts = 0
+                
+            elif opt == "ASW":
+                word = win32com.client.DispatchEx('Word.Application')
+                word.Visible = 0
+                word.DisplayAlerts = 0
 
-            doc = word.Documents.Open(self.doc)
-            table_infor = doc.Tables(2)
-            table_attach = doc.Tables(3)
-            table_finding = doc.Tables(4)
-            table_check_list = doc.Tables(8)
+                doc = word.Documents.Open(self.doc)
+                table_infor = doc.Tables(2)
+                table_attach = doc.Tables(3)
+                table_finding = doc.Tables(4)
+                table_check_list = doc.Tables(8)
 
-            
-            finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
-            impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
-            confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
+                
+                finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
+                impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
+                confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
 
-            temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
-            [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%.*MCDC: ([0-9]+)%", r'\1 \2 \3', temp).split(" ")
+                temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
+                score_c0 = score_c1 = score_mcdc = ""
+                if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
+                    [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
+                else:
+                    score_c0 = score_c1 = score_mcdc = "Unknown"
+                    logger.error("Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
 
-            [project_name, item_revision] = re.sub("^(.*) v(.*)", r'\1 \2', reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)).split(" ")
+                [project_name, item_revision] = re.sub("^(.*) v(.*)", r'\1 \2', reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)).split(" ")
 
-            dict_walkthrough = {
-                'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
-                'project': project_name,
-                'ItemRevision': item_revision.replace("_", "."),
-                'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
-                'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
-                'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
-                'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
-                'C0': score_c0,
-                'C1': score_c1,
-                'MCDC': score_mcdc,
-                'tbl_finding': {
-                    "finding": finding,
-                    "impact": impact,
-                    "confirm_UT26": confirm_UT26
+                dict_walkthrough = {
+                    'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
+                    'project': project_name,
+                    'ItemRevision': item_revision.replace("_", "."),
+                    'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
+                    'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
+                    'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
+                    'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
+                    'C0': score_c0,
+                    'C1': score_c1,
+                    'MCDC': score_mcdc,
+                    'tbl_finding': {
+                        "finding": finding,
+                        "impact": impact,
+                        "confirm_UT26": confirm_UT26
+                    }
                 }
-            }
-
-            doc.Close()
-            word.Quit()
-            word = None
-        else:
+            else:
+                dict_walkthrough = {}
+                logger.error("None Bug Type")
+        except Exception as e:
             dict_walkthrough = {}
-            raise "BUG No Type"
-
-        return dict_walkthrough
+            logger.exception(e)
+        finally:
+            if opt == "ASW":
+                doc.Close()
+                word.Quit()
+                word = None
+            return dict_walkthrough
 
 class FileCoverageReasonXLS(Base):
     def __init__(self, path):
@@ -373,71 +410,84 @@ class FileCoverageReasonXLS(Base):
 
     # Function update_tpa: update tpa file with the input data
     def update(self, data):
-        excel = win32com.client.Dispatch('Excel.Application')
-        wb = excel.Workbooks.Open(self.doc)
-        excel.Visible = False
-        excel.DisplayAlerts = False
-        wb.DoNotPromptForConvert = True
-        wb.CheckCompatibility = False
+        flag = False
+        try:
+            excel = win32com.client.Dispatch('Excel.Application')
+            wb = excel.Workbooks.Open(self.doc)
+            excel.Visible = False
+            excel.DisplayAlerts = False
+            wb.DoNotPromptForConvert = True
+            wb.CheckCompatibility = False
 
-        score_c0 = (value(formatNumber(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA")
-        score_c1 = (value(formatNumber(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
-        score_mcdc = (value(formatNumber(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")
+            score_c0 = (value(formatNumber(float(value(data.get("C0"))) * 100)) if (value(data.get("C0")) != "-" and data.get("C0") != None) else "NA")
+            score_c1 = (value(formatNumber(float(value(data.get("C1"))) * 100)) if (value(data.get("C1")) != "-" and data.get("C1") != None) else "NA")
+            score_mcdc = (value(formatNumber(float(value(data.get("MCDC"))) * 100)) if (value(data.get("MCDC")) != "-" and data.get("MCDC") != None) else "NA")
 
-        data_tpa = {
-            "UnitUnderTest": data.get("ItemName"),
-            "NTUserID": str(convert_name(key=data.get("Tester"), opt="id")),
-            "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%d"),
-            "C0": score_c0,
-            "C1": score_c1,
-            "MCDCU": score_mcdc
-        }
+            data_tpa = {
+                "UnitUnderTest": data.get("ItemName"),
+                "NTUserID": str(convert_name(key=data.get("Tester"), opt="id")),
+                "ExecutionDate" : datetime.datetime.now().strftime("%Y-%m-%d"),
+                "C0": score_c0,
+                "C1": score_c1,
+                "MCDCU": score_mcdc
+            }
 
-        writeData = wb.Worksheets(1)
-        # Write data here
-        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
+            writeData = wb.Worksheets(1)
+            # Write data here
+            infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
 
-        writeData.Range(infor_CoverageReasonXLS.get("Tester")).Value = data_tpa.get("NTUserID")
-        writeData.Range(infor_CoverageReasonXLS.get("Date")).Value = data_tpa.get("ExecutionDate")
-        writeData.Range(infor_CoverageReasonXLS.get("Item_Name")).Value = data_tpa.get("UnitUnderTest")
-        writeData.Range(infor_CoverageReasonXLS.get("C0")).Value = data_tpa.get("C0")
-        writeData.Range(infor_CoverageReasonXLS.get("C1")).Value = data_tpa.get("C1")
-        writeData.Range(infor_CoverageReasonXLS.get("MCDC")).Value = data_tpa.get("MCDCU")
+            writeData.Range(infor_CoverageReasonXLS.get("Tester")).Value = data_tpa.get("NTUserID")
+            writeData.Range(infor_CoverageReasonXLS.get("Date")).Value = data_tpa.get("ExecutionDate")
+            writeData.Range(infor_CoverageReasonXLS.get("Item_Name")).Value = data_tpa.get("UnitUnderTest")
+            writeData.Range(infor_CoverageReasonXLS.get("C0")).Value = data_tpa.get("C0")
+            writeData.Range(infor_CoverageReasonXLS.get("C1")).Value = data_tpa.get("C1")
+            writeData.Range(infor_CoverageReasonXLS.get("MCDC")).Value = data_tpa.get("MCDCU")
 
-        wb.Save()
-        wb.Close()
-        excel.Quit()
-        excel = None
+            flag = True
+        except Exception as e:
+            flag = False
+            logger.exception(e)
+        finally:
+            wb.Save()
+            wb.Close()
+            excel.Quit()
+            excel = None
+            return flag
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self):
-        excel = win32com.client.Dispatch('Excel.Application')
-        wb = excel.Workbooks.Open(self.doc)
+        data = dict()
+        try:
+            excel = win32com.client.Dispatch('Excel.Application')
+            wb = excel.Workbooks.Open(self.doc)
 
-        excel.Visible = False
-        excel.DisplayAlerts = False
-        wb.DoNotPromptForConvert = True
-        wb.CheckCompatibility = False
+            excel.Visible = False
+            excel.DisplayAlerts = False
+            wb.DoNotPromptForConvert = True
+            wb.CheckCompatibility = False
 
-        readData = wb.Worksheets(1)
-        allData = readData.UsedRange
+            readData = wb.Worksheets(1)
+            allData = readData.UsedRange
 
-        infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
+            infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
 
-        data = {
-            "Tester": value(allData.Cells(1, 2).value),
-            "Date": value(allData.Cells(2, 2).value),
-            "Item_Name": value(allData.Cells(3, 2).value),
-            "C0": value(formatNumber(float(allData.Cells(9, 2).value))),
-            "C1": value(formatNumber(float(allData.Cells(10, 2).value))),
-            "MCDC": value(formatNumber(float(allData.Cells(11, 2).value)))
-        }
-
-        wb.Save()
-        wb.Close()
-        excel.Quit()
-        excel = None
-        return data
+            data = {
+                "Tester": value(allData.Cells(1, 2).value),
+                "Date": value(allData.Cells(2, 2).value),
+                "Item_Name": value(allData.Cells(3, 2).value),
+                "C0": value(formatNumber(float(allData.Cells(9, 2).value))),
+                "C1": value(formatNumber(float(allData.Cells(10, 2).value))),
+                "MCDC": value(formatNumber(float(allData.Cells(11, 2).value)))
+            }
+        except Exception as e:
+            data = {}
+            logger.exception(e)
+        finally:
+            wb.Save()
+            wb.Close()
+            excel.Quit()
+            excel = None
+            return data
 
 class FileSummaryXLSX(Base):
     # Class FileSummaryXLSX
@@ -451,13 +501,18 @@ class FileSummaryXLSX(Base):
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self, data, key, value):
-        item = -1
-        d = dict()
-        for item in data.keys():
-            if(data[item].get(key) == value):
-                d[item] = data[item]
-
-        return d
+        result = dict()
+        try:
+            item = -1
+            result = dict()
+            for item in data.keys():
+                if(data[item].get(key) == value):
+                    result[item] = data[item]
+        except Exception as e:
+            result = {}
+            logger.exception(e)
+        finally:
+            return result
 
 class FileRTRTCov(Base):
     # Class FileRTRTCov
@@ -496,8 +551,9 @@ class FileRTRTCov(Base):
 
                             data = {**data, key : val}
 
-        except:
+        except Exception as e:
             data = {}
+            logger.exception(e)
         finally:
             return data
 
@@ -513,21 +569,26 @@ class FileTestDesignXLSX(Base):
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self):
-        if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
-            item_name = re.sub("^TD_(\w.*)_(MT_\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")[0]
-            item_revision = "NA"
-        else:
-            [item_name, item_revision] = re.sub("^TD_(\w.*)_v(\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")
+        data = dict()
+        try:
+            if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+                item_name = re.sub("^TD_(\w.*)_(MT_\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")[0]
+                item_revision = "NA"
+            else:
+                [item_name, item_revision] = re.sub("^TD_(\w.*)_v(\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")
 
-        data = {
-            "ItemName": item_name,
-            "TM": parse.get_xlsx_cells(xlsx=self.doc, sheet="Testcases", list_cell=['A24']).get('A24'),
-            "ItemRevision": item_revision.replace("_", "."),
-            "Tester": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['C17']).get('C17'),
-            "Date": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['D17']).get('D17'),
-        }
-
-        return data
+            data = {
+                "ItemName": item_name,
+                "TM": parse.get_xlsx_cells(xlsx=self.doc, sheet="Testcases", list_cell=['A24']).get('A24'),
+                "ItemRevision": item_revision.replace("_", "."),
+                "Tester": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['C17']).get('C17'),
+                "Date": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['D17']).get('D17'),
+            }
+        except Exception as e:
+            data = {}
+            logger.exception(e)
+        finally:
+            return data
 
 class FileATTReportXML(Base):
     # Class FileTestReportXML
@@ -543,13 +604,17 @@ class FileATTReportXML(Base):
 
     # Function get_data: get the information in the Summary HTML file : Verdict, C0, C1, MCDC
     def get_data(self):
-        lst_header = ["ClassName", "ClassVersion", "CompleteVerdict", "TestModuleName"]
         data = dict()
+        try:
+            lst_header = ["ClassName", "ClassVersion", "CompleteVerdict", "TestModuleName"]
 
-        for index, key in enumerate(lst_header):
-            data = {**data, **{key: self.get_tag(key).text}}
-
-        return data
+            for index, key in enumerate(lst_header):
+                data = {**data, **{key: self.get_tag(key).text}}
+        except Exception as e:
+            data = {}
+            logger.exception(e)
+        finally:
+            return data
 
 # Check the directory of function is exist or not
 def check_exist(dir_input, function):
@@ -564,7 +629,7 @@ def convert_name(key, opt="name"):
         if opt == "name" or opt == "id":
             return str(users[key].get(opt))
         else:
-            raise("Bug convert name")
+            logger.error("Bug convert name")
     except Exception as e:
         logger.exception(e)
     finally:
@@ -608,21 +673,27 @@ def formatNumber(num):
 
 # Check the number attachment of OPL
 def check_OPL_Walkthrough(file):
-    word = win32com.client.DispatchEx('Word.Application')
-    word.Visible = 0
-    word.DisplayAlerts = 0
+    num_OPL = -1
+    try:
+        word = win32com.client.DispatchEx('Word.Application')
+        word.Visible = 0
+        word.DisplayAlerts = 0
 
-    doc = word.Documents.Open(file.as_posix())
+        doc = word.Documents.Open(file.as_posix())
 
-    num_OPL =  doc.InlineShapes.Count - 1
-
-    doc.Close()
-    word.Quit()
-    word = None
-    return num_OPL
+        num_OPL =  doc.InlineShapes.Count - 1
+    except Exception as e:
+        num_OPL = -1
+        logger.exception(e)
+    finally:
+        doc.Close()
+        word.Quit()
+        word = None
+        return num_OPL
 
 # Check information between summary xlsx, and test_summay_html is same or not
 def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt="", mode=""):
+    flag = False
     try:
         data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
 
@@ -644,18 +715,24 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
             flag = False
             logger.error("Item FileTestSummaryHTML {} got different Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
 
-        score_c0 = convert_score_percentage(data.get("C0"))
-        score_c1 = convert_score_percentage(data.get("C1"))
-        score_mcdc = convert_score_percentage(data.get("MCDC"))
+        score_c0 = score_c1 = score_mcdc = ""
 
-        if not (check_score(score_test_summary=data_test_summary.get("C0"), score_exel=data.get("C0")) \
-                and check_score(score_test_summary=data_test_summary.get("C1"), score_exel=data.get("C1")) \
-                and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC"))):
+        if(data.get("C0") is None or data.get("C1") is None or data.get("MCDC") is None):
             flag = False
-            logger.error("Item FileTestSummaryHTML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
-                                                                        data_test_summary.get("C1"), score_c1,
-                                                                        data_test_summary.get("MCDCU"), score_mcdc)
-                        )
+            logger.error("Item FileSummaryXLSX {} has none C0/C1/MCDC: {} - {} - {}".format(data.get("ItemName").replace(".c", ""), data.get("C0"), data.get("C1"), data.get("MCDC")))
+        else:
+            score_c0 = convert_score_percentage(data.get("C0"))
+            score_c1 = convert_score_percentage(data.get("C1"))
+            score_mcdc = convert_score_percentage(data.get("MCDC"))
+
+            if not (check_score(score_test_summary=data_test_summary.get("C0"), score_exel=data.get("C0")) \
+                    and check_score(score_test_summary=data_test_summary.get("C1"), score_exel=data.get("C1")) \
+                    and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC"))):
+                flag = False
+                logger.error("Item FileTestSummaryHTML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
+                                                                            data_test_summary.get("C1"), score_c1,
+                                                                            data_test_summary.get("MCDCU"), score_mcdc)
+                            )
 
         if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
             # Check information between FileTPA and Summary
@@ -732,11 +809,16 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                 path_testscript = temp_path_test_WT + "\\Test_Spec"
                 path_test_summary = temp_path_test_WT + "\\Test_Result"
 
-                if not(data_Walkthrough.get('path_testscript') == path_testscript and data_Walkthrough.get('path_test_summary') == path_test_summary):
-                    flag = False
-                    logger.error("Item FileWalkThroughDoc {} has wrong path: {}/{} - {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'), path_testscript,
-                                                                                data_Walkthrough.get('path_test_summary'), path_test_summary)
+                if str(data.get("TaskID")) == "9.1":
+                    logger.warning("Item FileWalkThroughDoc {} has path: {} - {}. Please make sure it is correct".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'),
+                                                                                data_Walkthrough.get('path_test_summary'))
                                 )
+                else:
+                    if not(data_Walkthrough.get('path_testscript') == path_testscript and data_Walkthrough.get('path_test_summary') == path_test_summary):
+                        flag = False
+                        logger.error("Item FileWalkThroughDoc {} has wrong path: {}/{} - {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'), path_testscript,
+                                                                                    data_Walkthrough.get('path_test_summary'), path_test_summary)
+                                    )
 
                 if (data.get("OPL/Defect") == "OPL" or data.get("OPL/Defect") == "Defect"):
                     num_OPL = check_OPL_Walkthrough(file_Walkthrough)
@@ -785,7 +867,7 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                                     )
 
         else:
-            raise ("No sheet name")
+            logger.error("No sheet name")
 
         # if (datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y") == datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")):
         #     flag = True
@@ -793,12 +875,12 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         #     flag = False
         #     logger.warning("ItemName {} got wrong date end: {} - {}".format(data_test_summary.get("Project"), datetime.datetime.strptime(data_test_summary.get("date"), "%b %d, %Y, %H:%M %p").strftime("%d-%b-%Y"), datetime.datetime.strptime(data.get("End"), "%Y-%m-%d %H:%M:%S").strftime("%d-%b-%Y")))
         #     return flag
-
-        return flag
     except Exception as e:
+        flag = False
         logger.exception(e)
     finally:
         logger.debug("Done")
+        return flag
 
 def check_information_ASW(path, data, opt=""):
     def check_exist_plt(lst, pat):
@@ -809,6 +891,8 @@ def check_information_ASW(path, data, opt=""):
                 break
 
         return flag
+    
+    flag = False
     try:
         logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
 
@@ -822,7 +906,7 @@ def check_information_ASW(path, data, opt=""):
         file_test_design = file_RTRT = file_ATT = ""
         if not (len(lst_file_PLT)):
             flag = False
-            logger.error("ItemName {} has none file PLT".format(data.get("ItemName").replace(".c", "")))
+            logger.error("Item PLT {} has none file".format(data.get("ItemName").replace(".c", "")))
         else:
             lst_file_PLT = lst_file_PLT
 
@@ -835,15 +919,19 @@ def check_information_ASW(path, data, opt=""):
             temp = data.get("ItemName").replace(".c", "")
 
         if not (len(lst_file_test_design)):
-            flag = False
-            logger.error("ItemName {} has none file test design".format(data.get("ItemName").replace(".c", "")))
+            if len(utils.scan_files(Path(path).as_posix(), ext='.xls')[0]) or len(utils.scan_files(Path(path).as_posix(), ext='.xlsx')[0]) or len(utils.scan_files(Path(path).as_posix(), ext='.xlsb')[0]):
+                flag = False
+                logger.error("Item FileTestDesignXLSX {} has wrong extension. Please convert xls* to xlsm".format(data.get("ItemName").replace(".c", "")))
+            else:
+                flag = False
+                logger.error("Item FileTestDesignXLSX {} has none file".format(data.get("ItemName").replace(".c", "")))
         else:
             file_test_design = lst_file_test_design[0]
             data_test_design = FileTestDesignXLSX(file_test_design).get_data()
 
             if not (len(lst_file_ATT)):
                 flag = False
-                logger.error("ItemName {} has none file ATT Report".format(data.get("ItemName").replace(".c", "")))
+                logger.error("Item FileATTReportXML {} has none file ".format(data.get("ItemName").replace(".c", "")))
             else:
                 file_ATT = lst_file_ATT[0]
                 data_ATT = FileATTReportXML(file_ATT).get_data()
@@ -851,35 +939,50 @@ def check_information_ASW(path, data, opt=""):
                 if not (data_test_design.get("ItemName") == temp \
                     and data_ATT.get("ClassName") == temp):
                     flag = False
-                    logger.error("Different ItemName {} - {}".format(data_test_design.get("ItemName"), temp))
+                    logger.error("Item FileTestDesignXLSX/FileATTReportXML has different name {} - {}".format(data_test_design.get("ItemName"), temp))
 
                 if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
                     if not(data_ATT.get("ClassVersion") == data.get("ItemRevision")):
                         flag = False
-                        logger.error("ItemName {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
+                        logger.error("Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
                 else:
                     if not(data_ATT.get("ClassVersion") == data.get("ItemRevision") and data_test_design.get("ItemRevision") == data.get("ItemRevision")):
                         flag = False
-                        logger.error("ItemName {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
+                        logger.error("Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
 
                 # for tm_ATT in data_ATT.get("TestModuleName"):
                 #     print(tm_ATT)
 
                 if not check_exist_plt(lst_file_PLT, data_ATT.get("TestModuleName")):
                     flag = False
-                    logger.error("ItemName {} got TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
+                    logger.error("Item PLT {} got TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
 
                 if not (data_ATT.get("CompleteVerdict") == "Passed"):
                     flag = False
-                    logger.error("ItemName {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
+                    logger.error("Item PLT {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
 
-        score_c0 = convert_score_percentage(data.get("C0"))
-        score_c1 = convert_score_percentage(data.get("C1"))
-        score_mcdc = convert_score_percentage(data.get("MCDC"))
+        score_c0 = score_c1 = score_mcdc = ""
+
+        if(data.get("C0") is None or data.get("C1") is None or data.get("MCDC") is None):
+            flag = False
+            logger.error("Item FileSummaryXLSX {} has none C0/C1/MCDC: {} - {} - {}".format(data.get("ItemName").replace(".c", ""), data.get("C0"), data.get("C1"), data.get("MCDC")))
+        else:
+            score_c0 = convert_score_percentage(data.get("C0"))
+            score_c1 = convert_score_percentage(data.get("C1"))
+            score_mcdc = convert_score_percentage(data.get("MCDC"))
 
         if not (len(lst_file_RTRT)):
-            flag = False
-            logger.error("ItemName {} has none file RTRT.txt".format(data.get("ItemName").replace(".c", "")))
+            if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+                temp_path = Path(path).joinpath("Delivery", "TestResult", "yymmdd_hhmm_Sim_" + data.get("ItemName").replace(".c", "") + data.get("ItemRevision").replace(".", "_"), "CovRep_MCDC_" +  data.get("ItemName").replace(".c", "") + data.get("ItemRevision").replace(".", "_"), "ReportRTRT.txt")
+                if(len(temp_path.as_posix()) > 256):
+                    flag = False
+                    logger.error("Item FileRTRTCov {} has long path".format(data.get("ItemName").replace(".c", "")))
+                else:
+                    flag = False
+                    logger.error("Item FileRTRTCov {} has none file".format(data.get("ItemName").replace(".c", "")))
+            else:
+                flag = False
+                logger.error("Item FileRTRTCov {} has none file".format(data.get("ItemName").replace(".c", "")))
         else:
             file_RTRT = lst_file_RTRT[0]
             data_RTRT = FileRTRTCov(file_RTRT).get_data()
@@ -887,7 +990,7 @@ def check_information_ASW(path, data, opt=""):
                     and check_score(score_test_summary=data_RTRT.get("C1"), score_exel=data.get("C1")) \
                     and check_score(score_test_summary=data_RTRT.get("MCDC"), score_exel=data.get("MCDC"))):
                 flag = False
-                logger.error("ItemName RTRT Report {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
+                logger.error("Item FileRTRTCov {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
                                                                             data_RTRT.get("C1"), score_c1,
                                                                             data_RTRT.get("MCDC"), score_mcdc)
                             )
@@ -899,7 +1002,7 @@ def check_information_ASW(path, data, opt=""):
 
                 if not (len(lst_file_WT)):
                         flag = False
-                        logger.error("ItemName {} has none file Walkthrough".format(data.get("ItemName").replace(".c", "")))
+                        logger.error("Item FileWalkThroughDoc {} has none file Walkthrough".format(data.get("ItemName").replace(".c", "")))
                 else:
                     file_Walkthrough = lst_file_WT[0]
                     data_Walkthrough = FileWalkThroughDoc(file_Walkthrough).get_data(opt="ASW")
@@ -983,15 +1086,16 @@ def check_information_ASW(path, data, opt=""):
                                                                                         '""')
                                         )
 
-        return flag
     except Exception as e:
         logger.exception(e)
     finally:
         logger.debug("Done")
+        return flag
 
 # Check Release for JOEM is correct ot not
 def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
     logger.debug("Start checker: Archives")
+    flag = False
     try:
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
@@ -1006,7 +1110,7 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
         for taskid in taskids["TaskGroup"]:
             temp_data_prj = doc.get_data(data=data, key="Project", value=taskids["Project"])
             data_taskid = doc.get_data(data=temp_data_prj, key="TaskGroup", value=taskid)
-            bb_number = taskids["BB"]
+            
             path_taskid = Path(dir_input).joinpath(str(taskid))
             if (path_taskid.exists()):
                 count = 0
@@ -1015,6 +1119,7 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
                     function = data_taskid[item].get("ItemName").replace(".c", "")
                     user_tester = data_taskid[item].get("Tester")
                     mt_number = data_taskid[item].get("MT_Number").replace("UT_", "").replace("MT_", "")
+                    bb_number = taskids["BB"]
 
                     if "ASW" == data_taskid[item].get("Type"):
                         mt_number = "MT_" + mt_number
@@ -1024,7 +1129,7 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
                         bb_number = "_" + bb_number
                     else:
                         mt_number = "NONE"
-                        raise "BUG mt_number"
+                        logger.error("BUG mt_number")
 
                     folder_mt_function = "{}_{}{}".format(mt_number, function, bb_number)
 
@@ -1059,7 +1164,7 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
                                 logger.error("Different Information {},{},{},{},{}".format(taskid, mt_number, function, user_tester, "NG_DiffInfor"))
                                 file_log.write("{},{},{},{},{}\n".format(taskid, mt_number, function, user_tester, "NG_DiffInfor"))
                         else:
-                            raise "Bug No Type"
+                            logger.error("Bug No Type")
 
                     else:
                         logging.warning("{},{},{},{},{}".format(taskid, mt_number, function, user_tester, "NG"))
@@ -1246,12 +1351,13 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                 for item in data_taskid.keys():
                     function = data_taskid[item].get("ItemName").replace(".c", "")
                     user_tester = data_taskid[item].get("Tester")
-
                     path_with_component = ""
                     if "ASW" == data_taskid[item].get("Type"):
                         path_with_component = Path(path_taskid)
                     elif "PSW" == data_taskid[item].get("Type"):
                         path_with_component = Path(path_taskid).joinpath(str(trim_src(data_taskid[item].get("ComponentName"))), "Unit_tst", str(data_taskid[item].get("TaskID")))
+                        if str(taskid) == "9.1":
+                            path_with_component = Path(path_taskid)
                     else:
                         print("BUG No Type")
 
@@ -1268,6 +1374,10 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
                         elif "PSW" == data_taskid[item].get("Type"):
                             f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "Test_Result", "test_summary.html")
+
+                            if str(taskid) == "9.1":
+                                f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "test_summary.html")
+
                             if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item], opt="check_WT"):
                                 print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
@@ -1275,7 +1385,7 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                                 logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
                         else:
-                            raise "Bug: No type"
+                            logger.error("Bug: No type")
 
                     else:
                         logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
@@ -1360,9 +1470,14 @@ def update_tpa(file, data, file_test_summary_html):
 
 # Encrypt file with 7z
 def sevenzip(filename, zipname):
-    zip_exe_path = utils.load(CONST.SETTING, "Tool_7z")
-    with open(os.devnull, 'w') as null:
-        subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename], stdout=null, stderr=null)
+    try:
+        zip_exe_path = utils.load(CONST.SETTING, "Tool_7z")
+        with open(os.devnull, 'w') as null:
+            subprocess.call([zip_exe_path, 'a', '-tzip', zipname, filename], stdout=null, stderr=null)
+    except Exception as e:
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
 
 # Create Archive Walkthrough
 def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=59):
@@ -1430,7 +1545,7 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=5
                                 else:
                                     logger.error("Miss src in componentname {},{},{},{}".format(taskid, function, user_tester, "NG"))
                         else:
-                                raise "BUG No Type"
+                            logger.error("BUG No Type")
                     else:
                         logger.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
 
@@ -1457,7 +1572,27 @@ def collect_information_deliverables(file_summary, sheetname="", begin=59, end=5
     if sheetname == "":
         sheetname = utils.load(CONST.SETTING).get("sheetname")
 
+    print("Start checker: Make collect_information_deliverables for: {}".format(sheetname))
+    print("*****************************************************************")
     data = FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=begin, end=end)
+
+    lst_header = ["ELOC Recheck With Tool", "LOC Complete", "Planned Start", "Planned End", "Release Date", "OPL/Defect"]
+    result_header = ["Project", "Type", "Assigned task (ELOC)", "Assigned date", "Target date", "Delivered task (ELOC)", "Delivered date", "Remain (ELOC)", "% Completion", "Nums of Defect"]
+
+    template_json_obj = {
+        "Project": None,
+        "Type": ["ASW", "PSW"],
+        "data": {
+            "Assigned task (ELOC)": {"ASW": 0, "PSW": 0},
+            "Assigned date": {"ASW": list(), "PSW": list()},
+            "Target date": {"ASW": list(), "PSW": list()},
+            "Delivered task (ELOC)": {"ASW": 0, "PSW": 0},
+            "Delivered date": {"ASW": list(), "PSW": list()},
+            "Remain (ELOC)": {"ASW": -1, "PSW": -1},
+            "% Completion": {"ASW": -1, "PSW": -1},
+            "Nums of Defect": {"ASW": 0, "PSW": 0}
+        }
+    }
 
     item = -1
     l_prj = list()
@@ -1469,161 +1604,120 @@ def collect_information_deliverables(file_summary, sheetname="", begin=59, end=5
     l_prj.sort()
 
     item = -1
-    d = dict()
 
-    for prj in l_prj:
-        total_assign_asw = 0.0
-        total_assign_psw = 0.0
-        total_deliver_asw = 0.0
-        total_deliver_psw = 0.0
-        total_remain_asw = 0.0
-        total_remain_psw = 0.0
-        percentage_asw = 0.0
-        percentage_psw = 0.0
-        max_date_asw = ""
-        max_date_psw = ""
-        l_date_start_asw = list()
-        l_date_end_asw = list()
-        l_date_release_asw = list()
-        l_date_start_psw = list()
-        l_date_end_psw = list()
-        l_date_release_psw = list()
+    result = dict()
+    data_prj = dict()
 
-        total_defect_asw = 0.0
-        total_defect_psw = 0.0
-
+    for index, prj in enumerate(l_prj):
+        data_prj = copy.deepcopy(template_json_obj)
         for item in data.keys():
             if(data[item].get("Project") == prj):
-                if data[item].get("ELOC Recheck With Tool") is not None:
-                    if "ASW" == data[item].get("Type"):
-                        total_assign_asw += float(data[item].get("ELOC Recheck With Tool"))
-                    elif "PSW" == data[item].get("Type"):
-                        total_assign_psw += float(data[item].get("ELOC Recheck With Tool"))
-                    else:
-                        raise("BUG")
+                data_prj['Project'] = prj
+                for __header__ in lst_header:
+                    if data[item].get(__header__) is not None and (data[item].get(__header__) != "None"):
+                        if "ASW" == data[item].get("Type") or "PSW" == data[item].get("Type"):
+                            if __header__ == "ELOC Recheck With Tool" or __header__ == "LOC Complete" or __header__ == "OPL/Defect":
+                                key = ""
+                                if __header__ == "ELOC Recheck With Tool":
+                                    key = "Assigned task (ELOC)"
+                                elif __header__ == "LOC Complete":
+                                    key = "Delivered task (ELOC)"
+                                elif __header__ == "OPL/Defect":
+                                    key = "Nums of Defect"
+                                else:
+                                    logger.error("BUG")
+                                
+                                if __header__ == "ELOC Recheck With Tool" or __header__ == "LOC Complete":
+                                    data_prj['data'][key][data[item].get("Type")] += float(data[item].get(__header__))
+                                elif __header__ == "OPL/Defect":
+                                    if "Defect" == data[item].get("OPL/Defect"):
+                                        data_prj['data'][key][data[item].get("Type")] += 1
+                                else:
+                                    logger.error("BUG")
+                            elif __header__ == "Planned Start" or __header__ == "Planned End" or __header__ == "Release Date":
+                                if __header__ == "Planned Start":
+                                    key = "Assigned date"
+                                elif __header__ == "Planned End":
+                                    key = "Target date"
+                                elif __header__ == "Release Date":
+                                    key = "Delivered date"
+                                else:
+                                    logger.error("BUG")
+                                
+                                data_prj['data'][key][data[item].get("Type")].append(data[item].get(__header__))
+                            else:
+                                logger.error("BUG")
+                        else:
+                            logger.error("BUG")
+
+        for __header__ in lst_header:
+            if __header__ == "Planned Start" or __header__ == "Planned End" or __header__ == "Release Date":
+                if __header__ == "Planned Start":
+                    key = "Assigned date"
+                elif __header__ == "Planned End":
+                    key = "Target date"
+                elif __header__ == "Release Date":
+                    key = "Delivered date"
                 else:
+                    logger.error("BUG")
+
+                for __type__ in ["ASW", "PSW"]:
+                    if (len(data_prj['data'][key][__type__]) == 0):
+                        del data_prj['data'][key][__type__]
+                        data_prj['data'][key][__type__] = "NA"
+                    else:
+                        previous_lst_date = list(data_prj['data'][key][__type__])
+                        del data_prj['data'][key][__type__]
+                        if key == "Assigned date":
+                            data_prj['data'][key][__type__] = min(previous_lst_date)
+                        else:
+                            data_prj['data'][key][__type__] = max(previous_lst_date)
+
+        for __type__ in ["ASW", "PSW"]:
+            data_prj['data']['Remain (ELOC)'][__type__] = data_prj['data']['Assigned task (ELOC)'][__type__] - data_prj['data']['Delivered task (ELOC)'][__type__]
+
+            if data_prj['data']['Assigned task (ELOC)'][__type__] > 0:
+                data_prj['data']['% Completion'][__type__] = round(data_prj['data']['Delivered task (ELOC)'][__type__]/data_prj['data']['Assigned task (ELOC)'][__type__] * 100,2)
+            elif data_prj['data']['Assigned task (ELOC)'][__type__] == 0:
+                data_prj["Type"].remove(__type__)
+                for key, val in dict(data_prj['data']).items():
+                    del data_prj['data'][key][__type__]
+            else:
+                data_prj['data']['% Completion'][__type__] = "NG"
+
+        
+        result[index] = dict(data_prj)
+
+    print_information_deliverables(result, header=result_header)
+
+    return result
+
+def print_information_deliverables(data, header):
+    print(','.join(header))
+    
+    result = dict()
+
+    flag = False
+    for index, obj_lv1 in dict(data).items():
+        for __type__ in obj_lv1["Type"]:
+            str_output = list()
+            str_output.append(obj_lv1["Project"])
+            str_output.append(__type__)
+            for __header__ in header:
+                for key, value in dict(obj_lv1["data"]).items():
+                    if key == __header__:
+                        if __type__ in list(value.keys()):
+                            flag = True
+                            str_output.append(str(value[__type__]))
+                        else:
+                            flag = False
+                            break
+                if(flag == False):
                     continue
+            
+            if(flag):
+                print(','.join(str_output))
 
-                if data[item].get("LOC Complete") is not None:
-                    # print("{},{},{},{}".format(item, prj, data[item].get("ItemName"),data[item].get("LOC Complete")))
-                    if "ASW" == data[item].get("Type"):
-                        total_deliver_asw += float(data[item].get("LOC Complete"))
-                    elif "PSW" == data[item].get("Type"):
-                        total_deliver_psw += float(data[item].get("LOC Complete"))
-                    else:
-                        raise("BUG")
-
-                if data[item].get("Planned Start") is not None:
-                    if "ASW" == data[item].get("Type"):
-                        l_date_start_asw.append(data[item].get("Planned Start"))
-                    elif "PSW" == data[item].get("Type"):
-                        l_date_start_psw.append(data[item].get("Planned Start"))
-                    else:
-                        raise("BUG")
-
-                if data[item].get("Planned End") is not None:
-                    if "ASW" == data[item].get("Type"):
-                        l_date_end_asw.append(data[item].get("Planned End"))
-                    elif "PSW" == data[item].get("Type"):
-                        l_date_end_psw.append(data[item].get("Planned End"))
-                    else:
-                        raise("BUG")
-
-                if data[item].get("Release Date") is not None:
-                    if "ASW" == data[item].get("Type"):
-                        l_date_release_asw.append(data[item].get("Release Date"))
-                    elif "PSW" == data[item].get("Type"):
-                        l_date_release_psw.append(data[item].get("Release Date"))
-                    else:
-                        raise("BUG")
-
-                if data[item].get("OPL/Defect") is not None:
-                    if "ASW" == data[item].get("Type"):
-                        if "Defect" == data[item].get("OPL/Defect"):
-                            total_defect_asw += 1
-                    elif "PSW" == data[item].get("Type"):
-                        if "Defect" == data[item].get("OPL/Defect"):
-                            total_defect_psw += 1
-                    else:
-                        raise("BUG")
-                else:
-                    continue
-
-
-        date_start_asw = ""
-        date_end_asw = ""
-        date_release_asw = ""
-
-        date_start_psw = ""
-        date_end_psw = ""
-        date_release_psw = ""
-
-        if len(l_date_start_asw) == 0:
-            date_start_asw = "NA"
-        else:
-            date_start_asw = min(l_date_start_asw)
-
-        if len(l_date_end_asw) == 0:
-            date_end_asw = "NA"
-        else:
-            date_end_asw = max(l_date_end_asw)
-
-        if len(l_date_release_asw) == 0:
-            date_release_asw = "NA"
-        else:
-            date_release_asw = max(l_date_release_asw)
-
-        if len(l_date_start_psw) == 0:
-            date_start_psw = "NA"
-        else:
-            date_start_psw = min(l_date_start_psw)
-
-        if len(l_date_end_psw) == 0:
-            date_end_psw = "NA"
-        else:
-            date_end_psw = max(l_date_end_psw)
-
-        if len(l_date_release_psw) == 0:
-            date_release_psw = "NA"
-        else:
-            date_release_psw = max(l_date_release_psw)
-
-        total_remain_asw = total_assign_asw - total_deliver_asw
-        total_remain_psw = total_assign_psw - total_deliver_psw
-
-        if (total_assign_asw > 0):
-            percentage_asw = round(total_deliver_asw/total_assign_asw * 100,2)
-        elif (total_assign_asw == 0):
-            percentage_asw = "NA"
-        else:
-            percentage_asw = "NG"
-
-        if (total_assign_psw > 0):
-            percentage_psw = round(total_deliver_psw/total_assign_psw * 100,2)
-        elif (total_assign_psw == 0):
-            percentage_psw = "NA"
-        else:
-            percentage_psw = "NG"
-
-        template_json = {
-            "Project": prj,
-            "Type": "ASW",
-            "Assigned task (ELOC)": total_assign_asw,
-            "Assigned date": date_start_asw,
-            "Target date": date_end_asw,
-            "Delivered task (ELOC)": total_deliver_asw,
-            "Delivered date": date_release_asw,
-            "Remain (ELOC)": total_remain_asw,
-            "% Completion": percentage_asw
-        }
-
-        if total_assign_asw > 0:
-            print("{},{},{},{},{},{},{},{},{},{}".format(prj, "ASW", total_assign_asw, date_start_asw, date_end_asw, total_deliver_asw, date_release_asw, total_remain_asw, percentage_asw, total_defect_asw))
-        if total_assign_psw > 0:
-            print("{},{},{},{},{},{},{},{},{},{}".format(prj, "PSW", total_assign_psw, date_start_psw, date_end_psw, total_deliver_psw, date_release_psw, total_remain_psw, percentage_psw, total_defect_psw))
-
-
-    return l_prj
 
 def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
     logger.debug("make_folder_release")
@@ -1685,6 +1779,16 @@ def main():
             dir_input = utils.load(CONST.SETTING).get("dir_input_joem")
             lst_opt = utils.load(CONST.SETTING).get("mode_joem")
 
+        if(not(Path(file_summary).exists() \
+            and sheetname is not None \
+            and Path(dir_output).exists() \
+            and Path(dir_input).exists() \
+            and len(l_taskids)) \
+        ):
+            logger.error("Please make sure file_summary, sheetname, dir_input, dir_output, l_taskids are exist!\n\t+ file_summary: {}\n\t+ sheetname: {}\n\t+ dir_output: {}\n\t+ dir_input: {}\n\t+ l_taskids: {}".format(file_summary, sheetname, dir_output, dir_input, l_taskids))
+            os.system("pause")
+            quit()
+
         index_begin = utils.load(CONST.SETTING).get("coordinator").get("begin")
         index_end = utils.load(CONST.SETTING).get("coordinator").get("end")
 
@@ -1711,9 +1815,10 @@ def main():
                 create_summary_json_file(file_summary=file_summary, sheetname="Merged_JOEM", begin=index_begin, end=index_end)
             elif opt == "collect_information_deliverables":
                 """Collect information for deliverables"""
+                collect_information_deliverables(file_summary=file_summary, sheetname="Merged_COEM", begin=index_begin, end=index_end)
                 collect_information_deliverables(file_summary=file_summary, sheetname="Merged_JOEM", begin=index_begin, end=index_end)
             else:
-                raise("I dont know your mode")
+                logger.error("I dont know your mode")
     except Exception as e:
         logger.exception(e)
     finally:
@@ -1724,50 +1829,51 @@ def test():
     data = utils.scan_files(directory, ext=".doc")
     print(FileWalkThroughDoc(data[0][0].as_posix()).get_data(opt="ASW"))
 
-
-    # check_information_ASW(path=directory, data="", opt="")
-    # data = utils.scan_files(directory, ext='.xlsm')
-    # for f in data[0]:
-    #     new_file = Path(f)
-    #     print(FileTestDesignXLSX(new_file).get_data())
-
 def check_update_version():
-    directory="//hc-ut40070c/duongnguyen/9000_utils/hieu.nguyen-trung/script_auto_checker"
-    data = utils.scan_files(directory, ext="version.json")[0]
-
-    current_version = utils.load(CONST.VERSION).get("version")
-
-    l_version = []
-    for f in data:
-        version = utils.load(f).get("version")
-        l_version.append(version)
-
-    l_version = list(set(l_version))
-    l_version.sort()
-    latest_version = ""
-    if (len(l_version) > 0):
-        latest_version = l_version[-1]
-    else:
-        raise "BUG check update version"
-
     flag = False
+    try:
+        directory="//hc-ut40070c/duongnguyen/9000_utils/hieu.nguyen-trung/script_auto_checker"
+        data = utils.scan_files(directory, ext="version.json")[0]
 
-    print("-----------------------------------------------------------------")
-    if latest_version != None and latest_version != current_version:
-        print('Please checkout new version "{}" at: "{}"'.format(latest_version, directory))
-        flag = True
-    else:
-        print("Your version is latest")
-    print("-----------------------------------------------------------------")
+        current_version = utils.load(CONST.VERSION).get("version")
 
-    return flag
+        l_version = []
+        for f in data:
+            version = utils.load(f).get("version")
+            l_version.append(version)
+
+        l_version = list(set(l_version))
+        l_version.sort()
+        latest_version = ""
+        if (len(l_version) > 0):
+            latest_version = l_version[-1]
+        else:
+            logger.error("BUG check update version")
+
+        flag = False
+
+        print("-----------------------------------------------------------------")
+        if latest_version != None and latest_version != current_version:
+            print('Please checkout new version "{}" at: "{}"'.format(latest_version, directory))
+            flag = True
+        else:
+            print("Your version is latest")
+        print("-----------------------------------------------------------------")
+
+    except Exception as e:
+        flag = False
+        logger.exception(e)
+    finally:
+        logger.debug("Done)")
+        return flag
 
 if __name__ == "__main__":
     if(check_update_version()):
-        print("If you do not upgrade new version, you have to wait in 10s")
-        for i in range(0, 11):
-            print("------Waiting: {} s-------".format(str(9 - i)))
-            time.sleep(1)
+        pass
+        # print("If you do not upgrade new version, you have to wait in 10s")
+        # for i in range(0, 11):
+        #     print("------Waiting: {} s-------".format(str(9 - i)))
+        #     time.sleep(1)
 
     # test()
     main()
