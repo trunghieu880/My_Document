@@ -4,6 +4,8 @@ import io
 import logging
 import sys
 from pathlib import Path
+import copy
+import json
 
 from openpyxl import load_workbook
 
@@ -83,13 +85,14 @@ def check_flag(list_data, pat):
     for x in list_data:
         if x == pat:
             result = True
-        
+
     return result
 
 def main():
     file = "C:\\Users\\hieu.nguyen-trung\\Desktop\\a.xlsx"
     lst_sheet = [x for x in get_xlsx_sheets(file)]
     data = get_xlsx_raw(file, lst_sheet[0], begin=22, end=22)
+    # print(data)
 
     header = ['Inputs', 'Local variables as inputs', 'Imported Parameters', 'Local Parameters']
     list_flag = [check_flag(data[0], x) for x in header]
@@ -113,6 +116,71 @@ def main():
                     count += 1
             d.update({__header__: count})
 
-    print(d)
- 
+    # print(d)
+
+    for key, value in d.items():
+        if not(value > 0):
+            d.delete(key)
+    
+    data = get_xlsx_raw(file, lst_sheet[0], begin=1, end=26)
+    # print(data)
+    temp_col_start = 1
+    temp_col_end = 1 + d['Inputs'] - 1
+    
+    temp_col_start = 0
+    temp_col_start = 0
+    offset = d['Inputs']
+    
+    result = dict()
+
+    template_obj = {
+        "Tolerance": -1,
+        "Type": None,
+        "Max": -1,
+        "Min": -1,
+        "Data": list()
+    }
+    
+    for __header__ in header:
+        if __header__ == "Inputs":
+            offset = 1
+        else:
+            offset = temp_col_end + 1
+        
+        temp_col_start = offset
+        temp_col_end = temp_col_start + d[__header__] - 1
+        
+        # print(__header__)
+        result[__header__] = list()
+        for j in range(temp_col_start, temp_col_end + 1):
+        
+            name_input = data[22][j]
+            data_js_variable = copy.deepcopy(template_obj)
+            
+            data_js_variable["Tolerance"] = data[17][j]
+            data_js_variable["Type"] = data[18][j]
+            data_js_variable["Max"] = data[19][j]
+            data_js_variable["Min"] = data[20][j]
+            
+            for i in range(23, 26):
+                data_js_variable["Data"].append(data[i][j])
+            
+            result[__header__].append({name_input: data_js_variable})
+
+    # print(json.dumps(result, indent=2))
+    
+    for __header__ in header:
+        print(result[__header__])
+        
+        for data_var in result[__header__]:
+            for key, obj_level_2 in data_var.items():
+                list_data_var = list(set(obj_level_2["Data"]))
+                list_data_var.sort(key=None, reverse=False)
+                # print(list_data_var)
+                if (max(list_data_var)) > obj_level_2["Max"]:
+                    print("OUT RANGE MAX")
+                if (min(list_data_var)) < obj_level_2["Min"]:
+                    print("OUT RANGE MIN")                    
+        
+    
 main()
