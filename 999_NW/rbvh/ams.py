@@ -11,10 +11,12 @@ import const as CONST
 import subprocess
 import re
 from docx.api import Document
+import win32timezone
 import win32com.client
 from win32com.client import Dispatch
 import json, copy
 import time
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +74,12 @@ class FileTPA(Base):
     def get_data(self):
         d = dict()
         try:
-            lst_header = ["UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
+            lst_header = ["ExecutionDate", "UnitUnderTest", "NTUserID", "FileName", "Verdict", "MetricName", "Percentage"]
             ut = self.get_tag("UnitUnderTest").text
             user = self.get_tag("NTUserID").text
             func = self.get_tag("FileName").text
             result = self.get_tag("Verdict").text
+            date = self.get_tag("ExecutionDate").text
             # collect title C0, C1, MC/DC
             lst_MetricName = [e.text for e in self.doc.iterfind('.//{0}'.format("MetricName"))]
             # collect Percentage Coverage
@@ -89,6 +92,8 @@ class FileTPA(Base):
             lst_data.append(func)
             lst_data.append("TestResult")
             lst_data.append(result)
+            lst_data.append("ExecutionDate")
+            lst_data.append(date)
 
             for index, key in enumerate(lst_MetricName):
                 lst_data.append(key)
@@ -101,7 +106,6 @@ class FileTPA(Base):
             logger.exception(e)
         finally:
             return d
-
 
 class FileTestReportXML(Base):
     # Class FileTestReportXML
@@ -348,48 +352,109 @@ class FileWalkThroughDoc(Base):
                 }
                 
             elif opt == "ASW":
-                word = win32com.client.DispatchEx('Word.Application')
-                word.Visible = 0
-                word.DisplayAlerts = 0
+                if(re.search(".docx$", self.doc)):
+                    doc = Document(self.doc)
+                    table_infor = doc.tables[1]
+                    table_attach = doc.tables[2]
+                    table_finding = doc.tables[3]
+                    table_check_list = doc.tables[7]
+                    
+                    finding = reformat_string(table_finding.cell(1, 1).text)
+                    impact = reformat_string(table_finding.cell(1, 3).text)
+                    confirm_UT26 = reformat_string(table_check_list.cell(11, 4).text)
 
-                doc = word.Documents.Open(self.doc)
-                table_infor = doc.Tables(2)
-                table_attach = doc.Tables(3)
-                table_finding = doc.Tables(4)
-                table_check_list = doc.Tables(8)
+                    temp = reformat_string(table_finding.cell(2, 1).text)
+                    score_c0 = score_c1 = score_mcdc = ""
+                    if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
+                        temp = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
+                        score_c0 = temp[0]
+                        score_c1 = temp[1]
+                        score_mcdc = temp[2]
+                    else:
+                        score_c0 = score_c1 = score_mcdc = "Unknown"
+                        logger.error(">> Failed: Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
 
-                
-                finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
-                impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
-                confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
+                    temp = reformat_string(table_infor.cell(0, 3).text)
+                    if re.search("^(.*) \<V(.*)\>", temp):
+                        temp = re.sub("^(.*) \<V(.*)\>", r'\1 \2', temp).split(" ")
+                        project_name = temp[0]
+                        item_revision = temp[1]
+                    else:
+                        project_name = "Unknown"
+                        item_revision = "Unknown"
+                        logger.error(">> Failed: Item FileWalkThroughDoc has wrong format project: [Class] <V[Version]>")
 
-                temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
-                score_c0 = score_c1 = score_mcdc = ""
-                if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
-                    [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
-                else:
-                    score_c0 = score_c1 = score_mcdc = "Unknown"
-                    logger.error("Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
-
-                [project_name, item_revision] = re.sub("^(.*) v(.*)", r'\1 \2', reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)).split(" ")
-
-                dict_walkthrough = {
-                    'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
-                    'project': project_name,
-                    'ItemRevision': item_revision.replace("_", "."),
-                    'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
-                    'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
-                    'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
-                    'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
-                    'C0': score_c0,
-                    'C1': score_c1,
-                    'MCDC': score_mcdc,
-                    'tbl_finding': {
-                        "finding": finding,
-                        "impact": impact,
-                        "confirm_UT26": confirm_UT26
+                    dict_walkthrough = {
+                        'date': reformat_string(table_infor.cell(0, 1).text),
+                        'project': project_name,
+                        'ItemRevision': item_revision.replace("_", "."),
+                        'review initiator': reformat_string(table_infor.cell(0, 5).text),
+                        'effort': reformat_string(table_infor.cell(1, 1).text),
+                        'baseline': reformat_string(table_infor.cell(1, 3).text),
+                        'review partner' : reformat_string(table_infor.cell(1, 5).text),
+                        'C0': score_c0,
+                        'C1': score_c1,
+                        'MCDC': score_mcdc,
+                        'tbl_finding': {
+                            "finding": finding,
+                            "impact": impact,
+                            "confirm_UT26": confirm_UT26
+                        }
                     }
-                }
+                else:
+                    word = win32com.client.DispatchEx('Word.Application')
+                    word.Visible = 0
+                    word.DisplayAlerts = 0
+
+                    doc = word.Documents.Open(self.doc)
+                    table_infor = doc.Tables(2)
+                    table_attach = doc.Tables(3)
+                    table_finding = doc.Tables(4)
+                    table_check_list = doc.Tables(8)
+
+                    
+                    finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
+                    impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
+                    confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
+
+                    temp = reformat_string(table_finding.Cell(Row=3, Column=2).Range.Text)
+                    score_c0 = score_c1 = score_mcdc = ""
+                    if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
+                        temp = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
+                        score_c0 = temp[0]
+                        score_c1 = temp[1]
+                        score_mcdc = temp[2]
+                    else:
+                        score_c0 = score_c1 = score_mcdc = "Unknown"
+                        logger.error(">> Failed: Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
+
+                    temp = reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)
+                    if re.search("^(.*) \<V(.*)\>", temp):
+                        temp = re.sub("^(.*) \<V(.*)\>", r'\1 \2', temp).split(" ")
+                        project_name = temp[0]
+                        item_revision = temp[1]
+                    else:
+                        project_name = "Unknown"
+                        item_revision = "Unknown"
+                        logger.error(">> Failed: Item FileWalkThroughDoc has wrong format project: [Class] <V[Version]>")
+
+                    dict_walkthrough = {
+                        'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
+                        'project': project_name,
+                        'ItemRevision': item_revision.replace("_", "."),
+                        'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
+                        'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
+                        'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
+                        'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
+                        'C0': score_c0,
+                        'C1': score_c1,
+                        'MCDC': score_mcdc,
+                        'tbl_finding': {
+                            "finding": finding,
+                            "impact": impact,
+                            "confirm_UT26": confirm_UT26
+                        }
+                    }
             else:
                 dict_walkthrough = {}
                 logger.error("None Bug Type")
@@ -397,10 +462,10 @@ class FileWalkThroughDoc(Base):
             dict_walkthrough = {}
             logger.exception(e)
         finally:
-            if opt == "ASW":
-                doc.Close()
-                word.Quit()
-                word = None
+            # if opt == "ASW":
+            #     doc.Close()
+            #     word.Quit()
+            #     word = None
             return dict_walkthrough
 
 class FileCoverageReasonXLS(Base):
@@ -471,14 +536,24 @@ class FileCoverageReasonXLS(Base):
 
             infor_CoverageReasonXLS = utils.load(CONST.SETTING).get("CoverageReasonXLS")
 
+            # data = {
+            #     "Tester": value(allData.Cells(1, 2).value),
+            #     "Date": value(allData.Cells(2, 2).value),
+            #     "Item_Name": value(allData.Cells(3, 2).value),
+            #     "C0": value(formatNumber(float(allData.Cells(9, 2).value))),
+            #     "C1": value(formatNumber(float(allData.Cells(10, 2).value))),
+            #     "MCDC": value(formatNumber(float(allData.Cells(11, 2).value)))
+            # }
+
             data = {
-                "Tester": value(allData.Cells(1, 2).value),
-                "Date": value(allData.Cells(2, 2).value),
-                "Item_Name": value(allData.Cells(3, 2).value),
-                "C0": value(formatNumber(float(allData.Cells(9, 2).value))),
-                "C1": value(formatNumber(float(allData.Cells(10, 2).value))),
-                "MCDC": value(formatNumber(float(allData.Cells(11, 2).value)))
+                "Tester": value(allData.Cells(1, 2)),
+                "Date": value(allData.Cells(2, 2)),
+                "Item_Name": value(allData.Cells(3, 2)),
+                "C0": value(formatNumber(float(value(allData.Cells(9, 2))))),
+                "C1": value(formatNumber(float(value(allData.Cells(10, 2))))),
+                "MCDC": value(formatNumber(float(value(allData.Cells(11, 2)))))
             }
+
         except Exception as e:
             data = {}
             logger.exception(e)
@@ -564,26 +639,187 @@ class FileTestDesignXLSX(Base):
         self.doc = str(path)
 
     # Function parse2json: convert XLSX to json data
-    def parse2json(self, sheetname="", begin=59, end=59):
-        pass
+    def parse2json(self, sheetname, begin=59, end=59):
+        ROW_ENUM = 15 - 1
+        ROW_TOLERANCE = 19 - 1
+        ROW_HEADER_INPUT = ROW_TOLERANCE + 4
+        ROW_NAME_VARIABLE = ROW_HEADER_INPUT + 1
+
+        if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+            ROW_ENUM = ROW_ENUM - 1
+            ROW_TOLERANCE = ROW_TOLERANCE - 1
+            ROW_HEADER_INPUT = ROW_TOLERANCE + 4
+            ROW_NAME_VARIABLE = ROW_HEADER_INPUT + 1
+
+        def check_flag(list_data, pat):
+            result = False
+            for x in list_data:
+                if x == pat:
+                    result = True
+
+            return result
+
+        def initial_value(header):
+            result = dict()
+            for __header__ in header:
+                result[__header__] = {"begin": -1, "end": -1}
+
+            return result
+
+        def find_cordinate(result, data, header, new_header=[], isEnum=False, row=0):
+            for index, __header__ in enumerate(header):
+                result[__header__]['begin'] = data[row].index(__header__)
+                if (__header__ == header[-1]):
+                    if isEnum == True:
+                        list_temp = [x for x in data[row + 1] if (x is not None)]
+                        result[__header__]['end'] = data[row + 1].index(list_temp[-1])
+                    else:
+                        result[__header__]['end'] = data[row].index(header[index])
+                else:
+                    result[__header__]['end'] = data[row].index(header[index + 1]) - 1
+
+            for key in dict(result).keys():
+                if isEnum == True:
+                    if (key == "Enum"):
+                        del result[key]
+                else:
+                    if not(key in new_header):
+                        del result[key]
+
+        def generate_data(data_header, data, row, header=[], isEnum=False):
+            result = dict()
+            if isEnum == True:
+                for __header__ in dict(data_header).keys():
+                    result[__header__] = list()
+                    for j in range(data_header[__header__]['begin'], data_header[__header__]['end'] + 1):
+                        result[__header__].append(data[row][j])
+                
+            else:
+                template_obj = {
+                    "Tolerance": -1,
+                    "Type": None,
+                    "Max": -1,
+                    "Min": -1,
+                    "Data": list()
+                }
+            
+                max_testcase = -1
+                for i in range(ROW_NAME_VARIABLE + 1, len(data)):
+                    if(i == len(data) - 1):
+                        max_testcase = i - (ROW_NAME_VARIABLE + 1) + 1
+                        break
+                    else:
+                        if (data[i][0] is None or ("TC" in data[i][0]) == False):
+                            max_testcase = i - (ROW_NAME_VARIABLE + 1)
+                            break
+
+                for __header__ in header:
+                    result[__header__] = list()
+                    flag_end_data = False
+                    for j in range(data_header[__header__]['begin'], data_header[__header__]['end'] + 1):
+                        name_input = data[ROW_NAME_VARIABLE][j]
+                        if __header__ == "DESCRIPTIONS":
+                            name_input = 'DESCRIPTIONS'
+                        
+                        data_js_variable = copy.deepcopy(template_obj)
+                        
+                        data_js_variable["Tolerance"] = data[ROW_TOLERANCE][j]
+                        data_js_variable["Type"] = data[ROW_TOLERANCE + 1][j]
+                        data_js_variable["Max"] = data[ROW_TOLERANCE + 2][j]
+                        data_js_variable["Min"] = data[ROW_TOLERANCE + 3][j]
+                        
+                        for i in range(ROW_NAME_VARIABLE + 1, ROW_NAME_VARIABLE + 1 + max_testcase):
+                            data_js_variable["Data"].append(data[i][j])
+
+                        result[__header__].append({name_input: data_js_variable})
+            return result
+        
+        full_data = parse.get_xlsx_raw(self.doc, sheet=sheetname, begin=begin, end=end)
+        header_input = ['INPUTS', 'LOCAL VARIABLES AS INPUT', 'IMPORTED PARAMETERS', 'LOCAL PARAMETERS', 'LOCAL VARIABLES', 'OUTPUTS', 'DESCRIPTIONS']
+        data_header = full_data[ROW_HEADER_INPUT]
+        finding_header = [x for x in data_header if (x is not None and (not re.search("^#", value(x))))]
+        
+        for __header__ in list(header_input):
+            if not (__header__ in finding_header):
+                header_input.remove(__header__)
+
+        ''' Count element '''
+        d_input_header = dict()
+        d_input_header = initial_value(header=finding_header)
+        find_cordinate(result=d_input_header, data=full_data, header=finding_header, new_header=header_input, row=ROW_HEADER_INPUT)
+        result = dict()
+        result = generate_data(data_header=d_input_header, header=header_input, data=full_data, row=ROW_TOLERANCE)
+
+        data_enum_title = full_data[ROW_ENUM]
+        enum_header = [x for x in data_enum_title if ((x is not None) and (x != "Enum"))]
+        d_enum_header = dict()
+        d_enum_header = initial_value(header=enum_header)
+        find_cordinate(result=d_enum_header, data=full_data, header=enum_header, isEnum=True, row=ROW_ENUM)
+        result_enum = dict()
+        result_enum = generate_data(data_header=d_enum_header, data=full_data, isEnum=True, row=ROW_ENUM + 1)
+        
+        final_result = dict()
+        final_result = {
+            "sheetname": sheetname,
+            "Header": header_input,
+            "Enum": result_enum,
+            "TestDesign": result
+        }
+
+        return final_result
 
     # Function get_data: to get the array data with specfic key, value of the nested json
     def get_data(self):
         data = dict()
+        BEGIN=1
+        END=5000
+        ROW_ENUM = 15 - 1
+        ROW_TOLERANCE = 19 - 1
+        ROW_HEADER_INPUT = ROW_TOLERANCE + 4
+        ROW_NAME_VARIABLE = ROW_HEADER_INPUT + 1
+        if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+            ROW_ENUM = ROW_ENUM - 1
+            ROW_TOLERANCE = ROW_TOLERANCE - 1
+            ROW_HEADER_INPUT = ROW_TOLERANCE + 4
+            ROW_NAME_VARIABLE = ROW_HEADER_INPUT + 1
+        
+        TM_CELL = "A{}".format(ROW_NAME_VARIABLE + 1)
+
         try:
             if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
                 item_name = re.sub("^TD_(\w.*)_(MT_\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")[0]
                 item_revision = "NA"
             else:
-                [item_name, item_revision] = re.sub("^TD_(\w.*)_v(\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")
+                try:
+                    temp =  re.sub("^TD_(\w.*)_v(\d.*)\.xls.*$", r'\1 \2', os.path.basename(self.doc)).split(" ")
+                    item_name = temp[0]
+                    item_revision = temp[1]
+                except Exception as e:
+                    item_name = "Uknown"
+                    item_revision = "Unknown"
+                    logger.error(">> Failed: Item FileTestDesignXLSX has wrong format name: {}".format(os.path.basename(self.doc)))
+                    # logger.exception(e)
+
+
+            ignore_sheet = ['Revision History', 'Summary', 'MCDC', 'Temporary', 'Guide', 'SavedVariables', 'MCDC_Backup', 'Testcases_Backup', 'Constants_Backup']
+            lst_sheet = [x for x in parse.get_xlsx_sheets(self.doc) if (x.strip() not in ignore_sheet and parse.get_xlsx_raw(self.doc, sheet=x, begin=BEGIN, end=END)[ROW_NAME_VARIABLE + 1][0] == "TC1")]
+            
+            sheet_history = [x for x in parse.get_xlsx_sheets(self.doc) if (x.strip() == "Revision History")][0]
+
+            data_test_design = list()
+
+            for sheet in lst_sheet:
+                data_test_design.append(self.parse2json(sheetname=sheet, begin=BEGIN, end=END))
 
             data = {
                 "ItemName": item_name,
-                "TM": parse.get_xlsx_cells(xlsx=self.doc, sheet="Testcases", list_cell=['A24']).get('A24'),
+                "TM": [parse.get_xlsx_cells(xlsx=self.doc, sheet=x, list_cell=[TM_CELL]).get(TM_CELL) for x in lst_sheet],
                 "ItemRevision": item_revision.replace("_", "."),
-                "Tester": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['C17']).get('C17'),
-                "Date": parse.get_xlsx_cells(xlsx=self.doc, sheet="Revision History", list_cell=['D17']).get('D17'),
+                "Tester": parse.get_xlsx_cells(xlsx=self.doc, sheet=sheet_history, list_cell=['C17']).get('C17'),
+                "Date": parse.get_xlsx_cells(xlsx=self.doc, sheet=sheet_history, list_cell=['D17']).get('D17'),
+                "DataTestDesign": data_test_design
             }
+
         except Exception as e:
             data = {}
             logger.exception(e)
@@ -607,9 +843,13 @@ class FileATTReportXML(Base):
         data = dict()
         try:
             lst_header = ["ClassName", "ClassVersion", "CompleteVerdict", "TestModuleName"]
-
             for index, key in enumerate(lst_header):
-                data = {**data, **{key: self.get_tag(key).text}}
+                if key == 'TestModuleName':
+                    temp_lst_test_module = [e.text for e in self.doc.iterfind('.//{0}'.format("TestModuleName"))]
+                    data = {**data, **{key: temp_lst_test_module}}
+                else:
+                    data = {**data, **{key: self.get_tag(key).text}}
+            
         except Exception as e:
             data = {}
             logger.exception(e)
@@ -656,14 +896,17 @@ def value(cell):
         return str(cell)
 
 def convert_score_percentage(num, opt=""):
-    if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-        if num == "NA" or num == "none":
-            return "NA"
+    try:
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            if num == "NA" or num == "none":
+                return "NA"
 
-    if opt == 'nomul':
-        return value(formatNumber(float(value(num))))
-    else:
-        return value(formatNumber(round(float(value(formatNumber(float(value(num)) * 100))), 1)))
+        if opt == 'nomul':
+            return value(formatNumber(float(value(num))))
+        else:
+            return value(formatNumber(round(float(value(formatNumber(float(value(num)) * 100))), 1)))
+    except ValueError:
+        return "Unknown"
 
 def check_score(score_test_summary, score_exel, opt=""):
     return ((score_test_summary == convert_score_percentage(score_exel) if (value(score_exel) != "-" and score_exel != None) else "NA"))
@@ -684,20 +927,192 @@ def check_OPL_Walkthrough(file):
         num_OPL =  doc.InlineShapes.Count - 1
     except Exception as e:
         num_OPL = -1
-        logger.exception(e)
+        logger.error("Walkthrough can not open!!!. Please check your name carefully at link: {}".format(file))
+        # logger.exception(e)
     finally:
         doc.Close()
         word.Quit()
         word = None
         return num_OPL
 
+# Check def check_DataTestDesignXLSX(data):
+def check_DataTestDesignXLSX(data_test_design):
+    flag = True
+    logger.debug("Function check_DataTestDesignXLSX")
+    try:
+        for __header__ in data_test_design['Header']:
+            if __header__ == "LOCAL PARAMETERS" or __header__ == 'LOCAL VARIABLES' or __header__ == 'OUTPUTS':
+                continue
+
+            for data_var in data_test_design['TestDesign'][__header__]:
+                for key, obj_level_2 in data_var.items():
+                    list_data_var = list(set(obj_level_2["Data"]))
+                    if not utils.isMissingValue(list_data_var):
+                        list_data_var.sort(key=None, reverse=False)
+                        if __header__ == 'DESCRIPTIONS':
+                            logger.info(">> Passed: Your comment is missing: {}".format(key))
+                        else:
+                            logger.info(">> Passed: Your input is missing or wrong type value: {} <=> {}".format(key, list_data_var))
+                    else:
+                        flag = False
+                        if __header__ == 'DESCRIPTIONS':
+                            logger.error(">> Failed: Your comment is missing: {}".format(key))
+                        else:
+                            logger.error(">> Failed: Your input is missing or wrong type value: {} <=> {}".format(key, list_data_var))
+                        continue
+                    
+                    if __header__ == 'DESCRIPTIONS':
+                        continue
+
+                    if obj_level_2['Type'] == 'log':
+                        if not (False in list_data_var and True in list_data_var and len(list_data_var) == 2):
+                            flag = False
+                            logger.error("Header {}, Variable {}, Type {}: {} <=> {}".format(__header__, key, obj_level_2['Type'], "[False, True]", list_data_var))
+                    elif obj_level_2['Type'] == 'cont' or obj_level_2['Type'] == 'sdisc' or obj_level_2['Type'] == 'udisc':
+                        if __header__ == "INPUTS" and utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+                            if not (max(list_data_var) > obj_level_2['Max']):
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing OUT RANGE MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], max(list_data_var)))
+                            else:
+                                logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing OUT RANGE MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], max(list_data_var)))
+
+                            if not (min(list_data_var) < obj_level_2['Min']):
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing OUT RANGE MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], min(list_data_var)))
+                            else:
+                                logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing OUT RANGE MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], min(list_data_var)))
+                        else:
+
+                            if __header__ == "IMPORTED PARAMETERS" and ("INF" in str(obj_level_2['Max']) or "inf" in str(obj_level_2['Max'])):
+                                if not (len(list_data_var) >= 3):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
+                                
+                                continue
+                            else:
+                                if not (obj_level_2['Max'] in list_data_var):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
+                                if not (obj_level_2['Min'] in list_data_var):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
+                            
+                        check_mid = [x for x in list_data_var if (x != obj_level_2['Max'] and x != obj_level_2['Min'])]
+                        
+                        tolerance = obj_level_2['Tolerance']
+                        if __header__ == "IMPORTED PARAMETERS":
+                            tolerance = 0
+
+                        if obj_level_2['Max'] > obj_level_2['Min']:
+                            if ((obj_level_2['Max'] - tolerance) != obj_level_2['Min']):
+                                if not (len(check_mid) != 0 and utils.checkMidValue(lst=check_mid, min=obj_level_2['Min'], max=obj_level_2['Max'])):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
+                            else:
+                                if not (len(check_mid) == 0):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
+                        elif obj_level_2['Max'] == obj_level_2['Min']:
+                            if not (len(check_mid) == 0):
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
+                            else:
+                                logger.info(">> Passed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
+                        else:
+                            flag = False
+                            logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
+
+                    elif obj_level_2['Type'] in data_test_design['Enum'].keys() or obj_level_2['Type'] == 'enum':
+                        value_find_type_enum = obj_level_2['Type']
+                        current_type = random.choice(list_data_var)
+                        if obj_level_2['Type'] == 'enum' and utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
+                            value_find_type_enum = utils.find_enum(pat=current_type, data=data_test_design['Enum']) 
+                            if not(value_find_type_enum is not None):
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
+                                continue
+                            else:
+                                logger.info(">> Passed: Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
+
+                        if not (data_test_design['Enum'][value_find_type_enum][-1] in list_data_var):
+                            if data_test_design['Enum'][value_find_type_enum][-1] is None:
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Please check your enum header that it hasn't any redundant table at here: {}".format(__header__, key, value_find_type_enum, list_data_var))
+                            else:
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
+                        else:
+                            logger.info(">> Passed: Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
+                        if not (data_test_design['Enum'][value_find_type_enum][0] in list_data_var):
+                            flag = False
+                            logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
+                        else:
+                            logger.info(">> Passed: Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
+
+                        check_mid = [x for x in list_data_var if (x != data_test_design['Enum'][value_find_type_enum][-1] and x != data_test_design['Enum'][value_find_type_enum][0])]
+
+                        tolerance = obj_level_2['Tolerance']
+                        if __header__ == "IMPORTED PARAMETERS":
+                            tolerance = 0
+                        
+                        if obj_level_2['Max'] > obj_level_2['Min']:
+                            if ((obj_level_2['Max'] - tolerance) != obj_level_2['Min']):
+                                if not (len(check_mid) != 0 and utils.checkMidValue(lst=check_mid, data=data_test_design['Enum'][value_find_type_enum], isEnum=True, min=obj_level_2['Min'], max=obj_level_2['Max'])):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                            else:
+                                if not (len(check_mid) == 0):
+                                    flag = False
+                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, value_find_type_enum))
+                                else:
+                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                        elif obj_level_2['Max'] == obj_level_2['Min']:
+                            if not (len(check_mid) == 0):
+                                flag = False
+                                logger.error(">> Failed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
+                            else:
+                                logger.info(">> Passed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
+                        else:
+                            flag = False
+                            logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
+                    else:
+                        flag = False
+                        logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG".format(__header__, key, obj_level_2['Type']))
+    except Exception as e:
+        flag = False
+        logger.exception(e)
+    finally:
+        logger.debug("Done")
+        return flag
+
 # Check information between summary xlsx, and test_summay_html is same or not
-def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt="", mode=""):
+def check_information(file_test_summary_html, data, function_with_prj_name="", file_test_report_xml="", file_tpa="", file_CoverageReasonXLS="", opt=[], mode=""):
+    def isTimeFormat(date):
+        try:
+            datetime.datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+            return True
+        except ValueError:
+            return False
+
     flag = False
+
+    logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
+
     try:
         data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-
-        logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
+        
         count = 0
         flag = True
 
@@ -709,15 +1124,19 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
 
         if not (data_test_summary.get("Project") == sub_new_func):
             flag = False
-            logger.error("Item FileTestSummaryHTML {} has different name: {} - {}".format(sub_new_func, data_test_summary.get("Project"), sub_new_func))
+            logger.error(">> Failed: Item FileTestSummaryHTML {} has different name: {} - {}".format(sub_new_func, data_test_summary.get("Project"), sub_new_func))
+        else:
+            logger.info(">> Passed: Item FileTestSummaryHTML {} has different name: {} - {}".format(sub_new_func, data_test_summary.get("Project"), sub_new_func))
 
         if not (data_test_summary.get("Verdict") == "Pass"):
             flag = False
-            logger.error("Item FileTestSummaryHTML {} got different Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
+            logger.error(">> Failed: Item FileTestSummaryHTML {} got different Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
+        else:
+            logger.info(">> Passed: Item FileTestSummaryHTML {} got different Verdict: {} - {}".format(data_test_summary.get("Project"), data_test_summary.get("Verdict"), data.get("Status Result")))
 
         score_c0 = score_c1 = score_mcdc = ""
 
-        if(data.get("C0") is None or data.get("C1") is None or data.get("MCDC") is None):
+        if (data.get("C0") is None or data.get("C1") is None or data.get("MCDC") is None):
             flag = False
             logger.error("Item FileSummaryXLSX {} has none C0/C1/MCDC: {} - {} - {}".format(data.get("ItemName").replace(".c", ""), data.get("C0"), data.get("C1"), data.get("MCDC")))
         else:
@@ -729,25 +1148,59 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                     and check_score(score_test_summary=data_test_summary.get("C1"), score_exel=data.get("C1")) \
                     and check_score(score_test_summary=data_test_summary.get("MCDCU"), score_exel=data.get("MCDC"))):
                 flag = False
-                logger.error("Item FileTestSummaryHTML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
+                logger.error(">> Failed: Item FileTestSummaryHTML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
+                                                                            data_test_summary.get("C1"), score_c1,
+                                                                            data_test_summary.get("MCDCU"), score_mcdc)
+                            )
+            else:
+                logger.info(">> Passed: Item FileTestSummaryHTML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_summary.get("Project"), data_test_summary.get("C0"), score_c0,
                                                                             data_test_summary.get("C1"), score_c1,
                                                                             data_test_summary.get("MCDCU"), score_mcdc)
                             )
 
-        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-            # Check information between FileTPA and Summary
-            if (opt == "check_tpa_xls"):
+        # Check information between FileTPA and Summary
+        if(file_tpa != ""):
+            try:
                 data_tpa = FileTPA(file_tpa).get_data()
-                data_tpa = data_tpa[data.get("ItemName").replace(".c", "") + ".c"]
-                if not (check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
-                        and check_score(score_test_summary=data_tpa.get("C1"), score_exel=data.get("C1")) \
-                        and check_score(score_test_summary=data_tpa.get("MC/DC"), score_exel=data.get("MCDC"))):
-                    flag = False
-                    logger.error("Item FileTPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
-                                                                                data_tpa.get("C1"), score_c1,
-                                                                                data_tpa.get("MC/DC"), score_mcdc)
-                                )
+            except Exception as e:
+                data_tpa = None
+                logger.error(">> Failed: Item {} can not open file TPA. Please check at link: {}".format(data.get("ItemName").replace(".c", "") + ".c", file_tpa))
 
+            if data_tpa is not None:
+                data_tpa = data_tpa[data.get("ItemName").replace(".c", "") + ".c"]
+                if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+                    if not (check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
+                            and check_score(score_test_summary=data_tpa.get("C1"), score_exel=data.get("C1")) \
+                            and check_score(score_test_summary=data_tpa.get("MC/DC"), score_exel=data.get("MCDC"))):
+                        flag = False
+                        logger.error(">> Failed: Item FileTPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
+                                                                                    data_tpa.get("C1"), score_c1,
+                                                                                    data_tpa.get("MC/DC"), score_mcdc)
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileTPA {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
+                                                                                    data_tpa.get("C1"), score_c1,
+                                                                                    data_tpa.get("MC/DC"), score_mcdc)
+                                    )
+                else:
+                    if not (check_score(score_test_summary=data_tpa.get("C0"), score_exel=data.get("C0")) \
+                            and check_score(score_test_summary=data_tpa.get("C1"), score_exel=data.get("C1"))):
+                        flag = False
+                        logger.error(">> Failed: Item FileTPA {} has different C0: {}/{}; C1: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
+                                                                                    data_tpa.get("C1"), score_c1)
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileTPA {} has different C0: {}/{}; C1: {}/{}".format(data_tpa.get("FileName").replace(".c", ""), data_test_summary.get("C0"), score_c0,
+                                                                                    data_tpa.get("C1"), score_c1)
+                                    )
+                
+                if not (isTimeFormat(data_tpa.get("ExecutionDate"))):
+                    flag = False
+                    logger.error(">> Failed: Item FileTPA {} has different time format %Y-%m-%dT%H:%M:%SZ: {}".format(data_tpa.get("FileName").replace(".c", ""), data_tpa.get("ExecutionDate")))
+                else:
+                    logger.info(">> Passed: Item FileTPA {} has different time format %Y-%m-%dT%H:%M:%SZ: {}".format(data_tpa.get("FileName").replace(".c", ""), data_tpa.get("ExecutionDate")))
+            
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
             # Check information between FileTestReportXML and Summary
             data_test_report_xml = FileTestReportXML(file_test_report_xml).get_data()
 
@@ -755,35 +1208,51 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                     and check_score(score_test_summary=data_test_report_xml.get("C1"), score_exel=data.get("C1")) \
                     and check_score(score_test_summary=data_test_report_xml.get("MCDCU"), score_exel=data.get("MCDC"))):
                 flag = False
-                logger.error("Item FileTestReportXML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), score_c0,
+                logger.error(">> Failed: Item FileTestReportXML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), score_c0,
+                                                                            data_test_report_xml.get("C1"), score_c1,
+                                                                            data_test_report_xml.get("MCDCU"), score_mcdc)
+                            )
+            else:
+                logger.info(">> Passed: Item FileTestReportXML {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_test_report_xml.get("testScriptName"), data_test_report_xml.get("C0"), score_c0,
                                                                             data_test_report_xml.get("C1"), score_c1,
                                                                             data_test_report_xml.get("MCDCU"), score_mcdc)
                             )
 
-            if (opt == "check_tpa_xls"):
+            if ("check_FileCoverageReasonXLS" in opt and utils.load(CONST.SETTING, "mode_check_by_user").get("check_FileCoverageReasonXLS") == True):
                 # Check information between FileCoverageReasonXLS and Summary
                 data_CoverageReasonXLS = FileCoverageReasonXLS(file_CoverageReasonXLS).get_data()
                 if not (check_score(score_test_summary=data_CoverageReasonXLS.get("C0"), score_exel=data.get("C0")) \
                         and check_score(score_test_summary=data_CoverageReasonXLS.get("C1"), score_exel=data.get("C1")) \
                         and check_score(score_test_summary=data_CoverageReasonXLS.get("MCDC"), score_exel=data.get("MCDC"))):
                     flag = False
-                    logger.error("Item FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name"), data_CoverageReasonXLS.get("C0"), score_c0,
+                    logger.error(">> Failed: Item FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name").replace(".c", ""), data_CoverageReasonXLS.get("C0"), score_c0,
                                                                                 data_CoverageReasonXLS.get("C1"), score_c1,
                                                                                 data_CoverageReasonXLS.get("MCDC"), score_mcdc)
                                 )
+                else:
+                    logger.info(">> Passed: Item FileCoverageReasonXLS {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data_CoverageReasonXLS.get("Item_Name").replace(".c", ""), data_CoverageReasonXLS.get("C0"), score_c0,
+                                                                                data_CoverageReasonXLS.get("C1"), score_c1,
+                                                                                data_CoverageReasonXLS.get("MCDC"), score_mcdc)
+                                )
+
         elif (utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM"):
-            if (opt == "check_WT"):
+            if ("check_FileWalkThroughDoc" in opt):
                 file_Walkthrough = utils.scan_files(Path(file_test_summary_html).parent.as_posix(), ext='.docx')[0][0]
                 data_Walkthrough = FileWalkThroughDoc(file_Walkthrough).get_data()
 
-                if not (data_Walkthrough.get("project").replace(".c", "") == sub_new_func):
+                if not (data_Walkthrough.get("project").replace(".c", "") == sub_new_func and os.path.basename(file_Walkthrough) == "Walkthrough_Protocol_{}.docx".format(data.get("ItemName").replace(".c", ""))):
                     flag = False
-                    logger.error("Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), sub_new_func))
+                    logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), sub_new_func))
+                else:
+                    logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), sub_new_func))
 
                 if not (check_score(score_test_summary=data_Walkthrough.get("C0"), score_exel=data.get("C0")) \
                         and check_score(score_test_summary=data_Walkthrough.get("C1"), score_exel=data.get("C1"))):
                     flag = False
-                    logger.error("Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
+                    logger.error(">> Failed: Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
+                                                                                data_Walkthrough.get("C1"), score_c1))
+                else:
+                    logger.info(">> Passed: Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
                                                                                 data_Walkthrough.get("C1"), score_c1))
 
                 if data.get("Baseline") == "" or data.get("Baseline") == "None" or data.get("Baseline") == None:
@@ -793,16 +1262,20 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
 
                 if not ((data_Walkthrough.get("baseline") == temp_baseline) or (temp_baseline == "" and data_Walkthrough.get("baseline") == "None")):
                     flag = False
-                    logger.error("Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline)
-                                    )
+                    logger.error(">> Failed: Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline))
+                else:
+                    logger.info(">> Passed: Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline))
 
                 if not (data_Walkthrough.get("review partner") == convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name") \
                     and data_Walkthrough.get("review initiator") == convert_name(key=data.get("Tester"), opt="name")):
                     flag = False
 
-                    logger.error("Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
-                                                                                  data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name")
-                                                                                 )
+                    logger.error(">> Failed: Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
+                                                                                  data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name"))
+                                )
+                else:
+                    logger.info(">> Passed: Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
+                                                                                  data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name"))
                                 )
 
                 temp_path_test_WT = str(trim_src(data.get("ComponentName"))) + "\\Unit_tst\\" + str(data.get("TaskID")) + "\\" + data.get("ItemName").replace(".c", "")
@@ -816,53 +1289,83 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
                 else:
                     if not(data_Walkthrough.get('path_testscript') == path_testscript and data_Walkthrough.get('path_test_summary') == path_test_summary):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has wrong path: {}/{} - {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'), path_testscript,
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong path: {}/{} - {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'), path_testscript,
+                                                                                    data_Walkthrough.get('path_test_summary'), path_test_summary)
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong path: {}/{} - {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get('path_testscript'), path_testscript,
                                                                                     data_Walkthrough.get('path_test_summary'), path_test_summary)
                                     )
 
                 if (data.get("OPL/Defect") == "OPL" or data.get("OPL/Defect") == "Defect"):
-                    num_OPL = check_OPL_Walkthrough(file_Walkthrough)
+                    if utils.load(CONST.SETTING, "mode_check_by_user").get("check_OPL_Walkthrough") == True:
+                        num_OPL = check_OPL_Walkthrough(file_Walkthrough)
 
-                    if not (num_OPL > 0):
-                        flag = False
-                        logger.error("Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                        if not (num_OPL > 0):
+                            flag = False
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
 
                     if not (data_Walkthrough.get("tbl_finding").get('finding') != "/" \
                         and data_Walkthrough.get("tbl_finding").get('impact') != "/"):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                                                                                    data_Walkthrough.get("tbl_finding").get('impact'))
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
                                                                                     data_Walkthrough.get("tbl_finding").get('impact'))
                                     )
 
                     if (data_Walkthrough.get('C0') == "100" and data_Walkthrough.get('C1') == "100"):
                         if not (data_Walkthrough.get("tbl_finding").get('confirm_UT9').strip() == "Yes, Documented"):
                             flag = False
-                            logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                                                                                        '"Yes, Documented"')
+                                        )
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
                                                                                         '"Yes, Documented"')
                                         )
                     else:
                         if not (data_Walkthrough.get("tbl_finding").get('confirm_UT9').strip() == "No, Documented"):
                             flag = False
-                            logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
                                                                                         '"No, Documented"')
                                     )
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                                                                                        '"No, Documented"')
+                                    ) 
                 else:
-                    num_OPL = check_OPL_Walkthrough(file_Walkthrough)
+                    if utils.load(CONST.SETTING, "mode_check_by_user").get("check_OPL_Walkthrough") == True:
+                        num_OPL = check_OPL_Walkthrough(file_Walkthrough)
 
-                    if not (num_OPL <= 0):
-                        flag = False
-                        logger.error("Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                        if not (num_OPL <= 0):
+                            flag = False
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
 
                     if not (data_Walkthrough.get("tbl_finding").get('finding') == "/" \
                         and data_Walkthrough.get("tbl_finding").get('impact') == "/"):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
                                                                                     data_Walkthrough.get("tbl_finding").get('impact'))
                                     )
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                                                                                    data_Walkthrough.get("tbl_finding").get('impact'))
+                                    )  
 
                     if not (data_Walkthrough.get("tbl_finding").get('confirm_UT9').strip() == "Yes"):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
+                                                                                    '"Yes"')
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT9: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT9'),
                                                                                     '"Yes"')
                                     )
 
@@ -883,12 +1386,11 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         return flag
 
 def check_information_ASW(path, data, opt=""):
-    def check_exist_plt(lst, pat):
-        flag = False
-        for f in lst:
-            if f == pat:
-                flag = True
-                break
+    def check_exist_plt(list_module, list_plt):
+        flag = True
+        for f in list_module:
+            if not (f in list_plt):
+                flag = False
 
         return flag
     
@@ -902,13 +1404,46 @@ def check_information_ASW(path, data, opt=""):
         lst_file_RTRT = utils.scan_files(Path(path).as_posix(), ext='ReportRTRT.txt')[0]
         lst_file_ATT = utils.scan_files(Path(path).as_posix(), ext='ATT_Report.xml')[0]
         lst_file_PLT = [os.path.basename(f).replace('.plt', '') for f in utils.scan_files(Path(path).as_posix(), ext='.plt')[0] if re.search('mdfFiles', str(Path(f).as_posix)) == None]
+        lst_file_ATT_Prj = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xml')[0] if re.search('{}/Project_.*.xml'.format(data.get("ItemName").replace(".c", "")), str(Path(f).as_posix))]
+
+        lst_file_gif = []
+        lst_file_htm = []
+
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            lst_file_test_design = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0] if re.search('Documents/TD_.*.xlsm', str(Path(f).as_posix))]
+            lst_file_RTRT = [f for f in utils.scan_files(Path(path).as_posix(), ext='ReportRTRT.txt')[0] if re.search('Delivery/TestResult', str(Path(f).as_posix))]
+            lst_file_ATT = [f for f in utils.scan_files(Path(path).as_posix(), ext='ATT_Report.xml')[0] if re.search('Delivery/TestResult/.*/Rubasa/ATT_Report.xml', str(Path(f).as_posix))]
+            lst_file_PLT = [os.path.basename(f).replace('.plt', '') for f in utils.scan_files(Path(path).as_posix(), ext='.plt')[0] if re.search('Documents/.*plt', str(Path(f).as_posix))]
+            lst_file_ATT_Prj = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xml')[0] if re.search('Delivery/TestEnvironment/.*/Project_.*.xml'.format(data.get("ItemName").replace(".c", "")), str(Path(f).as_posix))]
+            lst_file_gif = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0] if re.search('Documents/.*.gif', str(Path(f).as_posix))]
+            lst_file_htm = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0] if re.search('Documents/.*.htm', str(Path(f).as_posix))]
 
         file_test_design = file_RTRT = file_ATT = ""
         if not (len(lst_file_PLT)):
             flag = False
-            logger.error("Item PLT {} has none file".format(data.get("ItemName").replace(".c", "")))
+            logger.error(">> Failed: Item FilePLT {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_PLT))
         else:
             lst_file_PLT = lst_file_PLT
+            logger.info(">> Passed: Item FilePLT {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_PLT))
+
+        if not (len(lst_file_ATT_Prj) == 1):
+            flag = False
+            logger.error(">> Failed: Item file_ATT_Prj {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_ATT_Prj))
+        else:
+            logger.info(">> Passed: Item file_ATT_Prj {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_ATT_Prj))
+
+        if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
+            if not (len(lst_file_gif) == 1):
+                flag = False
+                logger.error(">> Failed: Item File Gif {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_gif))
+            else:
+                logger.info(">> Passed: Item File Gif {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_gif))
+
+            if not (len(lst_file_htm) == 1):
+                flag = False
+                logger.error(">> Failed: Item File HTM {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_htm))
+            else:
+                logger.info(">> Passed: Item File HTM {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_htm))
 
         data_test_design = data_RTRT = data_ATT = ""
 
@@ -918,48 +1453,71 @@ def check_information_ASW(path, data, opt=""):
         else:
             temp = data.get("ItemName").replace(".c", "")
 
-        if not (len(lst_file_test_design)):
+        if not (len(lst_file_test_design) == 1):
             if len(utils.scan_files(Path(path).as_posix(), ext='.xls')[0]) or len(utils.scan_files(Path(path).as_posix(), ext='.xlsx')[0]) or len(utils.scan_files(Path(path).as_posix(), ext='.xlsb')[0]):
                 flag = False
-                logger.error("Item FileTestDesignXLSX {} has wrong extension. Please convert xls* to xlsm".format(data.get("ItemName").replace(".c", "")))
+                logger.error(">> Failed: Item FileTestDesignXLSX {} has wrong extension. Please convert xls* to xlsm: {}".format(data.get("ItemName").replace(".c", ""), lst_file_test_design))
             else:
                 flag = False
-                logger.error("Item FileTestDesignXLSX {} has none file".format(data.get("ItemName").replace(".c", "")))
+                logger.error(">> Failed: Item FileTestDesignXLSX {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_test_design))
         else:
             file_test_design = lst_file_test_design[0]
             data_test_design = FileTestDesignXLSX(file_test_design).get_data()
 
-            if not (len(lst_file_ATT)):
+            logger.info(">> Passed: Item FileTestDesignXLSX {} has none file".format(data.get("ItemName").replace(".c", "")))
+            if not (len(lst_file_ATT) == 1):
                 flag = False
-                logger.error("Item FileATTReportXML {} has none file ".format(data.get("ItemName").replace(".c", "")))
+                logger.error(">> Failed: Item FileATTReportXML {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_ATT))
             else:
+                logger.info(">> Passed: Item FileATTReportXML {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_ATT))
+
                 file_ATT = lst_file_ATT[0]
                 data_ATT = FileATTReportXML(file_ATT).get_data()
 
                 if not (data_test_design.get("ItemName") == temp \
                     and data_ATT.get("ClassName") == temp):
                     flag = False
-                    logger.error("Item FileTestDesignXLSX/FileATTReportXML has different name {} - {}".format(data_test_design.get("ItemName"), temp))
+                    logger.error(">> Failed: Item FileTestDesignXLSX/FileATTReportXML has different name {} - {}".format(data_test_design.get("ItemName"), temp))
+                else:
+                    logger.info(">> Passed: Item FileTestDesignXLSX/FileATTReportXML has different name {} - {}".format(data_test_design.get("ItemName"), temp))
+
+                for __each_data__ in data_test_design['DataTestDesign']:
+                    if not (check_DataTestDesignXLSX(__each_data__)):
+                        flag = False
+                        logger.error(">> Failed: Item FileTestDesignXLSX {} with sheet {} has wrong information".format(data_test_design.get("ItemName"), __each_data__['sheetname']))
+                    else:
+                        logger.info(">> Passed: Item FileTestDesignXLSX {} with sheet {} has wrong information".format(data_test_design.get("ItemName"), __each_data__['sheetname']))
 
                 if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
                     if not(data_ATT.get("ClassVersion") == data.get("ItemRevision")):
                         flag = False
-                        logger.error("Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
+                        logger.error(">> Failed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
+                    else:
+                        logger.info(">> Passed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
                 else:
                     if not(data_ATT.get("ClassVersion") == data.get("ItemRevision") and data_test_design.get("ItemRevision") == data.get("ItemRevision")):
                         flag = False
-                        logger.error("Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
+                        logger.error(">> Failed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
+                    else:
+                        logger.info(">> Passed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
 
-                # for tm_ATT in data_ATT.get("TestModuleName"):
-                #     print(tm_ATT)
-
-                if not check_exist_plt(lst_file_PLT, data_ATT.get("TestModuleName")):
+                if not check_exist_plt(data_test_design.get("TM"), lst_file_PLT):
                     flag = False
-                    logger.error("Item PLT {} got TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
+                    logger.error(">> Failed: Item FileTestDesignXLSX/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_test_design.get("TM"), lst_file_PLT))
+                else:
+                    logger.info(">> Passed: Item FileTestDesignXLSX/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TM"), lst_file_PLT))
+
+                if not check_exist_plt(data_ATT.get("TestModuleName"), lst_file_PLT):
+                    flag = False
+                    logger.error(">> Failed: Item FileATTReportXML/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
+                else:
+                    logger.info(">> Passed: Item FileATTReportXML/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
 
                 if not (data_ATT.get("CompleteVerdict") == "Passed"):
                     flag = False
-                    logger.error("Item PLT {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
+                    logger.error(">> Failed: Item FileATTReportXML {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
+                else:
+                    logger.info(">> Passed: Item FileATTReportXML {} got Verdict: {} - {}".format(data.get("ItemName"), data_ATT.get("CompleteVerdict"), data.get("Status Result")))
 
         score_c0 = score_c1 = score_mcdc = ""
 
@@ -971,18 +1529,18 @@ def check_information_ASW(path, data, opt=""):
             score_c1 = convert_score_percentage(data.get("C1"))
             score_mcdc = convert_score_percentage(data.get("MCDC"))
 
-        if not (len(lst_file_RTRT)):
+        if not (len(lst_file_RTRT) == 1):
             if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
                 temp_path = Path(path).joinpath("Delivery", "TestResult", "yymmdd_hhmm_Sim_" + data.get("ItemName").replace(".c", "") + data.get("ItemRevision").replace(".", "_"), "CovRep_MCDC_" +  data.get("ItemName").replace(".c", "") + data.get("ItemRevision").replace(".", "_"), "ReportRTRT.txt")
                 if(len(temp_path.as_posix()) > 256):
                     flag = False
-                    logger.error("Item FileRTRTCov {} has long path".format(data.get("ItemName").replace(".c", "")))
+                    logger.error(">> Failed: Item FileRTRTCov {} has long path".format(data.get("ItemName").replace(".c", "")))
                 else:
                     flag = False
-                    logger.error("Item FileRTRTCov {} has none file".format(data.get("ItemName").replace(".c", "")))
+                    logger.error(">> Failed: Item FileRTRTCov {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_RTRT))
             else:
                 flag = False
-                logger.error("Item FileRTRTCov {} has none file".format(data.get("ItemName").replace(".c", "")))
+                logger.error(">> Failed: Item FileRTRTCov {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_RTRT))
         else:
             file_RTRT = lst_file_RTRT[0]
             data_RTRT = FileRTRTCov(file_RTRT).get_data()
@@ -990,35 +1548,50 @@ def check_information_ASW(path, data, opt=""):
                     and check_score(score_test_summary=data_RTRT.get("C1"), score_exel=data.get("C1")) \
                     and check_score(score_test_summary=data_RTRT.get("MCDC"), score_exel=data.get("MCDC"))):
                 flag = False
-                logger.error("Item FileRTRTCov {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
+                logger.error(">> Failed: Item FileRTRTCov {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
+                                                                            data_RTRT.get("C1"), score_c1,
+                                                                            data_RTRT.get("MCDC"), score_mcdc)
+                            )
+            else:
+                logger.info(">> Passed: Item FileRTRTCov {} has different C0: {}/{}; C1: {}/{}; MCDC: {}/{}".format(data.get("ItemName"), data_RTRT.get("C0"), score_c0,
                                                                             data_RTRT.get("C1"), score_c1,
                                                                             data_RTRT.get("MCDC"), score_mcdc)
                             )
 
         """ Check Walkthrough"""
         if (utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM"):
-            if (opt == "check_WT"):
-                lst_file_WT = utils.scan_files(Path(path).as_posix(), ext='.doc')[0]
-
-                if not (len(lst_file_WT)):
+            if ("check_FileWalkThroughDoc" in opt):
+                lst_file_WT = [f for f in utils.scan_files(Path(path).as_posix(), ext='.docx')[0] if re.search('AR/{}/.*.docx'.format(data.get("ItemName").replace(".c", "")), str(Path(f).as_posix))]
+                if not (len(lst_file_WT) == 1):
+                    if len(utils.scan_files(Path(path).as_posix(), ext='.doc')[0]):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has none file Walkthrough".format(data.get("ItemName").replace(".c", "")))
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong extension. Please convert doc* to docx: {}".format(data.get("ItemName").replace(".c", ""), lst_file_WT))
+                    else:
+                        flag = False
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_WT))
                 else:
                     file_Walkthrough = lst_file_WT[0]
                     data_Walkthrough = FileWalkThroughDoc(file_Walkthrough).get_data(opt="ASW")
 
-                    if not (data_Walkthrough.get("project").replace(".c", "") == data.get("ItemName")):
+                    if not (data_Walkthrough.get("project").replace(".c", "") == data.get("ItemName") and os.path.basename(file_Walkthrough) == "Walkthrough_Protocol_{}.docx".format(data.get("ItemName").replace(".c", ""))):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), data.get("ItemName")))
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), data.get("ItemName")))
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), data.get("ItemName")))
 
                     if not(data_Walkthrough.get("ItemRevision") == data.get("ItemRevision")):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has wrong ItemRevision: {} - {}".format(data.get("ItemName"), data_Walkthrough.get("ItemRevision"), data.get("ItemRevision")))
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong ItemRevision: {} - {}".format(data.get("ItemName"), data_Walkthrough.get("ItemRevision"), data.get("ItemRevision")))
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong ItemRevision: {} - {}".format(data.get("ItemName"), data_Walkthrough.get("ItemRevision"), data.get("ItemRevision")))
 
                     if not (check_score(score_test_summary=data_Walkthrough.get("C0"), score_exel=data.get("C0")) \
                             and check_score(score_test_summary=data_Walkthrough.get("C1"), score_exel=data.get("C1"))):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
+                                                                                    data_Walkthrough.get("C1"), score_c1))
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has different C0: {}/{}; C1: {}/{}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("C0"), score_c0,
                                                                                     data_Walkthrough.get("C1"), score_c1))
 
                     if data.get("Baseline") == "" or data.get("Baseline") == "None" or data.get("Baseline") == None:
@@ -1028,63 +1601,80 @@ def check_information_ASW(path, data, opt=""):
 
                     if not ((data_Walkthrough.get("baseline") == temp_baseline) or (temp_baseline == "" and data_Walkthrough.get("baseline") == "None")):
                         flag = False
-                        logger.error("Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline)
-                                        )
+                        logger.error(">> Failed: Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline))
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc {} has different Baseline: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("baseline"), temp_baseline))
 
                     if not (data_Walkthrough.get("review partner") == convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name") \
                         and data_Walkthrough.get("review initiator") == convert_name(key=data.get("Tester"), opt="name")):
                         flag = False
-
-                        logger.error("Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
-                                                                                    data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name")
-                                                                                    )
+                        logger.error(">> Failed: Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
+                                                                                    data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name"))
+                                    )
+                    else:
+                        logger.info(">> Passed: Item FileWalkThroughDoc has different reviewer/tester {}/{} - {}/{}".format(data_Walkthrough.get("review partner"), convert_name(key=utils.load(CONST.SETTING, "users").get(data.get("Tester")).get("reviewer"), opt="name"), \
+                                                                                    data_Walkthrough.get("review initiator"), convert_name(key=data.get("Tester"), opt="name"))
                                     )
 
                     if (data.get("OPL/Defect") == "OPL" or data.get("OPL/Defect") == "Defect"):
-                        num_OPL = check_OPL_Walkthrough(file_Walkthrough)
+                        if utils.load(CONST.SETTING, "mode_check_by_user").get("check_OPL_Walkthrough") == True:
+                            num_OPL = check_OPL_Walkthrough(file_Walkthrough)
 
-                        if not (num_OPL > 0):
-                            flag = False
-                            logger.error("Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                            if not (num_OPL > 0):
+                                flag = False
+                                logger.error(">> Failed: Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                            else:
+                                logger.info(">> Passed: Item FileWalkThroughDoc {} has none OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
 
                         if not (data_Walkthrough.get("tbl_finding").get('finding') != "/" \
                             and data_Walkthrough.get("tbl_finding").get('impact') != "/"):
                             flag = False
-                            logger.error("Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                                                                                        data_Walkthrough.get("tbl_finding").get('impact'))
+                                        )
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has none comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
                                                                                         data_Walkthrough.get("tbl_finding").get('impact'))
                                         )
 
                         if (data_Walkthrough.get('C0') == "100" and data_Walkthrough.get('C1') == "100"):
                             if not (data_Walkthrough.get("tbl_finding").get('confirm_UT26').strip() == "Yes, Documented"):
                                 flag = False
-                                logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'),
-                                                                                            '"Yes, Documented"')
-                                            )
+                                logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '"Yes, Documented"'))
+                            else:
+                                logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '"Yes, Documented"'))
                         else:
                             if not (data_Walkthrough.get("tbl_finding").get('confirm_UT26').strip() == "No, Documented"):
                                 flag = False
-                                logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'),
-                                                                                            '"No, Documented"')
-                                        )
+                                logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '"No, Documented"'))
+                            else:
+                                logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '"No, Documented"'))
                     else:
-                        num_OPL = check_OPL_Walkthrough(file_Walkthrough)
+                        if utils.load(CONST.SETTING, "mode_check_by_user").get("check_OPL_Walkthrough") == True:
+                            num_OPL = check_OPL_Walkthrough(file_Walkthrough)
 
-                        if not (num_OPL <= 0):
-                            flag = False
-                            logger.error("Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                            if not (num_OPL <= 0):
+                                flag = False
+                                logger.error(">> Failed: Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
+                            else:
+                                logger.info(">> Passed: Item FileWalkThroughDoc {} has OPL: {}".format(data_Walkthrough.get("project").replace(".c", ""), str(num_OPL)))
 
                         if not (data_Walkthrough.get("tbl_finding").get('finding') == "/" \
                             and data_Walkthrough.get("tbl_finding").get('impact') == "/"):
                             flag = False
-                            logger.error("Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
+                                                                                        data_Walkthrough.get("tbl_finding").get('impact'))
+                                        )
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment finding/impact: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('finding'),
                                                                                         data_Walkthrough.get("tbl_finding").get('impact'))
                                         )
 
                         if not (data_Walkthrough.get("tbl_finding").get('confirm_UT26').strip() == ""):
                             flag = False
-                            logger.error("Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'),
-                                                                                        '""')
-                                        )
+                            logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '""'))
+                        else:
+                            logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong comment confirm UT26: {} - {}".format(data_Walkthrough.get("project").replace(".c", ""), data_Walkthrough.get("tbl_finding").get('confirm_UT26'), '""'))
 
     except Exception as e:
         logger.exception(e)
@@ -1151,11 +1741,12 @@ def check_archives_joem(path_summary, dir_input, taskids, begin=59, end=59):
                             file_test_report_xml = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_report.xml")
                             file_test_summary = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_summary.html")
 
-                            option_check = ""
-                            if (len(str(function)) < 32):
-                                option_check = "check_tpa_xls"
-                            else:
-                                option_check = ""
+                            option_check = []
+                            # if (len(str(function)) < 32):
+                            #     option_check.append("check_FileCoverageReasonXLS")
+                            # else:
+                            #     option_check = []
+                            option_check.append("check_FileCoverageReasonXLS")
 
                             if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], function_with_prj_name=folder_mt_function, file_test_report_xml=file_test_report_xml, file_tpa=file_tpa, file_CoverageReasonXLS=file_CoverageReasonXLS, opt=option_check):
                                 print("{},{},{},{},{}".format(taskid, mt_number, function, user_tester, "OK"))
@@ -1220,8 +1811,8 @@ def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=59, e
 
                     if "ASW" == data_taskid[item].get("Type"):
                         mt_number = "MT_" + mt_number
-                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG_MT_Check_Later"))
-                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_MT_Check_Later"))
+                        logging.warning("{},{},{},{},{}".format(taskid, mt_number, function, user_tester, "NG_MT_Check_Later"))
+                        file_log.write("{},{},{},{},{}\n".format(taskid, mt_number, function, user_tester, "NG_MT_Check_Later"))
                         continue
                     elif "PSW" == data_taskid[item].get("Type"):
                         mt_number = "UT_" + mt_number
@@ -1240,24 +1831,23 @@ def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=59, e
                         file_test_report_xml = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_report.xml")
                         file_test_summary = Path(path_taskid).joinpath(folder_mt_function, "Cantata", "results", "test_summary.html")
 
-                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], function_with_prj_name=folder_mt_function, file_test_report_xml=file_test_report_xml, opt=""):
-                            if (len(str(function)) < 32):
+                        if check_information(file_test_summary_html=file_test_summary, data=data_taskid[item], function_with_prj_name=folder_mt_function, file_test_report_xml=file_test_report_xml, opt=[]):
+                            utils.copy(src=Path(CONST.TEMPLATE).joinpath("JOEM", "template.tpa"), dst=file_tpa)
+                            update_tpa(file=file_tpa, data=data_taskid[item], file_test_summary_html=file_test_summary)
+                            try:
                                 FileCoverageReasonXLS(file_CoverageReasonXLS).update(data_taskid[item])
-                                utils.copy(src=Path(CONST.TEMPLATE).joinpath("template_joem.tpa"), dst=file_tpa)
-                                update_tpa(file=file_tpa, data=data_taskid[item], file_test_summary_html=file_test_summary)
-
                                 print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
-                            else:
-                                logger.error("Long Name {},{},{},{}".format(taskid, function, user_tester, "NG_Long_Name"))
+                            except Exception as e:
+                                logger.error("{},{},{},{}".format(taskid, function, user_tester, "NG_FileCoverageReasonXLS_Long_Name"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_Long_Name"))
                         else:
-                            logger.error("Different Information {},{},{},{}".format(taskid, function, user_tester, "NG_DiffInfor"))
-                            file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
+                            logger.error("Different Information {},{},{},{},{}".format(taskid, mt_number, function, user_tester, "NG_DiffInfor"))
+                            file_log.write("{},{},{},{},{}\n".format(taskid, mt_number, function, user_tester, "NG_DiffInfor"))
 
                     else:
-                        logging.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
-                        file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
+                        logging.warning("{},{},{},{},{}".format(taskid, mt_number, function, user_tester, "NG"))
+                        file_log.write("{},{},{},{},{}\n".format(taskid, mt_number, function, user_tester, "NG"))
 
                 num_tpa = len(utils.scan_files(directory=path_taskid, ext=".tpa")[0]) + len(utils.scan_files(directory=path_taskid, ext=".xlsm")[0])
 
@@ -1366,7 +1956,7 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                         count += 1
 
                         if "ASW" == data_taskid[item].get("Type"):
-                            if check_information_ASW(path=Path.joinpath(path_with_component, function), data=data_taskid[item], opt="check_WT"):
+                            if check_information_ASW(path=Path.joinpath(path_with_component, function), data=data_taskid[item], opt=["check_FileWalkThroughDoc"]):
                                 print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
                             else:
@@ -1374,11 +1964,13 @@ def check_archives(path_summary, dir_input, taskids, begin=59, end=59):
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG_DiffInfor"))
                         elif "PSW" == data_taskid[item].get("Type"):
                             f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "Test_Result", "test_summary.html")
+                            f_tpa = Path(path_taskid).joinpath(path_with_component, function, "Test_Result","{}.tpa".format(function))
 
                             if str(taskid) == "9.1":
                                 f_test_summary = Path(path_taskid).joinpath(path_with_component, function, "test_summary.html")
+                                f_tpa = ""
 
-                            if check_information(file_test_summary_html=f_test_summary, data=data_taskid[item], opt="check_WT"):
+                            if check_information(file_test_summary_html=f_test_summary, file_tpa=f_tpa, data=data_taskid[item], opt=["check_FileWalkThroughDoc"]):
                                 print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                                 file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
                             else:
@@ -1525,8 +2117,8 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=5
                                         Path(dir_Test_Spec).mkdir(exist_ok=True)
                                         Path(dir_Test_Result).mkdir(exist_ok=True)
 
-                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("WT_template.docx"), dst=f_walkthrough)
-                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("template.tpa"), dst=f_tpa)
+                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("COEM", "WT_template_PSW.docx"), dst=f_walkthrough)
+                                        utils.copy(src=Path(CONST.TEMPLATE).joinpath("COEM", "template.tpa"), dst=f_tpa)
                                         utils.copy(src=f_test_summary, dst=dir_Test_Result)
 
                                         update_walkthrough(file=f_walkthrough, data=data_taskid[item], file_test_summary_html=f_test_summary)
@@ -1825,9 +2417,10 @@ def main():
         logger.debug("Done)")
 
 def test():
-    directory = "C:\\Users\\nhi5hc\\Desktop\\Input\\1550364\\ddd"
-    data = utils.scan_files(directory, ext=".doc")
-    print(FileWalkThroughDoc(data[0][0].as_posix()).get_data(opt="ASW"))
+    directory = "C:/Users/nhi5hc/Desktop/Input/Test/MT_611_CRB_BoundByRegenProhibit_Gradient_SetValue"
+
+    print(Path(utils.scan_files(Path(directory).as_posix(), ext='.xlsm')[0][1]).as_posix())
+    lst_file_test_design = [f for f in utils.scan_files(Path(directory).as_posix(), ext='.xlsm')[0] if re.search('Documents/TD_.*.xlsm', str(Path(f).as_posix))]
 
 def check_update_version():
     flag = False
@@ -1878,4 +2471,3 @@ if __name__ == "__main__":
     # test()
     main()
     os.system("pause")
-    # test()

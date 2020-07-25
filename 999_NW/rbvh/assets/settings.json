@@ -1,12 +1,11 @@
 {
     "file_summary": "//hc-ut40070c/duongnguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200801.xlsm",
-    "dir_input_joem": "C:/Test",
-    "dir_input_coem": "C:/Users/nhi5hc/Desktop/Input/Review",
+    "dir_input_joem": "C:/Test/Test",
+    "dir_input_coem": "C:/Users/nhi5hc/Desktop/Input/OUTPUT_1553109/a",
 
     "dir_output": "C:/Users/nhi5hc/Desktop/OUTPUT",
-    "file_summary_bk": "C:/Users/nhi5hc/Desktop/Fully_Summary_JOEM_COEM_20200701.xlsm",
 
-    "sheetname": "Merged_COEM",
+    "sheetname": "Merged_JOEM",
 
     "reviewer": "huy.nguyen-hoang",
 
@@ -15,18 +14,18 @@
     ],
 
     "l_taskids_coem": [
-        9.1, 1554012, 1561039
+        1575445
     ],
 
     "l_taskids_joem": {
-        "Package": 20200715,
+        "Package": 20200717,
         "Project": "RN_SUV_BSS80",
         "BB": "BB80081",
         "TaskGroup": [
-            "T210"
+            "T216"
         ]
     },
-    
+
     "mode_coem": [
         "check_releases",
         "check_archives",
@@ -34,10 +33,6 @@
     ],
 
     "mode_joem": [
-        "check_archives"
-    ],
-
-    "mode_joem_bk": [
         "check_archives",
         "make_archives"
     ],
@@ -54,6 +49,13 @@
     "coordinator": {
         "begin": 59,
         "end": 1000
+    },
+
+    "debug_mode": false,
+
+    "mode_check_by_user": {
+        "check_FileCoverageReasonXLS": true,
+        "check_OPL_Walkthrough": true
     },
 
     "Tool_7z": "C:/Program Files/7-Zip/7z.exe",

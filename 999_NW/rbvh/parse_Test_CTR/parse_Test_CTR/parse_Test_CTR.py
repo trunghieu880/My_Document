@@ -69,7 +69,7 @@ def get_infor_ctr(path, tc_index=1):
                                     key = temp.split("=")[0].strip()
                                 else:
                                     key = temp.split("=")[1].strip()
-
+                                 
                             elif 'Check Memory:':
                                 temp = re.sub("^>>.*Check Memory: ", "", line)
                                 key = temp.strip()
@@ -92,7 +92,8 @@ def get_infor_ctr(path, tc_index=1):
                     if (flag_start_collect):
                         if flag_start_access:
                             if re.search("=$", line):
-                                key = key + " " + line.split("=")[0].strip()
+                                # key = key + " " + line.split("=")[0].strip()
+                                key = key.split("=")[0].strip()
                                 flag_start_access = False
 
                         if 'actual:' in line:

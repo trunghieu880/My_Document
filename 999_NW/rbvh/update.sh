@@ -6,7 +6,7 @@ name="script_auto_checker_v${version}"
 
 echo "COPY ASSETS"
 
-grep error ams.py | grep logger | sed 's/^\s*\s//g' | sed 's/^logger\.error("//g' | sort -u > CHECK_LIST.txt
+grep logger.error ams.py | grep ">> Failed:" | sed 's/^\s*\s//g' | sed 's/^logger\.error("//g' | sed 's/)$//g' | sort -u > CHECK_LIST.txt
 
 list="assets log_json template README.txt CHECK_LIST.txt"
 new_path="`find ./dist -mindepth 1 -maxdepth 1`"

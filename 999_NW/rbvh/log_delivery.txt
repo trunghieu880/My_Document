@@ -1,0 +1,15 @@
+Start checker: Make Archives JOEM
+*****************************************************************
+T216,RBAPLCUST_0x1140_MPU_FailureTest,duong.nguyen-tuan,OK
+T216,Rte_Lib,duong.nguyen-tuan,OK
+T216,RTE_SubSystem,duong.nguyen-tuan,OK
+T216,Rte_task_StdDiagM,duong.nguyen-tuan,OK
+T216,TPSW_Lockfunctions,duong.nguyen-tuan,OK
+T216,UT_537,TPSW_MPU_FailureTest,duong.nguyen-tuan,NG
+T216,ComR,duong.nguyen-tuan,OK
+T216,ComR_Cfg,duong.nguyen-tuan,OK
+T216,UT_540,StdDiagM,duong.nguyen-tuan,NG_DiffInfor
+T216,SSI_Signal2State_CallbackFunction_ESP_VirtualNode_MultiDriveMode,duong.nguyen-tuan,OK
+## Total T216: status BAD: Found/Count/Total - 9/9/10
+-----------------------------------------------------------------
+FINISH

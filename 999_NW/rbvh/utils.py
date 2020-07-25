@@ -123,3 +123,33 @@ def scan_files(directory, ext='.txt'):
                     # latest = filepath
 
     return data, latest
+
+""" Some function for FileTestDesignXLSX"""
+def isMissingValue(lst):
+    try:
+        lst.sort(key=None, reverse=False)
+        return False
+    except Exception as e:
+        return True
+
+def checkMidValue(lst, min, max, isEnum=False, data=[]):
+    if isEnum == True:
+        for val in lst:
+            if(isMidValue(data.index(val), min, max)):
+                return True
+    else:
+        for val in lst:
+            if(isMidValue(val, min, max)):
+                return True
+
+    return False
+
+def isMidValue(val, min, max):
+    return ((val > min) and (val < max))
+
+def find_enum(pat, data):
+    for key, val in data.items():
+        if pat in val:
+            return key
+    
+    return None
