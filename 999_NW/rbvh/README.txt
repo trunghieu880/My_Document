@@ -17,6 +17,11 @@ VERSION: 1.7.5
 VERSION: 1.7.6.1
     - Update check Test Design
     - Update check HTM File and Gif File for JOEM
+VERSION: 1.7.6.5
+    - Add color for logger
+VERSION: 1.7.7
+    - Support check ipg.cop
+    - Support check color in PLT file
 
 SETUP (file "./assets/settings.json")
     "file_summary": "//hc-ut40070c/duongnguyen/0000_Project/001_Prj/02_JOEM/Summary_JOEM_COEM_20200701.xlsm",

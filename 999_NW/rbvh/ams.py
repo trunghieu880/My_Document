@@ -236,11 +236,6 @@ class FileTestSummaryHTML(Base):
         finally:
             return data
 
-def reformat_string(value):
-    temp = re.sub("[\n\t\r\x07\xa0]", " ", value.strip()).strip()
-    temp = re.sub("\s+", " ", temp).strip()
-    return temp
-
 class FileWalkThroughDoc(Base):
     def __init__(self, path):
         super().__init__(path)
@@ -266,45 +261,6 @@ class FileWalkThroughDoc(Base):
                 document.save(self.doc)
             elif opt == "ASW":
                 pass
-                # word = win32com.client.DispatchEx('Word.Application')
-                # word.Visible = 0
-                # word.DisplayAlerts = 0
-
-                # doc = word.Documents.Open(self.doc)
-
-                # table_infor = doc.Tables(2)
-                # table_attach = doc.Tables(3)
-                # table_finding = doc.Tables(4)
-                # table_check_list = doc.Tables(8)
-
-                # finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
-                # impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
-                # confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
-
-                # temp = reformat_string(table_attach.Cell(Row=7, Column=2).Range.Text)
-                # [score_c0, score_c1, score_mcdc] = re.sub("^.*C0: ([0-9]+)%.*C1: ([0-9]+)%.*MCDC: ([0-9]+)%", r'\1 \2 \3', temp).split(" ")
-
-                # dict_walkthrough = {
-                #     'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
-                #     'project': reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text),
-                #     'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
-                #     'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
-                #     'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
-                #     'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
-                #     'C0': score_c0,
-                #     'C1': score_c1,
-                #     'MCDC': score_mcdc,
-                #     'tbl_finding': {
-                #         "finding": finding,
-                #         "impact": impact,
-                #         "confirm_UT26": confirm_UT26
-                #     }
-                # }
-
-                # doc.Save()
-                # doc.Close()
-                # word.Quit()
-                # word = None
             else:
                 logger.error("None Bug Type")
             
@@ -327,7 +283,7 @@ class FileWalkThroughDoc(Base):
                 table_check_list = document.tables[6]
 
                 temp = re.sub("[\n\t]", " ", table_attach.cell(3, 1).text).strip()
-                [score_c0, score_c1] = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+)", r'\1 \2', temp).replace("%", "").split(" ")
+                [score_c0, score_c1] = re.sub("^.*C0: ([0-9].*)%.*C1: ([0-9].*)%", r'\1 \2', temp).replace("%", "").split(" ")
 
                 finding = table_finding.cell(1, 1).text
                 impact = table_finding.cell(1, 3).text
@@ -359,14 +315,14 @@ class FileWalkThroughDoc(Base):
                     table_finding = doc.tables[3]
                     table_check_list = doc.tables[7]
                     
-                    finding = reformat_string(table_finding.cell(1, 1).text)
-                    impact = reformat_string(table_finding.cell(1, 3).text)
-                    confirm_UT26 = reformat_string(table_check_list.cell(11, 4).text)
+                    finding = utils.reformat_string(table_finding.cell(1, 1).text)
+                    impact = utils.reformat_string(table_finding.cell(1, 3).text)
+                    confirm_UT26 = utils.reformat_string(table_check_list.cell(11, 4).text)
 
-                    temp = reformat_string(table_finding.cell(2, 1).text)
+                    temp = utils.reformat_string(table_finding.cell(2, 1).text)
                     score_c0 = score_c1 = score_mcdc = ""
-                    if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
-                        temp = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
+                    if re.search("^.*C0: ([0-9].*)%.*C1: ([0-9].*)%.*MCDC: (.*)", temp):
+                        temp = re.sub("^.*C0: ([0-9].*)%.*C1: ([0-9].*)%.*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
                         score_c0 = temp[0]
                         score_c1 = temp[1]
                         score_mcdc = temp[2]
@@ -374,7 +330,7 @@ class FileWalkThroughDoc(Base):
                         score_c0 = score_c1 = score_mcdc = "Unknown"
                         logger.error(">> Failed: Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
 
-                    temp = reformat_string(table_infor.cell(0, 3).text)
+                    temp = utils.reformat_string(table_infor.cell(0, 3).text)
                     if re.search("^(.*) \<V(.*)\>", temp):
                         temp = re.sub("^(.*) \<V(.*)\>", r'\1 \2', temp).split(" ")
                         project_name = temp[0]
@@ -385,13 +341,13 @@ class FileWalkThroughDoc(Base):
                         logger.error(">> Failed: Item FileWalkThroughDoc has wrong format project: [Class] <V[Version]>")
 
                     dict_walkthrough = {
-                        'date': reformat_string(table_infor.cell(0, 1).text),
+                        'date': utils.reformat_string(table_infor.cell(0, 1).text),
                         'project': project_name,
                         'ItemRevision': item_revision.replace("_", "."),
-                        'review initiator': reformat_string(table_infor.cell(0, 5).text),
-                        'effort': reformat_string(table_infor.cell(1, 1).text),
-                        'baseline': reformat_string(table_infor.cell(1, 3).text),
-                        'review partner' : reformat_string(table_infor.cell(1, 5).text),
+                        'review initiator': utils.reformat_string(table_infor.cell(0, 5).text),
+                        'effort': utils.reformat_string(table_infor.cell(1, 1).text),
+                        'baseline': utils.reformat_string(table_infor.cell(1, 3).text),
+                        'review partner' : utils.reformat_string(table_infor.cell(1, 5).text),
                         'C0': score_c0,
                         'C1': score_c1,
                         'MCDC': score_mcdc,
@@ -413,14 +369,14 @@ class FileWalkThroughDoc(Base):
                     table_check_list = doc.Tables(8)
 
                     
-                    finding = reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
-                    impact = reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
-                    confirm_UT26 = reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
+                    finding = utils.reformat_string(table_finding.Cell(Row=2, Column=2).Range.Text)
+                    impact = utils.reformat_string(table_finding.Cell(Row=2, Column=4).Range.Text)
+                    confirm_UT26 = utils.reformat_string(table_check_list.Cell(Row=12, Column=5).Range.Text)
 
-                    temp = reformat_string(table_finding.Cell(Row=3, Column=2).Range.Text)
+                    temp = utils.reformat_string(table_finding.Cell(Row=3, Column=2).Range.Text)
                     score_c0 = score_c1 = score_mcdc = ""
-                    if re.search("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", temp):
-                        temp = re.sub("^.*C0: ([0-9]+).*C1: ([0-9]+).*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
+                    if re.search("^.*C0: ([0-9].*)%.*C1: ([0-9].*)%.*MCDC: (.*)", temp):
+                        temp = re.sub("^.*C0: ([0-9].*)%.*C1: ([0-9].*)%.*MCDC: (.*)", r'\1 \2 \3', temp).replace("%", "").split(" ")
                         score_c0 = temp[0]
                         score_c1 = temp[1]
                         score_mcdc = temp[2]
@@ -428,7 +384,7 @@ class FileWalkThroughDoc(Base):
                         score_c0 = score_c1 = score_mcdc = "Unknown"
                         logger.error(">> Failed: Item FileWalkThroughDoc has wrong format at Table Review Item: Coverage Report: \\nC0: <>%\\nC1: <>%\\nMCDC: <>%")
 
-                    temp = reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)
+                    temp = utils.reformat_string(table_infor.Cell(Row=1, Column=4).Range.Text)
                     if re.search("^(.*) \<V(.*)\>", temp):
                         temp = re.sub("^(.*) \<V(.*)\>", r'\1 \2', temp).split(" ")
                         project_name = temp[0]
@@ -439,13 +395,13 @@ class FileWalkThroughDoc(Base):
                         logger.error(">> Failed: Item FileWalkThroughDoc has wrong format project: [Class] <V[Version]>")
 
                     dict_walkthrough = {
-                        'date': reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
+                        'date': utils.reformat_string(table_infor.Cell(Row=1, Column=2).Range.Text),
                         'project': project_name,
                         'ItemRevision': item_revision.replace("_", "."),
-                        'review initiator': reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
-                        'effort': reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
-                        'baseline': reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
-                        'review partner' : reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
+                        'review initiator': utils.reformat_string(table_infor.Cell(Row=1, Column=6).Range.Text),
+                        'effort': utils.reformat_string(table_infor.Cell(Row=2, Column=2).Range.Text),
+                        'baseline': utils.reformat_string(table_infor.Cell(Row=2, Column=4).Range.Text),
+                        'review partner' : utils.reformat_string(table_infor.Cell(Row=2, Column=6).Range.Text),
                         'C0': score_c0,
                         'C1': score_c1,
                         'MCDC': score_mcdc,
@@ -601,7 +557,7 @@ class FileRTRTCov(Base):
             flag_count = 0
 
             data = dict()
-            with open(self.doc, encoding='shift-jis', errors='ignore') as fp:
+            with open(self.doc, encoding='utf-8', errors='ignore') as fp:
                 for line in fp.readlines()[:100]:
                     line = line.strip()
                     if flag_count > 1:
@@ -626,6 +582,65 @@ class FileRTRTCov(Base):
 
                             data = {**data, key : val}
 
+        except Exception as e:
+            data = {}
+            logger.exception(e)
+        finally:
+            return data
+
+class FilePLT(Base):
+    # Class FilePLT
+    def __init__(self, path):
+        super().__init__(path)
+        self.doc = str(path)
+
+    # Function get_data: to get the array data with specfic key, value of the nested json
+    def get_data(self):
+        try:
+            data = dict()
+            result = dict()
+
+            with open(self.doc, encoding='utf-8', errors='ignore') as fp:
+                for line in fp.readlines():
+                    line = line.strip()
+
+                    temp = utils.reformat_string(line)
+                    if re.search('^~', line):
+                        continue
+                    else:
+                        temp = re.sub("^(\w.*) .*nobit ([0-9]).*$", r'\1 \2', temp).split(" ")
+                        variable = temp[0]
+                        color = value(temp[1])
+
+                        OUTPUT_COLOR = "2" # RED
+                        INPUT_COLOR = "3" # GREEN
+                        IMPORT_COLOR = "4" # YELLOW
+                        PARAM_COLOR = "5" # BLUE  
+                        LOCAL_VAR_COLOR = "7" # LIGHT BLUE
+
+                        key = ""
+                        val = variable.split(".")[0]
+                        if color == OUTPUT_COLOR:
+                            if re.search('^expected_', variable):
+                                key = "OUTPUTS"
+                                val = re.sub("^expected_", "", val)
+                            else:
+                                continue
+                        elif color == INPUT_COLOR:
+                            key = "INPUTS"
+                        elif color == IMPORT_COLOR:
+                            key = "IMPORTED PARAMETERS"
+                        elif color == PARAM_COLOR:
+                            key = "LOCAL PARAMETERS"
+                        elif color == LOCAL_VAR_COLOR:
+                            key = "LOCAL VARIABLES"
+                        else:
+                            print("BUG")
+
+                        if key not in data.keys():
+                            data[key] = list()
+                        
+                        data[key].append(val)
         except Exception as e:
             data = {}
             logger.exception(e)
@@ -950,15 +965,15 @@ def check_DataTestDesignXLSX(data_test_design):
                     if not utils.isMissingValue(list_data_var):
                         list_data_var.sort(key=None, reverse=False)
                         if __header__ == 'DESCRIPTIONS':
-                            logger.info(">> Passed: Your comment is missing: {}".format(key))
+                            logger.info(">> Passed: Inside FileTestDesignXLSX Header {}: missing comment".format(key))
                         else:
-                            logger.info(">> Passed: Your input is missing or wrong type value: {} <=> {}".format(key, list_data_var))
+                            logger.info(">> Passed: Inside FileTestDesignXLSX Header {}: your input is missing or wrong type value: {}".format(key, list_data_var))
                     else:
                         flag = False
                         if __header__ == 'DESCRIPTIONS':
-                            logger.error(">> Failed: Your comment is missing: {}".format(key))
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}: missing comment".format(key))
                         else:
-                            logger.error(">> Failed: Your input is missing or wrong type value: {} <=> {}".format(key, list_data_var))
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}: your input is missing or wrong type value: {}".format(key, list_data_var))
                         continue
                     
                     if __header__ == 'DESCRIPTIONS':
@@ -967,8 +982,8 @@ def check_DataTestDesignXLSX(data_test_design):
                     if obj_level_2['Type'] == 'log':
                         if not (False in list_data_var and True in list_data_var and len(list_data_var) == 2):
                             flag = False
-                            logger.error("Header {}, Variable {}, Type {}: {} <=> {}".format(__header__, key, obj_level_2['Type'], "[False, True]", list_data_var))
-                    elif obj_level_2['Type'] == 'cont' or obj_level_2['Type'] == 'sdisc' or obj_level_2['Type'] == 'udisc':
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: {} <=> {}".format(__header__, key, obj_level_2['Type'], "[False, True]", list_data_var))
+                    elif obj_level_2['Type'] == 'cont' or obj_level_2['Type'] == 'sdisc' or obj_level_2['Type'] == 'udisc' or obj_level_2['Type'] == 'array':
                         if __header__ == "INPUTS" and utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
                             if not (max(list_data_var) > obj_level_2['Max']):
                                 flag = False
@@ -986,110 +1001,118 @@ def check_DataTestDesignXLSX(data_test_design):
                             if __header__ == "IMPORTED PARAMETERS" and ("INF" in str(obj_level_2['Max']) or "inf" in str(obj_level_2['Max'])):
                                 if not (len(list_data_var) >= 3):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MAX/MIN/MID: {} <=> {}".format(__header__, key, obj_level_2['Type'], "+-{}".format(obj_level_2['Max']), list_data_var))
                                 
                                 continue
                             else:
                                 if not (obj_level_2['Max'] in list_data_var):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MAX: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max'], list_data_var))
                                 if not (obj_level_2['Min'] in list_data_var):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing MIN: {} <=> {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Min'], list_data_var))
                             
                         check_mid = [x for x in list_data_var if (x != obj_level_2['Max'] and x != obj_level_2['Min'])]
                         
                         tolerance = obj_level_2['Tolerance']
                         if __header__ == "IMPORTED PARAMETERS":
+                            if not (tolerance is None):
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Do not add tolerance: {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Tolerance']))
+                            else:
+                                logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Do not add tolerance: {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Tolerance']))
+
                             tolerance = 0
 
                         if obj_level_2['Max'] > obj_level_2['Min']:
                             if ((obj_level_2['Max'] - tolerance) != obj_level_2['Min']):
                                 if not (len(check_mid) != 0 and utils.checkMidValue(lst=check_mid, min=obj_level_2['Min'], max=obj_level_2['Max'])):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, obj_level_2['Type'], check_mid))
                             else:
                                 if not (len(check_mid) == 0):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, obj_level_2['Type']))
                         elif obj_level_2['Max'] == obj_level_2['Min']:
                             if not (len(check_mid) == 0):
                                 flag = False
-                                logger.error(">> Failed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
                             else:
-                                logger.info(">> Passed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
+                                logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, obj_level_2['Type'], obj_level_2['Max']))
                         else:
                             flag = False
-                            logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
 
                     elif obj_level_2['Type'] in data_test_design['Enum'].keys() or obj_level_2['Type'] == 'enum':
                         value_find_type_enum = obj_level_2['Type']
                         current_type = random.choice(list_data_var)
+                        tolerance = obj_level_2['Tolerance']
                         if obj_level_2['Type'] == 'enum' and utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
-                            value_find_type_enum = utils.find_enum(pat=current_type, data=data_test_design['Enum']) 
+                            value_find_type_enum = utils.find_enum(pat=current_type, data=data_test_design['Enum'])
+                            tolerance = 1 ## Add tolerance = 1 for ENUM If Sheet Name is Merged_JOEM => Stupid JOEM
                             if not(value_find_type_enum is not None):
                                 flag = False
-                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
                                 continue
                             else:
-                                logger.info(">> Passed: Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
+                                logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM with value {}: Can not find your type".format(__header__, key, current_type))
 
                         if not (data_test_design['Enum'][value_find_type_enum][-1] in list_data_var):
                             if data_test_design['Enum'][value_find_type_enum][-1] is None:
                                 flag = False
-                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Please check your enum header that it hasn't any redundant table at here: {}".format(__header__, key, value_find_type_enum, list_data_var))
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM {}: Please check your enum header that it hasn't any redundant table at here: {}".format(__header__, key, value_find_type_enum, list_data_var))
                             else:
                                 flag = False
-                                logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
                         else:
-                            logger.info(">> Passed: Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
+                            logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM {}: Missing MAX {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][-1], list_data_var))
+
                         if not (data_test_design['Enum'][value_find_type_enum][0] in list_data_var):
                             flag = False
-                            logger.error(">> Failed: Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
                         else:
-                            logger.info(">> Passed: Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
+                            logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type ENUM {}: Missing MIN {} <=> {}".format(__header__, key, value_find_type_enum, data_test_design['Enum'][value_find_type_enum][0], list_data_var))
 
                         check_mid = [x for x in list_data_var if (x != data_test_design['Enum'][value_find_type_enum][-1] and x != data_test_design['Enum'][value_find_type_enum][0])]
 
-                        tolerance = obj_level_2['Tolerance']
+                        
                         if __header__ == "IMPORTED PARAMETERS":
-                            tolerance = 0
+                            tolerance = 0 ## Add tolerance = 0 due to we don't need to fill tolerance
                         
                         if obj_level_2['Max'] > obj_level_2['Min']:
                             if ((obj_level_2['Max'] - tolerance) != obj_level_2['Min']):
                                 if not (len(check_mid) != 0 and utils.checkMidValue(lst=check_mid, data=data_test_design['Enum'][value_find_type_enum], isEnum=True, min=obj_level_2['Min'], max=obj_level_2['Max'])):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
                             else:
                                 if not (len(check_mid) == 0):
                                     flag = False
-                                    logger.error(">> Failed: Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, value_find_type_enum))
+                                    logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: None Mid because MAX = MIN".format(__header__, key, value_find_type_enum))
                                 else:
-                                    logger.info(">> Passed: Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
+                                    logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: Missing mid {}".format(__header__, key, value_find_type_enum, check_mid))
                         elif obj_level_2['Max'] == obj_level_2['Min']:
                             if not (len(check_mid) == 0):
                                 flag = False
-                                logger.error(">> Failed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
+                                logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
                             else:
-                                logger.info(">> Passed: Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
+                                logger.info(">> Passed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: May be constant {}".format(__header__, key, value_find_type_enum, obj_level_2['Max']))
                         else:
                             flag = False
-                            logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
+                            logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: BUG MAX NEVER LESS THAN MIN".format(__header__, key, obj_level_2['Type']))
                     else:
                         flag = False
-                        logger.error(">> Failed: Header {}, Variable {}, Type {}: BUG".format(__header__, key, obj_level_2['Type']))
+                        logger.error(">> Failed: Inside FileTestDesignXLSX Header {}, Variable {}, Type {}: BUG".format(__header__, key, obj_level_2['Type']))
     except Exception as e:
         flag = False
         logger.exception(e)
@@ -1112,7 +1135,6 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
 
     try:
         data_test_summary = FileTestSummaryHTML(file_test_summary_html).get_data()
-        
         count = 0
         flag = True
 
@@ -1237,6 +1259,12 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
 
         elif (utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM"):
             if ("check_FileWalkThroughDoc" in opt):
+                lst_Configuration = os.listdir(Path(Path(Path(file_test_summary_html).parent).parent).joinpath("Configuration"))
+                if not (len(lst_Configuration) == 1 and ("{}.zip".format(data.get("ItemName").replace(".c", "")) in lst_Configuration)):
+                    logger.error(">> Failed: Item {} has missing/redundant file at folder Configuration: {}".format(data.get("ItemName").replace(".c", ""), lst_Configuration))
+                else:
+                    logger.info(">> Passed: Item {} has missing/redundant file at folder Configuration: {}".format(data.get("ItemName").replace(".c", ""), lst_Configuration))
+
                 file_Walkthrough = utils.scan_files(Path(file_test_summary_html).parent.as_posix(), ext='.docx')[0][0]
                 data_Walkthrough = FileWalkThroughDoc(file_Walkthrough).get_data()
 
@@ -1385,6 +1413,25 @@ def check_information(file_test_summary_html, data, function_with_prj_name="", f
         logger.debug("Done")
         return flag
 
+def check_color_PLT(lst_PLT, data_test_design):
+    for index, TM_name in enumerate(data_test_design['TM']):
+        lst_file_PLT = [x for x in lst_PLT if re.search("{}.plt$".format(TM_name), Path(x).as_posix())]
+        if not(len(lst_file_PLT) == 1):
+            logger.error(">> Failed: Item {} File PLT has none file or duplicate: {}".format(data_test_design.get("ItemName"), lst_file_PLT))
+        else:
+            file_PLT = lst_file_PLT[0]
+            data_PLT = FilePLT(file_PLT).get_data()
+            for __header__, obj_level_2 in data_test_design['DataTestDesign'][index]['TestDesign'].items():
+                if __header__ == "LOCAL VARIABLES AS INPUT" or __header__ == "DESCRIPTIONS":
+                    continue
+                for obj_level_3 in obj_level_2:
+                    for __var_test_design__ in obj_level_3.keys():
+                        if not (__var_test_design__ in data_PLT[__header__]):
+                            logger.error(">> Failed: Item {} PLT {} Check color: Header {}, {}".format(data_test_design.get("ItemName"), file_PLT, __header__, __var_test_design__))
+                        else:
+                            logger.info(">> Passed: Item {} PLT {} Check color: Header {}, {}".format(data_test_design.get("ItemName"), file_PLT, __header__, __var_test_design__))
+
+
 def check_information_ASW(path, data, opt=""):
     def check_exist_plt(list_module, list_plt):
         flag = True
@@ -1393,8 +1440,9 @@ def check_information_ASW(path, data, opt=""):
                 flag = False
 
         return flag
-    
+
     flag = False
+
     try:
         logger.debug("Check information {}", data.get("ItemName").replace(".c", ""))
 
@@ -1415,8 +1463,8 @@ def check_information_ASW(path, data, opt=""):
             lst_file_ATT = [f for f in utils.scan_files(Path(path).as_posix(), ext='ATT_Report.xml')[0] if re.search('Delivery/TestResult/.*/Rubasa/ATT_Report.xml', str(Path(f).as_posix))]
             lst_file_PLT = [os.path.basename(f).replace('.plt', '') for f in utils.scan_files(Path(path).as_posix(), ext='.plt')[0] if re.search('Documents/.*plt', str(Path(f).as_posix))]
             lst_file_ATT_Prj = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xml')[0] if re.search('Delivery/TestEnvironment/.*/Project_.*.xml'.format(data.get("ItemName").replace(".c", "")), str(Path(f).as_posix))]
-            lst_file_gif = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0] if re.search('Documents/.*.gif', str(Path(f).as_posix))]
-            lst_file_htm = [f for f in utils.scan_files(Path(path).as_posix(), ext='.xlsm')[0] if re.search('Documents/.*.htm', str(Path(f).as_posix))]
+            lst_file_gif = [f for f in utils.scan_files(Path(path).as_posix(), ext='.gif')[0] if re.search('Documents/.*.gif', str(Path(f).as_posix))]
+            lst_file_htm = [f for f in utils.scan_files(Path(path).as_posix(), ext='.htm')[0] if re.search('Documents/.*.htm', str(Path(f).as_posix))]
 
         file_test_design = file_RTRT = file_ATT = ""
         if not (len(lst_file_PLT)):
@@ -1489,13 +1537,13 @@ def check_information_ASW(path, data, opt=""):
                         logger.info(">> Passed: Item FileTestDesignXLSX {} with sheet {} has wrong information".format(data_test_design.get("ItemName"), __each_data__['sheetname']))
 
                 if utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM":
-                    if not(data_ATT.get("ClassVersion") == data.get("ItemRevision")):
+                    if not(value(data_ATT.get("ClassVersion")) == value(data.get("ItemRevision"))):
                         flag = False
                         logger.error(">> Failed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
                     else:
                         logger.info(">> Passed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data.get("ItemRevision")))
                 else:
-                    if not(data_ATT.get("ClassVersion") == data.get("ItemRevision") and data_test_design.get("ItemRevision") == data.get("ItemRevision")):
+                    if not(value(data_ATT.get("ClassVersion")) == value(data.get("ItemRevision")) and value(data_test_design.get("ItemRevision")) == value(data.get("ItemRevision"))):
                         flag = False
                         logger.error(">> Failed: Item FileTestDesignXLSX/FileATTReportXML {} got ItemRevision: {}/{} - {}".format(data.get("ItemName"), data_ATT.get("ClassVersion"), data_test_design.get("ItemRevision"), data.get("ItemRevision")))
                     else:
@@ -1512,6 +1560,10 @@ def check_information_ASW(path, data, opt=""):
                     logger.error(">> Failed: Item FileATTReportXML/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
                 else:
                     logger.info(">> Passed: Item FileATTReportXML/FilePLT {} has missing TestModuleName: {} - {}".format(data.get("ItemName"), data_ATT.get("TestModuleName"), lst_file_PLT))
+                
+                if utils.load(CONST.SETTING).get("sheetname") == "Merged_COEM":
+                    temp_lst_file_PLT = [f for f in utils.scan_files(Path(path).as_posix(), ext='.plt')[0] if re.search('mdfFiles', str(Path(f).as_posix)) == None]
+                    check_color_PLT(lst_PLT=temp_lst_file_PLT, data_test_design=data_test_design)
 
                 if not (data_ATT.get("CompleteVerdict") == "Passed"):
                     flag = False
@@ -1579,7 +1631,7 @@ def check_information_ASW(path, data, opt=""):
                     else:
                         logger.info(">> Passed: Item FileWalkThroughDoc {} has wrong name - {}".format(data_Walkthrough.get("project").replace(".c", ""), data.get("ItemName")))
 
-                    if not(data_Walkthrough.get("ItemRevision") == data.get("ItemRevision")):
+                    if not(value(data_Walkthrough.get("ItemRevision")) == value(data.get("ItemRevision"))):
                         flag = False
                         logger.error(">> Failed: Item FileWalkThroughDoc {} has wrong ItemRevision: {} - {}".format(data.get("ItemName"), data_Walkthrough.get("ItemRevision"), data.get("ItemRevision")))
                     else:
@@ -1876,6 +1928,19 @@ def make_archives_joem(path_summary, dir_input, dir_output, taskids, begin=59, e
 def check_releases(path_summary, dir_input, taskids, begin=59, end=59):
     logger.debug("Start checker: Release")
 
+    def check_ipg(lst):
+        try:
+            rst = True
+            for f in lst:
+                file_ipg = Path((Path(f).parent).joinpath("ipg.cop"))
+                if utils.is_update_ipg(file_ipg) == False:
+                    rst = False
+                    break
+        except:
+            rst = None
+        finally:
+            return rst
+
     try:
         doc = FileSummaryXLSX(path_summary)
         data = doc.parse2json(begin=begin, end=end)
@@ -1895,9 +1960,16 @@ def check_releases(path_summary, dir_input, taskids, begin=59, end=59):
                     b_check_exist = check_exist(dir_input=path_taskid, function=function)
                     if (b_check_exist):
                         count += 1
+                        if data_taskid[item].get("Type") == "PSW":
+                            flag = True
+                            lst_ipg = [Path((Path(f).parent).joinpath("ipg.cop")) for f in utils.scan_files(directory=Path(path_taskid).joinpath(function, "Cantata", "tests"), ext=".c")[0]]
+                            if not(check_ipg(lst_ipg)):
+                                logger.error(">> Failed: Item {} has no update ipg.cop: {}".format(function, lst_ipg))
+                            else:
+                                logger.info(">> Passed: Item {} has no update ipg.cop: {}".format(function, lst_ipg))
+
                         print("{},{},{},{}".format(taskid, function, user_tester, "OK"))
                         file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "OK"))
-
                     else:
                         logger.warning("{},{},{},{}".format(taskid, function, user_tester, "NG"))
                         file_log.write("{},{},{},{}\n".format(taskid, function, user_tester, "NG"))
@@ -2151,6 +2223,7 @@ def make_archieves(path_summary, dir_input, dir_output, taskids, begin=59, end=5
     finally:
         logger.debug("Done")
 
+# Convert Summary File XLSX to JSON File
 def create_summary_json_file(file_summary, sheetname="", begin=59, end=59):
     # Generate json file
     if sheetname == "":
@@ -2160,6 +2233,7 @@ def create_summary_json_file(file_summary, sheetname="", begin=59, end=59):
     with open(file_log, errors='ignore', mode='w') as fp:
         json.dump(FileSummaryXLSX(file_summary).parse2json(sheetname=sheetname, begin=begin, end=end), fp, indent=4, sort_keys=True)
 
+# Collect information for Deliverables each month
 def collect_information_deliverables(file_summary, sheetname="", begin=59, end=59):
     if sheetname == "":
         sheetname = utils.load(CONST.SETTING).get("sheetname")
@@ -2284,6 +2358,7 @@ def collect_information_deliverables(file_summary, sheetname="", begin=59, end=5
 
     return result
 
+# Print data Deliverables each month
 def print_information_deliverables(data, header):
     print(','.join(header))
     
@@ -2310,7 +2385,7 @@ def print_information_deliverables(data, header):
             if(flag):
                 print(','.join(str_output))
 
-
+# Make folder release for each package base on the release date
 def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
     logger.debug("make_folder_release")
     try:
@@ -2352,6 +2427,95 @@ def make_folder_release(path_summary, l_packages, dir_output, begin=59, end=59):
     finally:
         logger.debug("Done")
 
+# Check update version
+def check_update_version():
+    flag = False
+    try:
+        if utils.load(CONST.SETTING).get("auto_update") == True:
+            directory = utils.load(CONST.SETTING).get("sever_update")
+
+            lst_folder = os.listdir(Path(directory))
+            data = []
+            for x in lst_folder:
+                temp = Path(directory).joinpath(x, "assets", "version.json")
+                if Path(temp).exists():
+                    data.append(temp)
+
+            current_version = utils.load(CONST.VERSION).get("version")
+
+            l_version = []
+            for f in data:
+                version = utils.load(f).get("version")
+                l_version.append(version)
+
+            l_version = list(set(l_version))
+            l_version.sort()
+            latest_version = ""
+            if (len(l_version) > 0):
+                latest_version = l_version[-1]
+            else:
+                logger.error("BUG check update version")
+
+            flag = False
+
+            print("-----------------------------------------------------------------")
+            if latest_version != None and latest_version != current_version:
+                print('Please checkout new version "{}" at: "{}"'.format(latest_version, directory))
+                flag = True
+            else:
+                print("Your version is latest")
+            print("-----------------------------------------------------------------")
+
+    except Exception as e:
+        flag = False
+        logger.exception(e)
+    finally:
+        logger.debug("Done)")
+        return flag
+
+# Convert log file to html file then open
+def convert_html():
+    IE_WEB='C:/Program Files (x86)/Internet Explorer/iexplore.exe'
+
+    file_convert_html = "{}_convert.html".format(CONST.LOGS)
+    utils.copy(src=Path(CONST.LOGS).as_posix(), dst=Path(file_convert_html).as_posix())
+
+    file_log = open(file_convert_html, "w")
+    with open(Path(CONST.LOGS).as_posix(), encoding='utf-8', errors='ignore') as fp:
+        for line in fp.readlines():
+            line = line.strip()
+            
+            temp = ""
+            if re.search("CRITICAL", line) != None:
+                temp = re.sub("^(.*){}(.*)$".format('CRITICAL'), r'{}\1{}\2{}'.format('<b><p style="background-color:green;color=red;">', 'CRITITCAL', '</p></b>'), line)
+            elif re.search(">> Passed", line) != None:
+                temp = re.sub("^(.*){}(.*)$".format('>> Passed'), r'{}\1{}\2{}'.format('<p style="color:blue;">', '>> Passed', '</p>'), line)
+            elif re.search(">> Failed", line) != None:
+                temp = re.sub("^(.*){}(.*)$".format('>> Failed'), r'{}\1{}\2{}'.format('<p style="color:red;">', '>> Failed', '</p>'), line)
+            elif re.search("Different Information", line) != None:
+                temp = re.sub("^(.*){}(.*)$".format('Different Information'), r'{}\1{}\2{}'.format('<p style="background-color:tomato;color=red;">', 'Different Information', '</p>'), line)
+            elif re.search("WARNING", line) != None:
+                temp = re.sub("^(.*){}(.*)$".format('WARNING'), r'{}\1{}\2{}'.format('<p style="background-color:violet;color=red;">', 'WARNING', '</p>'), line)
+            else:
+                temp = re.sub("^(.*)(.*)$".format(''), r'{}\1\2{}'.format('<p style="color=black;">', '</p>'), line)
+            
+            file_log.write("{}\n".format(temp))
+
+    # with open("./convert.sh", errors='ignore', mode='w') as f:
+    #     f.write("#!/bin/bash\n")
+    #     f.write("sed -i 's/^\(.*\)CRITICAL\(.*\)$/<b><p style=\"background-color:green;color=red;\">\\1CRITICAL\\2<\/p><\/b>/g' " + "'" + Path(file_convert_html).as_posix() + "'\n")
+    #     f.write("sed -i 's/^\(.*\)>> Passed\(.*\)$/<p style=\"color:blue;\">\\1>> Passed\\2<\/p>/g' " + "'" + Path(file_convert_html).as_posix() + "'\n")
+    #     f.write("sed -i 's/^\(.*\)>> Failed\(.*\)$/<p style=\"color:red;\">\\1>> Failed\\2<\/p>/g' " + "'" + Path(file_convert_html).as_posix() + "'\n")
+    #     f.write("sed -i 's/^\(.*\)Different Information\(.*\)$/<p style=\"background-color:tomato;color=red;\">\\1Different Information\\2<\/p>/g' " + "'" + Path(file_convert_html).as_posix() + "'\n")
+    #     f.write("sed -i 's/^\(.*\)WARNING\(.*\)$/<p style=\"background-color:violet;color=red;\">\\1WARNING\\2<\/p>/g' " + "'" + Path(file_convert_html).as_posix() + "'\n")
+
+    
+    # os.system("convert.sh")
+    subprocess.call([IE_WEB, file_convert_html])
+
+    # if Path("./convert.sh").exists():
+    #     os.remove("./convert.sh")
+
 # Main
 def main():
     try:
@@ -2380,6 +2544,8 @@ def main():
             logger.error("Please make sure file_summary, sheetname, dir_input, dir_output, l_taskids are exist!\n\t+ file_summary: {}\n\t+ sheetname: {}\n\t+ dir_output: {}\n\t+ dir_input: {}\n\t+ l_taskids: {}".format(file_summary, sheetname, dir_output, dir_input, l_taskids))
             os.system("pause")
             quit()
+
+        logger.critical("INFORMATION:<br>\t+ file_summary: {}<br>\t+ sheetname: {}<br>\t+ dir_output: {}<br>\t+ dir_input: {}<br>\t+ l_taskids: {}".format(file_summary, sheetname, dir_output, dir_input, l_taskids))
 
         index_begin = utils.load(CONST.SETTING).get("coordinator").get("begin")
         index_end = utils.load(CONST.SETTING).get("coordinator").get("end")
@@ -2417,50 +2583,14 @@ def main():
         logger.debug("Done)")
 
 def test():
-    directory = "C:/Users/nhi5hc/Desktop/Input/Test/MT_611_CRB_BoundByRegenProhibit_Gradient_SetValue"
+    directory = "C:/Users/nhi5hc/Desktop/Input/Review/Today/20200713/1564559/RV/FUNC_ATM_OverSpeedWarn"
 
-    print(Path(utils.scan_files(Path(directory).as_posix(), ext='.xlsm')[0][1]).as_posix())
-    lst_file_test_design = [f for f in utils.scan_files(Path(directory).as_posix(), ext='.xlsm')[0] if re.search('Documents/TD_.*.xlsm', str(Path(f).as_posix))]
-
-def check_update_version():
-    flag = False
-    try:
-        directory="//hc-ut40070c/duongnguyen/9000_utils/hieu.nguyen-trung/script_auto_checker"
-        data = utils.scan_files(directory, ext="version.json")[0]
-
-        current_version = utils.load(CONST.VERSION).get("version")
-
-        l_version = []
-        for f in data:
-            version = utils.load(f).get("version")
-            l_version.append(version)
-
-        l_version = list(set(l_version))
-        l_version.sort()
-        latest_version = ""
-        if (len(l_version) > 0):
-            latest_version = l_version[-1]
-        else:
-            logger.error("BUG check update version")
-
-        flag = False
-
-        print("-----------------------------------------------------------------")
-        if latest_version != None and latest_version != current_version:
-            print('Please checkout new version "{}" at: "{}"'.format(latest_version, directory))
-            flag = True
-        else:
-            print("Your version is latest")
-        print("-----------------------------------------------------------------")
-
-    except Exception as e:
-        flag = False
-        logger.exception(e)
-    finally:
-        logger.debug("Done)")
-        return flag
+    file_PLT = utils.scan_files(Path(directory).as_posix(), ext='.plt')[0][0]
+    print(file_PLT)
+    data = FilePLT(Path(file_PLT).as_posix()).get_data()
 
 if __name__ == "__main__":
+    logger.critical("START APPLICATION")
     if(check_update_version()):
         pass
         # print("If you do not upgrade new version, you have to wait in 10s")
@@ -2470,4 +2600,6 @@ if __name__ == "__main__":
 
     # test()
     main()
+
+    convert_html()
     os.system("pause")

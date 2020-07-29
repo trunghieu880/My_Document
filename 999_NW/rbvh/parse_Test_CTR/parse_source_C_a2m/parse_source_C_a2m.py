@@ -90,7 +90,7 @@ def get_infor_c(path, tc_name="test_1", index=1):
                             f.write("sed -i 's@{}@{}@g' {}\n".format(old_function, new_function, "'{}'".format(path.as_posix())))
                     else:
                         if(re.search('^"(\w.*)"\);$', line) or re.search('^"<(\w.*)>"\);$', line)):
-                            description = re.sub('^"(.*)"\);$', r'"\1"', line)
+                            description = re.sub('^"(.*)"\);$', r'\1', line)
                             result[tc_name] = {**data, tc_name: '"{}" -> "{}"'.format(old, new), "description": description}
     finally:
         return result
@@ -206,7 +206,7 @@ def main():
                 l_d.append(get_infor_c(new_file, tc, index + 1))
 
             print_infor_c(l_d)
-            # update_comment(path=new_file, l_d=l_d)
+            update_comment(path=new_file, l_d=l_d)
         else:
             print("Not found TEST CASE in LOG FILE")
 

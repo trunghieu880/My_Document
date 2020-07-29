@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 import shutil
+import re
 
 logger = logging.getLogger(__name__)
 def load(path, keys=''):
@@ -92,21 +93,6 @@ def collapse_list(lst):
 
     return ', '.join(rst)
 
-def is_simulink(path):
-    '''Check source code is Simulink model'''
-    try:
-        rst = False
-        with open(path, encoding='shift-jis', errors='ignore') as fp:
-            for line in fp.readlines()[:100]:
-                if 'Simulink model' in line:
-                    rst = True
-                    break
-    except:
-        rst = None
-    finally:
-        return rst
-
-
 def scan_files(directory, ext='.txt'):
     '''Scan all file that has extension in directory'''
     logger.debug("Scan directory %s %s", directory, ext)
@@ -123,6 +109,25 @@ def scan_files(directory, ext='.txt'):
                     # latest = filepath
 
     return data, latest
+
+def is_update_ipg(path):
+    '''Check source code is updated ipg'''
+    try:
+        rst = False
+        with open(path, encoding='utf-8', errors='ignore') as fp:
+            for line in fp.readlines()[:100]:
+                if '\"--ci:--no_instr:all;\"' in line:
+                    rst = True
+                    break
+    except:
+        rst = None
+    finally:
+        return rst
+
+def reformat_string(value):
+    temp = re.sub("[\n\t\r\x07\xa0]", " ", value.strip()).strip()
+    temp = re.sub("\s+", " ", temp).strip()
+    return temp
 
 """ Some function for FileTestDesignXLSX"""
 def isMissingValue(lst):
