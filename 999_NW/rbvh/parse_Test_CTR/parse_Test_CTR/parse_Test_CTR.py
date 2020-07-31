@@ -149,33 +149,37 @@ def print_infor(l_d):
                 val = item[child_key][key]
 
                 if utils.load(SETTING).get("opt_write2src") == True:
-                    print("==> Updating %s" % child_key)
-                    subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), utils.load(SETTING).get("file_src")])
+                    if not("#" in val):
+                        print("==> Updating %s" % child_key)
+                        subprocess.call(['sed', '-i', '/START_TEST("{}/i\\\t{} = {};'.format(child_key, key, val), utils.load(SETTING).get("file_src")])
 
                 print("%s = %s;" % (key, val))
 
         print("***********************************\n")
 
 def main():
-    dir_ctr = utils.load(SETTING).get("dir_ctr")
+    try:
+        dir_ctr = utils.load(SETTING).get("dir_ctr")
 
-    data = scan_files(dir_ctr, ext='.ctr')
-    
-    # subprocess.call(['sed', '-i', '/^\s*\sinitialise_expected_global_data/,/START_TEST/\{//!d;\};', 'C:/Users/nhi5hc/Desktop/Test_Ctr/src.c'])
-    for f in data[0]:
-        new_file = Path(f.parent, f.name)
-        l_tc = get_list_testcase(new_file)
+        data = scan_files(dir_ctr, ext='.ctr')
+        
+        # subprocess.call(['sed', '-i', '/^\s*\sinitialise_expected_global_data/,/START_TEST/\{//!d;\};', 'C:/Users/nhi5hc/Desktop/Test_Ctr/src.c'])
+        for f in data[0]:
+            new_file = Path(f.parent, f.name)
+            l_tc = get_list_testcase(new_file)
 
-        if(len(l_tc) > 0):
-            l_d = []
-            for i in l_tc:
-                flag_found_fail = False
-                l_d.append(get_infor_ctr(new_file, i))
+            if(len(l_tc) > 0):
+                l_d = []
+                for i in l_tc:
+                    flag_found_fail = False
+                    l_d.append(get_infor_ctr(new_file, i))
 
-            print_infor(l_d)
-        else:
-            print("Not found TEST CASE in LOG FILE")
-
+                print_infor(l_d)
+            else:
+                print("Not found TEST CASE in LOG FILE")
+    except Exception as e:
+        print(e)
+        
     os.system("pause")
 
 main()

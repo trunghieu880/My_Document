@@ -1481,7 +1481,7 @@ def check_information_ASW(path, data, opt=""):
             logger.info(">> Passed: Item file_ATT_Prj {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_ATT_Prj))
 
         if (utils.load(CONST.SETTING).get("sheetname") == "Merged_JOEM"):
-            if not (len(lst_file_gif) == 1):
+            if not (len(lst_file_gif)):
                 flag = False
                 logger.error(">> Failed: Item File Gif {} has none file: {}".format(data.get("ItemName").replace(".c", ""), lst_file_gif))
             else:
