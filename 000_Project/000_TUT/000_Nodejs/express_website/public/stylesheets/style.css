@@ -7,6 +7,10 @@ body {
   color: rgb(138, 207, 106);
 }
 
+button.btn.btn-default{
+  background-color: rgb(204, 214, 58);
+}
+
 footer{
   background:#f4f4f4;
   height:40px;
