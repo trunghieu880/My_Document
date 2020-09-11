@@ -7,7 +7,7 @@ var nodemailer = require('nodemailer');
 
 var routes = require('./routes/index');
 var about = require('./routes/about');
-var about = require('./routes/about');
+var contact = require('./routes/contact');
 
 var app = express();
 
@@ -23,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/about', about);
+app.use('/contact', contact);
 
 // error handler
 app.use(function(err, req, res, next) {

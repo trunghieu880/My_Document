@@ -4,6 +4,7 @@ body {
 
 .jumbotron {
   background:url(../images/bg.jpg) no-repeat;
+  color: rgb(138, 207, 106);
 }
 
 footer{
